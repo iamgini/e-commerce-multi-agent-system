@@ -30,7 +30,7 @@ ecommerce_multiagent/
 
 Agents Documentation
 
-- [Customer Support Agent][docs/customer-support.md]
+- [Customer Support Agent](docs/customer-support.md)
 
 ## Setup Local LLM
 
