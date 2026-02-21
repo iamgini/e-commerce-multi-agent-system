@@ -27,15 +27,6 @@ Agents Documentation
 
 - [Customer Support Agent](docs/customer-support.md)
 
-## Setup Local LLM
-
-```shell
-$ curl -fsSL https://ollama.com/install.sh | sh
-
-$ ollama pull llama3
-
-$ ollama run llama3
-```
 
 ## Try to cover all learning from 4 modules
 

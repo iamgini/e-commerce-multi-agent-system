@@ -44,3 +44,30 @@ if state["intent"] == "support":
 .
 .
 ```
+
+## Setup Local LLM
+
+```shell
+$ curl -fsSL https://ollama.com/install.sh | sh
+
+$ ollama serve
+
+$ ollama pull llama3
+
+$ ollama run llama3
+```
+
+Tip: If you are facing termination issues, then check with lightweight models.
+
+```shell
+$ ollama run phi3
+```
+
+## Local Testing
+
+```shell
+$ python -m venv cs
+$ source cs/bin/activate 
+
+$ pip install -r requirements.txt
+```
