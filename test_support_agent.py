@@ -1,0 +1,19 @@
+from agents.customer_support import customer_support_agent
+
+initial_state = {
+    "user_query": input("Ask something: "),
+    "user_id": "user123",
+    "intent": "support",
+    "response": None,
+    "escalate": False,
+    "confidence": None,
+    "explanation": None,
+}
+
+result = customer_support_agent(initial_state)
+
+print("\n===== RESULT =====")
+print("Response:", result["response"])
+print("Escalate:", result["escalate"])
+print("Confidence:", result["confidence"])
+print("Explanation:", result["explanation"])
