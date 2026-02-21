@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 from typing import Dict
 
-from langchain_community.llms import Ollama
-from langchain_community.llms 
+from langchain_ollama import OllamaLLM
+
 from state import AgentState
 from observability.logger import log_event
 
@@ -12,8 +12,7 @@ from observability.logger import log_event
 # Local LLM Setup (free, offline)
 # ==========================================================
 
-llm = Ollama(model="llama3")
-
+llm = OllamaLLM(model="llama3")
 
 # ==========================================================
 # Load FAQ Knowledge Base

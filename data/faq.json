@@ -1,0 +1,14 @@
+[
+  {
+    "question": "What is your return policy?",
+    "answer": "You can return items within 30 days of delivery."
+  },
+  {
+    "question": "How long does shipping take?",
+    "answer": "Shipping takes 3-5 business days."
+  },
+  {
+    "question": "What payment methods are accepted?",
+    "answer": "We accept credit cards and PayPal."
+  }
+]
