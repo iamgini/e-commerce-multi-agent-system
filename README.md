@@ -6,8 +6,7 @@ Directory structure
 ecommerce_multiagent/
 │
 ├── main.py                     # builds LangGraph
-├── state.py                    # shared state definition
-│
+├── state.py                    # shared state definition; All agents must use the same state.
 ├── agents/
 │   ├── conversation.py
 │   ├── coordinator.py
@@ -15,16 +14,12 @@ ecommerce_multiagent/
 │   ├── sales_recommendation.py
 │   ├── order_inventory.py
 │   ├── returns_refunds.py
-│
 ├── policy/
 │   ├── compliance.py
-│
 ├── observability/
 │   ├── logger.py
-│
 ├── data/
 │   ├── faq.json
-│
 └── requirements.txt
 ```
 
@@ -41,6 +36,34 @@ $ ollama pull llama3
 
 $ ollama run llama3
 ```
+
+## Try to cover all learning from 4 modules
+
+### Module 1 – Responsible & Explainable AI
+
+- No hallucination rule
+- Escalation when unsure
+- Confidence score
+- Explanation field
+
+### Module 2 – AI & Cybersecurity
+
+- No external API
+- No direct DB access
+- Controlled knowledge source
+- Logging enabled
+
+### Module 3 – Architecting Agentic AI
+
+- Stateless node design
+- Works inside LangGraph
+- Shared state architecture
+
+### Module 4 – Integration & Deployment
+
+- Local LLM
+- Replaceable model
+- Production-like structure
 
 ## Presentation Notes and Tips
 
