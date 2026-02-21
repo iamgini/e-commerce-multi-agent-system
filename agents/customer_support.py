@@ -21,8 +21,14 @@ llm = OllamaLLM(model="llama3")
 def load_faq() -> str:
     faq_path = Path("data/faq.json")
 
-    with open(faq_path, "r") as f:
-        faq_data = json.load(f)
+    if not faq_path.exists():
+        raise FileNotFoundError("FAQ file not found at data/faq.json")
+
+    try:
+        with open(faq_path, "r") as f:
+            faq_data = json.load(f)
+    except json.JSONDecodeError:
+        raise ValueError("faq.json is not valid JSON.")
 
     formatted = ""
     for item in faq_data:
