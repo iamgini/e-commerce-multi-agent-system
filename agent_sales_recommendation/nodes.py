@@ -1,7 +1,8 @@
 from langchain_core.messages import SystemMessage
-from agents import search_llm, intent_llm, chatbot_llm
-from tools import query_products_db
 from langgraph.graph import END
+from tools import query_products_db
+
+from agents import chatbot_llm, intent_llm, search_llm
 from state import AgentState
 
 # def intent_node(state: State):
@@ -38,7 +39,7 @@ from state import AgentState
 
 #     messages = [SystemMessage(content=system_prompt)] + state["messages"]
 #     result = intent_llm.invoke(messages)
-    
+
 #     return {"messages": state["messages"], "intent": state["result"]}
 
 
@@ -55,8 +56,8 @@ def intent_node(state: AgentState):
         3. none
         - The user does not fulfil either the sales or recommend intent.
         """
-    
-    messages = [SystemMessage(content=system_prompt)] + state['messages']
+
+    messages = [SystemMessage(content=system_prompt)] + state["messages"]
     response = intent_llm.invoke(messages)
     print(f"=== Output of intent_node ===\n{response}\n\n")
     return {"intent": response.intent}
@@ -76,6 +77,7 @@ def intent_node(state: AgentState):
 #     response = search_llm.invoke(messages)
 #     return {"messages": [response]}
 
+
 def search_node(state: AgentState):
     system_prompt = """
         You are a searcher within a Sales and Product Recommendation agent of an E-Commerce multi-agent system.
@@ -85,28 +87,28 @@ def search_node(state: AgentState):
         Make sure to only provide only searches for items that are in stock.
         """
 
-    messages = [SystemMessage(content=system_prompt)] + state['messages']
+    messages = [SystemMessage(content=system_prompt)] + state["messages"]
     filters = search_llm.invoke(messages)
     print(f"=== Search_node filters ===\n{filters['parsed']}\n\n")
-    
+
     products = query_products_db(filters["parsed"])
     print(f"=== Search_node output ===\n{products}\n\n")
-    
+
     return {"products": products}
 
     # raw_message = response.get('raw')
     # parsed_output = response.get('parsed')
-    
+
     # if parsed_output:
     #     return {"messages": messages + [raw_message], "final_structured_output": parsed_output}
-    
+
     # else:
     #     return {"messages": [response]}
 
 
 def response_node(state: AgentState):
     products = state["products"]
-    
+
     system_prompt = f"""
         You are the response node within a Sales and Product Recommendation agent of an E-Commerce multi-agent system.
         Your task is based on the user's query, recommend ONLY products that had been retrieved from the product database.
@@ -118,7 +120,7 @@ def response_node(state: AgentState):
         If the products retrieved do not match with the users query, respond with the following: 'There are currently no items that match your request. Would you like to search for other items instead?'
         """
 
-    messages = [SystemMessage(content=system_prompt)] + state['messages']
+    messages = [SystemMessage(content=system_prompt)] + state["messages"]
     response = chatbot_llm.invoke(messages)
     return {"messages": [response]}
 

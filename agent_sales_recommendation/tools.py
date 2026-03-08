@@ -1,7 +1,8 @@
+import sqlite3
+
 from langchain.tools import tool
 from langgraph.prebuilt import ToolNode
-import sqlite3
-# from mockdata import PRODUCT_DB
+
 # import difflib
 
 
