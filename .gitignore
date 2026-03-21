@@ -70,6 +70,11 @@ pyproject.toml
 # Block for Sales-Recommendation agent
 # ===============================
 *.db
+<<<<<<< HEAD
 **/main.py
 *.ipynb
 
+=======
+*/main.py
+*.ipynb
+>>>>>>> f20b0a9c3cd853b2f6b7460fe4f02e7df1e35e95
