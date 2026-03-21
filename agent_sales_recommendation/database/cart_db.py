@@ -137,12 +137,27 @@ def validate_discount_code(code: str) -> Optional[float]:
 # ── Checkout / Orders ──────────────────────────────────────────────────────────
 
 
-def create_order(user_id: str, discount_code: Optional[str] = None) -> dict:
+def create_order(
+    user_id: str,
+    discount_code: Optional[str] = None,
+    product_names: Optional[dict] = None,
+) -> dict:
     """
     Convert the current cart into an order record.
+
+    Args:
+        user_id:       The customer placing the order.
+        discount_code: Optional promo code; validated before use.
+        product_names: Mapping of {product_id: product_name} supplied by the
+                       checkout tool, which already fetched product records
+                       during stock validation. If a product_id is missing
+                       from this dict the name falls back to "Product #<id>".
+
     Returns the full order dict including discount breakdown.
     Raises ValueError if the cart is empty or the discount code is invalid.
     """
+    product_names = product_names or {}
+
     summary = get_cart_summary(user_id)
     if summary["item_count"] == 0:
         raise ValueError("Cannot checkout: cart is empty.")
@@ -169,14 +184,16 @@ def create_order(user_id: str, discount_code: Optional[str] = None) -> dict:
         # Snapshot cart items into order_items
         # (product names must be fetched from products.db separately by the tool layer)
         for item in summary["items"]:
+            pid = item["product_id"]
+            name = product_names.get(pid, f"Product #{pid}")
             conn.execute(
                 """INSERT INTO order_items
                        (order_id, product_id, product_name, quantity, unit_price)
                    VALUES (?, ?, ?, ?, ?)""",
                 (
                     order_id,
-                    item["product_id"],
-                    f"Product #{item['product_id']}",  # name resolved by tool layer
+                    pid,
+                    name,
                     item["quantity"],
                     item["unit_price"],
                 ),

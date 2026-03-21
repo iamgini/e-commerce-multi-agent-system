@@ -274,6 +274,13 @@ def checkout(
     try:
         # Re-validate stock for every item in the cart
         cart = cart_db.get_cart_summary(user_id)
+        if cart["item_count"] == 0:
+            return "Cannot checkout: your cart is empty."
+
+        # Fetch every product record once for stock validation.
+        # Reuse those records to build the product_names dict so create_order
+        # can snapshot real names into order_items rather than "Product #<id>".
+        product_records = {}
         for item in cart["items"]:
             product = product_db.get_product_by_id(item["product_id"])
             if not product:
@@ -284,8 +291,13 @@ def checkout(
                     f"(requested {item['quantity']}, available {product['stock']})."
                 )
 
+            product_records[item["product_id"]] = product
+
+        # Build {product_id: product_name} from already-fetched records.
+        product_names = {pid: p["name"] for pid, p in product_records.items()}
+
         # Create the order
-        order = cart_db.create_order(user_id, discount_code)
+        order = cart_db.create_order(user_id, discount_code, product_names)
 
         # Decrement stock and record purchase history for recommendations
         for item in cart["items"]:
@@ -297,7 +309,7 @@ def checkout(
 
         return json.dumps(
             {
-                "message": "Order placed successfully! 🎉",
+                "message": "Order placed successfully!",
                 "order_id": order["order_id"],
                 "items_purchased": len(order["items"]),
                 "subtotal": order["total_amount"],
@@ -333,7 +345,7 @@ def get_order_history(user_id: Annotated[str, InjectedState("user_id")]) -> str:
 
 
 @tool
-def get_order_details(order_id: Annotated[str, InjectedState("user_id")]) -> str:
+def get_order_details(order_id: int) -> str:
     """
     Fetch full details for a specific order, including line items.
 

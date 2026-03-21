@@ -1,14 +1,14 @@
 
 ## Agent Roles & Tasks
 
-### 🧠 Coordinator
+### Coordinator
 
 Routes each user message to the correct specialist agent using keyword
 heuristics (fast path) or an LLM call (fallback), then returns control back to the user after each agent turn for the next message.
 
 ---
 
-### 🔍 Product Recommendation Agent
+### Product Recommendation Agent
 
 **Function**: Helps users to *discover* products that match their needs,
 preferences, and budget. Plays the role of an intelligent virtual shop assistant.
@@ -28,7 +28,7 @@ preferences, and budget. Plays the role of an intelligent virtual shop assistant
 
 ---
 
-### 🛒 Sales Agent
+### Sales Agent
 
 **Function**: Converts user intent into confirmed purchases. Handles all
 transactional interactions from cart management through checkout.
@@ -73,8 +73,9 @@ transactional interactions from cart management through checkout.
 
 
 SQLite Databases
-├── products.db  (products, categories, user_purchase_history)
-└── cart.db      (carts, cart_items, orders, order_items)
+├── products.db     (products, categories, user_purchase_history)
+├── checkpoints.db  (conversation_history)
+└── cart.db         (carts, cart_items, orders, order_items)
 ```
 
 ---
@@ -88,6 +89,11 @@ ecommerce_agents/
 ├── config.py                        # Constants, discount codes
 ├── config_db.py                     # Seed data
 ├── requirements.txt
+│
+├── data/
+│   ├── cart.db                      # Stores cart and user orders information
+│   ├── checkpoints.db               # Stores user conversation history
+│   └── products.db                  # Stores product information and user purchase history
 │
 ├── database/
 │   ├── __init__.py
@@ -103,13 +109,12 @@ ecommerce_agents/
 │
 ├── tools/
 │   ├── __init__.py
-│   ├── recommendation_tools.py      # 7 tools for recommendation agent
+│   ├── recommendation_tools.py      # 8 tools for recommendation agent
 │   └── sales_tools.py               # 10 tools for sales agent
 │
 └── graph/
     ├── __init__.py
     └── workflow.py                  # LangGraph StateGraph definition
-
 ```
 
 ---

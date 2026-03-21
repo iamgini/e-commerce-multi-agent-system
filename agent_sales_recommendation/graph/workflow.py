@@ -42,6 +42,7 @@ import sys
 from typing import Annotated, TypedDict
 
 from langchain_core.messages import AIMessage, BaseMessage
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 
@@ -58,6 +59,7 @@ from config import (
     ROUTE_SALES,
     SALES_NODE,
 )
+from config_db import CHECKPOINTER_DB_PATH, DB_DIR
 from tools.recommendation_tools import RECOMMENDATION_TOOLS
 from tools.sales_tools import SALES_TOOLS
 
@@ -111,7 +113,7 @@ def should_continue_recommendation(state: AgentState) -> str:
 # ── Graph ──────────────────────────────────────────────────────────────────────
 
 
-def build_graph() -> StateGraph:
+def build_graph(checkpointer: SqliteSaver) -> StateGraph:
     """Assemble and compile the full multi-agent LangGraph."""
 
     builder = StateGraph(AgentState)
@@ -124,7 +126,6 @@ def build_graph() -> StateGraph:
     # Tool executor nodes (LangGraph's built-in ToolNode handles tool dispatch)
     builder.add_node("sales_tools", ToolNode(SALES_TOOLS))
     builder.add_node("recommendation_tools", ToolNode(RECOMMENDATION_TOOLS))
-
 
     # ── Edges ──────────────────────────────────────────────────────────────────
     builder.add_edge(START, COORDINATOR_NODE)
@@ -160,17 +161,27 @@ def build_graph() -> StateGraph:
     builder.add_edge("sales_tools", SALES_NODE)
     builder.add_edge("recommendation_tools", RECOMMENDATION_NODE)
 
-    return builder.compile()
+    return builder.compile(checkpointer=checkpointer)
 
 
 # ── Singleton accessor ─────────────────────────────────────────────────────────
 
 _graph = None
+_checkpointer_ctx = None
+_checkpointer = None
 
 
 def get_graph():
-    """Return a lazily-compiled singleton graph instance."""
-    global _graph
+    """
+    Return a lazily-compiled singleton graph instance.
+
+    The checkpointer database is created automatically inside DB_DIR on first
+    call (same directory as products.db and cart.db).
+    """
+    global _graph, _checkpointer_ctx, _checkpointer
     if _graph is None:
-        _graph = build_graph()
+        os.makedirs(DB_DIR, exist_ok=True)
+        _checkpointer_ctx = SqliteSaver.from_conn_string(CHECKPOINTER_DB_PATH)
+        _checkpointer = _checkpointer_ctx.__enter__()
+        _graph = build_graph(checkpointer=_checkpointer)
     return _graph

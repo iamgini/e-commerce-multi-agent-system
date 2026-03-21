@@ -2,4 +2,6 @@ langchain
 langchain-openai
 langchain-core
 langgraph
+langgraph-checkpoint-sqlite
 dotenv
+ddgs

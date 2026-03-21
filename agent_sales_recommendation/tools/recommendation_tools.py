@@ -3,6 +3,7 @@ import os
 import sys
 from typing import Annotated, Literal, Optional
 
+from ddgs import DDGS
 from langchain_core.tools import tool
 from langgraph.prebuilt import InjectedState
 
@@ -179,6 +180,74 @@ def get_personalised_recommendations(
     )
 
 
+@tool
+def web_search_product_comparison(
+    query: str,
+    max_results: Optional[int] = 5,
+) -> str:
+    """
+    Search the web for real-world reviews, expert opinions, and comparisons
+    for one or more products.
+
+    Use this tool AFTER presenting catalogue results, when the customer wants
+    to compare specific products or asks for external opinions.  Do NOT use
+    it as the primary way to discover products — use search_products for that.
+
+    Good use cases:
+    - "Which of these headphones has better noise cancellation?"
+    - "What do reviewers say about the LG C3 55" OLED evo?"
+    - "Compare the Smart Watch Series X vs competitors"
+    - "Is the mechanical keyboard worth it for office use?"
+
+    Args:
+        query:       A focused comparison or review query.  Include specific
+                     product names for the most relevant results.
+                     Examples:
+                       "Wireless Noise-Cancelling Headphones vs Sony WH-1000XM5 review"
+                       "Yoga Mat Premium vs Manduka PRO comparison"
+                       "mechanical keyboard Cherry MX office use review 2024"
+        max_results: Number of web results to fetch (default 5, max 8).
+
+    Returns:
+        A JSON object with:
+          query        - the search query used
+          results      - list of {title, url, snippet} dicts from top hits
+          summary_note - reminder to synthesise these with catalogue data
+        Or a plain-text error message if the search fails.
+    """
+    max_results = min(max_results or 5, 8)
+
+    try:
+        results = []
+        for hit in DDGS().text(query, max_results=max_results):
+            results.append(
+                {
+                    "title": hit.get("title", ""),
+                    "url": hit.get("href", ""),
+                    "snippet": hit.get("body", ""),
+                }
+            )
+    except Exception as exc:
+        return f"Web search failed: {exc}"
+
+    if not results:
+        return f"No web results found for query: '{query}'"
+
+    return json.dumps(
+        {
+            "query": query,
+            "results": results,
+            "summary_note": (
+                "Synthesise these external snippets with the catalogue data "
+                "already shown.  Present a balanced comparison: highlight "
+                "real-world strengths and weaknesses alongside our store's "
+                "price, rating, and stock."
+            ),
+        },
+        indent=2,
+    )
+
+
 # ── Convenience export ─────────────────────────────────────────────────────────
 
 RECOMMENDATION_TOOLS = [
@@ -189,4 +258,5 @@ RECOMMENDATION_TOOLS = [
     get_similar_products,
     get_trending_products,
     get_personalised_recommendations,
+    web_search_product_comparison,
 ]
