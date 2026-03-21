@@ -67,7 +67,9 @@ pyproject.toml
 
 
 # ===============================
-# Misc
+# Block for Sales-Recommendation agent
 # ===============================
-*.sqlite3
+*.db
+**/main.py
+*.ipynb
 
