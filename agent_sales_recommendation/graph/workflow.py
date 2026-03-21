@@ -9,9 +9,9 @@
 #      ▼
 #   coordinator ──── route="recommend" ──▶ recommendation_agent
 #      │                                        │
-#      ├──── route="sales"   ──▶ sales_agent    │ tool_calls?
+#      ├──── route="sales"   ──▶ sales_agent   │ tool_calls?
 #      │                              │         │
-#      └──── route="finish"  ──▶ [END]          ▼
+#      └──── route="finish"  ──▶    [END]      ▼
 #                                     │   recommendation_tools
 #                                     │         │ (loops back to agent)
 #                                     │         ▼
@@ -108,7 +108,7 @@ def should_continue_recommendation(state: AgentState) -> str:
     return END
 
 
-# ── Graph construction ─────────────────────────────────────────────────────────
+# ── Graph ──────────────────────────────────────────────────────────────────────
 
 
 def build_graph() -> StateGraph:
@@ -125,12 +125,10 @@ def build_graph() -> StateGraph:
     builder.add_node("sales_tools", ToolNode(SALES_TOOLS))
     builder.add_node("recommendation_tools", ToolNode(RECOMMENDATION_TOOLS))
 
-    # ── Edges ──────────────────────────────────────────────────────────────────
 
-    # Entry point
+    # ── Edges ──────────────────────────────────────────────────────────────────
     builder.add_edge(START, COORDINATOR_NODE)
 
-    # coordinator routes to an agent or finishes
     builder.add_conditional_edges(
         COORDINATOR_NODE,
         route_from_coordinator,
@@ -141,7 +139,6 @@ def build_graph() -> StateGraph:
         },
     )
 
-    # Sales agent: either call tools or return to coordinator
     builder.add_conditional_edges(
         SALES_NODE,
         should_continue_sales,
@@ -151,7 +148,6 @@ def build_graph() -> StateGraph:
         },
     )
 
-    # Recommendation agent: either call tools or return to coordinator
     builder.add_conditional_edges(
         RECOMMENDATION_NODE,
         should_continue_recommendation,
@@ -161,7 +157,6 @@ def build_graph() -> StateGraph:
         },
     )
 
-    # After tool execution, loop back to the agent that triggered the call
     builder.add_edge("sales_tools", SALES_NODE)
     builder.add_edge("recommendation_tools", RECOMMENDATION_NODE)
 

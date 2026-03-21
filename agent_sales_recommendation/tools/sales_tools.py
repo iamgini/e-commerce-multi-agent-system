@@ -1,14 +1,14 @@
 import json
-from typing import Optional
+import os
+import sys
+from typing import Annotated, Optional
 
 from langchain_core.tools import tool
-
-import sys, os
+from langgraph.prebuilt import InjectedState
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from database import cart_db, product_db
-
 
 # ── Product lookup tool ────────────────────────────────────────────────────────
 
@@ -62,7 +62,7 @@ def find_product(query: str) -> str:
 
 
 @tool
-def view_cart(user_id: str) -> str:
+def view_cart(user_id: Annotated[str, InjectedState("user_id")]) -> str:
     """
     Retrieve the current contents of a user's shopping cart,
     including all items, quantities, unit prices, and the grand total.
@@ -78,7 +78,11 @@ def view_cart(user_id: str) -> str:
 
 
 @tool
-def add_to_cart(user_id: str, product_id: int, quantity: int = 1) -> str:
+def add_to_cart(
+    user_id: Annotated[str, InjectedState("user_id")],
+    product_id: int,
+    quantity: int = 1,
+) -> str:
     """
     Add a product to the user's shopping cart.
     If the product is already in the cart its quantity is incremented.
@@ -121,7 +125,9 @@ def add_to_cart(user_id: str, product_id: int, quantity: int = 1) -> str:
 
 
 @tool
-def remove_from_cart(user_id: str, product_id: int) -> str:
+def remove_from_cart(
+    user_id: Annotated[str, InjectedState("user_id")], product_id: int
+) -> str:
     """
     Remove a product line entirely from the user's cart.
 
@@ -144,7 +150,9 @@ def remove_from_cart(user_id: str, product_id: int) -> str:
 
 
 @tool
-def update_cart_quantity(user_id: str, product_id: int, quantity: int) -> str:
+def update_cart_quantity(
+    user_id: Annotated[str, InjectedState("user_id")], product_id: int, quantity: int
+) -> str:
     """
     Change the quantity of a specific product already in the cart.
     Setting quantity to 0 removes the item.
@@ -195,7 +203,10 @@ def validate_discount_code(code: str) -> str:
 
 
 @tool
-def preview_order_total(user_id: str, discount_code: Optional[str] = None) -> str:
+def preview_order_total(
+    user_id: Annotated[str, InjectedState("user_id")],
+    discount_code: Optional[str] = None,
+) -> str:
     """
     Show a price breakdown before the user commits to checkout.
     Includes subtotal, discount, and final amount due.
@@ -244,7 +255,10 @@ def preview_order_total(user_id: str, discount_code: Optional[str] = None) -> st
 
 
 @tool
-def checkout(user_id: str, discount_code: Optional[str] = None) -> str:
+def checkout(
+    user_id: Annotated[str, InjectedState("user_id")],
+    discount_code: Optional[str] = None,
+) -> str:
     """
     Place an order for all items currently in the user's cart.
     Validates stock levels, applies the discount code if provided,
@@ -302,7 +316,7 @@ def checkout(user_id: str, discount_code: Optional[str] = None) -> str:
 
 
 @tool
-def get_order_history(user_id: str) -> str:
+def get_order_history(user_id: Annotated[str, InjectedState("user_id")]) -> str:
     """
     Retrieve a summary of all past orders placed by the user.
 
@@ -319,7 +333,7 @@ def get_order_history(user_id: str) -> str:
 
 
 @tool
-def get_order_details(order_id: int) -> str:
+def get_order_details(order_id: Annotated[str, InjectedState("user_id")]) -> str:
     """
     Fetch full details for a specific order, including line items.
 

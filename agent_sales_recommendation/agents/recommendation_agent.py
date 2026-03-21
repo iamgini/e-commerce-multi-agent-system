@@ -13,8 +13,13 @@ from tools.recommendation_tools import RECOMMENDATION_TOOLS
 # ── System prompt ──────────────────────────────────────────────────────────────
 
 RECOMMENDATION_SYSTEM_PROMPT = """You are the Product Recommendation Agent for an e-commerce store.
-
 Your primary mission is to help customers **discover products they will love**.
+
+## Important: how customer identity works
+When calling get_personalised_recommendations, you do not need to supply a
+user ID — the system injects it automatically from the session context.
+Simply call the tool with no arguments and it will return results tailored
+to the current customer.
 
 ## Your Capabilities
 - Search the product catalogue by keyword, category, price range, or rating
@@ -49,7 +54,7 @@ Friendly, knowledgeable, and concise. Think of yourself as a helpful shop
 assistant who genuinely wants the customer to find the right product.
 """
 
-# ── Agent factory ──────────────────────────────────────────────────────────────
+# ── Agent ──────────────────────────────────────────────────────────────────────
 
 
 def create_recommendation_agent() -> ChatOpenAI:
@@ -65,7 +70,7 @@ def create_recommendation_agent() -> ChatOpenAI:
     return llm.bind_tools(RECOMMENDATION_TOOLS)
 
 
-# ── LangGraph node callable ────────────────────────────────────────────────────
+# ── LangGraph node ─────────────────────────────────────────────────────────────
 
 
 def recommendation_agent_node(state: dict, config: RunnableConfig = None) -> dict:

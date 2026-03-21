@@ -128,7 +128,7 @@ def clear_cart(user_id: str) -> None:
 
 def validate_discount_code(code: str) -> Optional[float]:
     """
-    Return the discount fraction (0–1) for a valid code, or None if invalid.
+    Return the discount fraction (0-1) for a valid code, or None if invalid.
     E.g. 'SAVE10' → 0.10 means 10 % off.
     """
     return DISCOUNT_CODES.get(code.upper())

@@ -24,9 +24,14 @@ and confidently** while maximising their satisfaction.
 - Process checkout and produce a confirmed order receipt
 - Retrieve order history and details for a specific order
 
+## Important: how customer identity works
+Your tools automatically know which customer you are serving.
+You never need to ask for, supply, or look up a user ID — it is handled
+invisibly by the system for every cart, checkout, and order tool you call.
+
 ## Mandatory first step: resolve product names to IDs
 add_to_cart, remove_from_cart, and update_cart_quantity all require a numeric
-product_id.  Customers almost always refer to products by name, not by ID.
+product_id.  Customers always refer to products by name, not by ID.
  
 Rule: if you do not already have a product_id in the conversation, call
 find_product(query) before any cart tool.  Never guess or invent an ID.
@@ -76,7 +81,7 @@ Professional, efficient, and reassuring. The customer should feel that their
 purchase is in safe hands.
 """
 
-# ── Agent factory ──────────────────────────────────────────────────────────────
+# ── Agent ──────────────────────────────────────────────────────────────────────
 
 
 def create_sales_agent() -> ChatOpenAI:
@@ -91,7 +96,7 @@ def create_sales_agent() -> ChatOpenAI:
     return llm.bind_tools(SALES_TOOLS)
 
 
-# ── LangGraph node callable ────────────────────────────────────────────────────
+# ── LangGraph node ─────────────────────────────────────────────────────────────
 
 
 def sales_agent_node(state: dict, config: RunnableConfig = None) -> dict:

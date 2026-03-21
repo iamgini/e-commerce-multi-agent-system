@@ -130,11 +130,6 @@ def search_products(
     if not tokens:
         return []
 
-    # ── Step 1: broad SQL fetch (any token matches) ───────────────────────────
-    # Build: WHERE (name LIKE %tok1% OR desc LIKE %tok1% OR tags LIKE %tok1%)
-    #           OR (name LIKE %tok2% OR ...)
-    # This uses positional ? placeholders because we need one per token.
-
     token_clauses = " OR ".join(
         "(p.name LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)" for _ in tokens
     )
@@ -161,8 +156,6 @@ def search_products(
         sql += " AND p.rating >= ?"
         token_params.append(min_rating)
 
-    # Fetch a wider pool (up to 4× limit) so the Python ranker has material
-    # to work with before trimming to `limit`.
     sql += " LIMIT ?"
     token_params.append(limit * 4)
 
@@ -171,7 +164,6 @@ def search_products(
 
     candidates = [dict(r) for r in rows]
 
-    # ── Step 2: score and re-rank in Python ───────────────────────────────────
     scored = [(row, _relevance_score(row, tokens, query)) for row in candidates]
     scored.sort(key=lambda x: x[1], reverse=True)
 

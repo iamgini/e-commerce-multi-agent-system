@@ -82,7 +82,6 @@ def _create_cart_schema(conn: sqlite3.Connection) -> None:
     """)
 
 
-# TODO: Insert the SEED CATEGORIES and SEED PRODUCTS into db_config.py
 def seed_products(conn: sqlite3.Connection) -> None:
     """Insert categories and products if they don't already exist."""
     existing = conn.execute("SELECT COUNT(*) FROM categories").fetchone()[0]
@@ -102,7 +101,7 @@ def seed_products(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
-# ── Public entry point ─────────────────────────────────────────────────────────
+# ── Entrypoint in main.py ──────────────────────────────────────────────────────
 
 
 def initialise_databases() -> None:

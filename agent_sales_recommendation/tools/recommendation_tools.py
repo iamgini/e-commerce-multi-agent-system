@@ -1,14 +1,15 @@
 import json
 import os
 import sys
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
 from langchain_core.tools import tool
+from langgraph.prebuilt import InjectedState
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from database import product_db
 from config_db import SEED_CATEGORIES
+from database import product_db
 
 categories = (SEED_CATEGORIES[i][0] for i in range(len(SEED_CATEGORIES)))
 
@@ -123,7 +124,9 @@ def get_trending_products() -> str:
 
 
 @tool
-def get_personalised_recommendations(user_id: str) -> str:
+def get_personalised_recommendations(
+    user_id: Annotated[str, InjectedState("user_id")],
+) -> str:
     """
     Generate personalised product recommendations based on the user's
     purchase history. Finds products in the same categories as past purchases.

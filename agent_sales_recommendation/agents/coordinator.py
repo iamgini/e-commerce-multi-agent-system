@@ -101,27 +101,27 @@ Rules:
 
 def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
     """
-    LangGraph node: inspect the latest user message and return a routing decision.
+    LangGraph node: Inspect the latest user message and return a routing decision.
     The decision is stored in state["route"].
 
-    Safety guard: if no HumanMessage is at the top of the stack (e.g. the node
-    is somehow reached after an AI turn), we default to ROUTE_RECOMMEND rather
+    Safety guard: If no HumanMessage is at the top of the stack (e.g. the node
+    is somehow reached after an AI turn), default to ROUTE_RECOMMEND rather
     than re-routing mid-response.
     """
-    # Guard: only route when the most recent message is from the human.
-    # This prevents accidental re-entry if the graph topology is ever extended.
+    # Guard: Only route when the most recent message is from the human,
+    # prevents accidental re-entry if the graph topology is ever extended
     last_msg = state["messages"][-1] if state["messages"] else None
     if not isinstance(last_msg, HumanMessage):
-        # Shouldn't normally happen with the corrected topology, but safe-guard.
         return {"route": ROUTE_RECOMMEND}
 
-    # Fast keyword-based pre-routing (avoids an LLM call for obvious cases)
+    # Fast keyword-based pre-routing (skips LLM call)
     last_human = _last_human_text(state["messages"])
     fast_route = _keyword_route(last_human)
     if fast_route:
         return {"route": fast_route}
 
-    # Fallback: ask the LLM for nuanced routing
+    # Fallback: Ask the LLM to reason and route based on context 
+    # and user intent
     llm = ChatOpenAI(
         model=LLM_MODEL,
         temperature=LLM_TEMPERATURE,
