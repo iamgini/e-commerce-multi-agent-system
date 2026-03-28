@@ -106,6 +106,32 @@ _RECOMMEND_KEYWORDS = {
     "want a",
 }
 
+_RETURNS_KEYWORDS = {
+    "return",
+    "refund",
+    "damaged",
+    "broken",
+    "complaint",
+    "defective",
+    "eligible",
+    "return policy",
+    "return window",
+    "shipping back",
+    "refund status",
+    "money back",
+    "reimbursement",
+    "issue",
+    "problem",
+    "warranty",
+    "exchange",
+    "return label",
+    "return tracking",
+    "when will i get",
+    "refund when",
+    "can i return",
+    "how do i return",
+    "return process"}
+
 # ── System prompt ──────────────────────────────────────────────────────────────
 
 COORDINATOR_SYSTEM_PROMPT = """You are the Coordinator of an e-commerce multi-agent system.
