@@ -14,6 +14,7 @@ from agent_coordinator.coordinator import coordinator_node
 from agent_sales_recommendation.agents.recommendation_agent import recommendation_agent_node
 from agent_sales_recommendation.agents.sales_agent import sales_agent_node
 from agent_order_inventory_agent import order_inventory_agent_node
+from agent_customer_support.customer_support import customer_support_agent
 from agent_sales_recommendation.tools.recommendation_tools import RECOMMENDATION_TOOLS
 from agent_sales_recommendation.tools.sales_tools import SALES_TOOLS
 from config import (
@@ -53,6 +54,8 @@ def route_from_coordinator(state: AgentState) -> str:
         return SALES_NODE
     if route == ROUTE_ORDER_INVENTORY:
         return ORDER_INVENTORY_NODE
+    if route == ROUTE_SUPPORT:
+        return CUSTOMER_SUPPORT_NODE
     if route == ROUTE_FINISH:
         return END
     return RECOMMENDATION_NODE  # default
@@ -95,7 +98,7 @@ def build_graph(checkpointer: SqliteSaver) -> StateGraph:
     builder.add_node(SALES_NODE, sales_agent_node)
     builder.add_node(RECOMMENDATION_NODE, recommendation_agent_node)
     builder.add_node(ORDER_INVENTORY_NODE, order_inventory_agent_node)
-    builder.add_node(CUSTOMER_SUPPORT_NODE, ) ## Insert your agent node here
+    builder.add_node(CUSTOMER_SUPPORT_NODE, customer_support_agent)
     ##builder.add_node(ORDERS_INVENTORY_NODE, ) ## Insert your agent node here
     builder.add_node(RETURNS_REFUNDS_NODE, )  ## Insert your agent node here
 
@@ -117,6 +120,7 @@ def build_graph(checkpointer: SqliteSaver) -> StateGraph:
         {
             SALES_NODE: SALES_NODE,
             RECOMMENDATION_NODE: RECOMMENDATION_NODE,
+            CUSTOMER_SUPPORT_NODE: CUSTOMER_SUPPORT_NODE,
             ORDER_INVENTORY_NODE: ORDER_INVENTORY_NODE,
             END: END,
         },
@@ -142,6 +146,7 @@ def build_graph(checkpointer: SqliteSaver) -> StateGraph:
 
     builder.add_edge("sales_tools", SALES_NODE)
     builder.add_edge("recommendation_tools", RECOMMENDATION_NODE)
+    builder.add_edge(CUSTOMER_SUPPORT_NODE, END)
 
     return builder.compile(checkpointer=checkpointer)
 

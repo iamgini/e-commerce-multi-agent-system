@@ -2,7 +2,11 @@ import json
 from pathlib import Path
 from typing import Dict
 
+# Local LLM
 from langchain_ollama import OllamaLLM
+
+# cloud LLM
+from langchain_openai import ChatOpenAI
 
 from state import AgentState
 from observability.logger import log_event
@@ -11,8 +15,9 @@ from observability.logger import log_event
 # ==========================================================
 # Local LLM Setup (free, offline)
 # ==========================================================
-
 llm = OllamaLLM(model="llama3")
+
+
 
 # ==========================================================
 # Load FAQ Knowledge Base
