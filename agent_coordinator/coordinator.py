@@ -14,12 +14,46 @@ from config import (
     LLM_TEMPERATURE,
     OPENAI_API_KEY,
     ROUTE_FINISH,
+    ROUTE_ORDER_INVENTORY,
     ROUTE_RECOMMEND,
     ROUTE_SALES,
 )
 
 # ── Routing keywords ───────────────────────────────────────────────────────────
-
+_ORDER_INVENTORY_KEYWORDS = {
+    "purchase order",
+    "purchase orders",
+    "create po",
+    "update po",
+    "po status",
+    "procurement",
+    "supplier",
+    "suppliers",
+    "vendor",
+    "vendors",
+    "supply order",
+    "supply orders",
+    "goods receipt",
+    "receive stock",
+    "stock received",
+    "inventory",
+    "stock level",
+    "stock levels",
+    "stock by product",
+    "view stock",
+    "current stock",
+    "warehouse stock",
+    "low stock",
+    "reorder level",
+    "restock",
+    "inventory movement",
+    "inventory movements",
+    "stock movement",
+    "stock movements",
+    "reduce stock",
+    "deduct stock",
+    "adjust stock",
+}
 _SALES_KEYWORDS = {
     "add to cart",
     "remove from cart",
@@ -81,6 +115,8 @@ should handle it. You must respond with ONLY a valid JSON object - no prose.
 Available routes:
 - "support"   → Customer Support Agent (general inquiries, store hours, technical issues, human agent requests, account help)
 - "inventory" → Orders and Inventory Agent (stock availability, shipping status, tracking numbers, delivery dates)
+- "order_inventory" → Order & Inventory Agent (purchase orders, supply orders, stock, procurement, warehouse operations)
+- "finish"          → End the conversation (goodbye, thank you, done, exit)
 - "returns"   → Returns and Refunds Agent (refund requests, damaged items, exchange policy, return labels, warranty claims)
 - "recommend" → Product Recommendation Agent (browsing, searching, comparing products)
 - "sales"     → Sales Agent (cart actions, checkout, discounts, order history)
@@ -88,15 +124,16 @@ Available routes:
 
 Response format (strict JSON, nothing else):
 {
-  "route": "<recommend|sales|finish>",
+  "route": "<recommend|sales|order_inventory|finish>",
   "reason": "<one sentence rationale>"
 }
 
 Rules:
 1. If the message is about finding, browsing, comparing, or learning about products → "recommend".
 2. If the message is about cart, buying, discounts, checkout, or past orders → "sales".
-3. If the message is a farewell or the user says they are done → "finish".
-4. When in doubt, prefer "recommend".
+3. If the message is about stock levels, warehouse inventory, receiving stock, purchase orders, supply orders, supplier operations, or procurement → "order_inventory".
+4. If the message is a farewell or the user says they are done → "finish".
+5. When in doubt, prefer "recommend".
 """
 
 # ── Coordinator node ────────────────────────────────────────────────────────────
@@ -161,6 +198,8 @@ def _keyword_route(text: str) -> str | None:
         for kw in ("bye", "goodbye", "thank you", "thanks", "done", "exit", "quit")
     ):
         return ROUTE_FINISH
+    if any(kw in text for kw in _ORDER_INVENTORY_KEYWORDS):
+        return ROUTE_ORDER_INVENTORY
     if any(kw in text for kw in _SALES_KEYWORDS):
         return ROUTE_SALES
     if any(kw in text for kw in _RECOMMEND_KEYWORDS):
@@ -175,7 +214,7 @@ def _parse_route(content: str) -> str:
         clean = re.sub(r"```[a-z]*\n?", "", content).strip()
         data = json.loads(clean)
         route = data.get("route", ROUTE_RECOMMEND)
-        if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_FINISH):
+        if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_ORDER_INVENTORY,ROUTE_FINISH):
             return ROUTE_RECOMMEND
         return route
     except (json.JSONDecodeError, AttributeError):
