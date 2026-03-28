@@ -12,10 +12,16 @@ LLM_TEMPERATURE: float = 0.0  # deterministic outputs
 COORDINATOR_NODE: str = "coordinator"
 SALES_NODE: str = "sales_agent"
 RECOMMENDATION_NODE: str = "recommendation_agent"
+CUSTOMER_SUPPORT_NODE: str = "customer_support_agent"
+ORDERS_INVENTORY_AGENT: str = "orders_inventory_agent"
+RETURNS_REFUNDS_AGENT: str = "returns_refunds_agent"
 
 # ── Routing literals ──────────────────────────────────────────────────────────
 ROUTE_SALES: str = "sales"
 ROUTE_RECOMMEND: str = "recommend"
+ROUTE_SUPPORT: str = "customer_support"
+ROUTE_INVENTORY: str = "orders_inventory"
+ROUTE_RETURNS: str = "returns_refunds"
 ROUTE_FINISH: str = "finish"
 
 # ── Discount rules ────────────────────────────────────────────────────────────

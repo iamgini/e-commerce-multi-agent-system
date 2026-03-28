@@ -79,6 +79,9 @@ Your only job is to read the customer's latest message and decide which agent
 should handle it. You must respond with ONLY a valid JSON object - no prose.
 
 Available routes:
+- "support"   → Customer Support Agent (general inquiries, store hours, technical issues, human agent requests, account help)
+- "inventory" → Orders and Inventory Agent (stock availability, shipping status, tracking numbers, delivery dates)
+- "returns"   → Returns and Refunds Agent (refund requests, damaged items, exchange policy, return labels, warranty claims)
 - "recommend" → Product Recommendation Agent (browsing, searching, comparing products)
 - "sales"     → Sales Agent (cart actions, checkout, discounts, order history)
 - "finish"    → End the conversation (goodbye, thank you, done, exit)
