@@ -17,6 +17,7 @@ from config import (
     ROUTE_ORDER_INVENTORY,
     ROUTE_RECOMMEND,
     ROUTE_SALES,
+    ROUTE_RETURNS
 )
 
 # ── Routing keywords ───────────────────────────────────────────────────────────
@@ -106,6 +107,32 @@ _RECOMMEND_KEYWORDS = {
     "want a",
 }
 
+_RETURNS_KEYWORDS = {
+    "return",
+    "refund",
+    "damaged",
+    "broken",
+    "complaint",
+    "defective",
+    "eligible",
+    "return policy",
+    "return window",
+    "shipping back",
+    "refund status",
+    "money back",
+    "reimbursement",
+    "issue",
+    "problem",
+    "warranty",
+    "exchange",
+    "return label",
+    "return tracking",
+    "when will i get",
+    "refund when",
+    "can i return",
+    "how do i return",
+    "return process"}
+
 # ── System prompt ──────────────────────────────────────────────────────────────
 
 COORDINATOR_SYSTEM_PROMPT = """You are the Coordinator of an e-commerce multi-agent system.
@@ -117,7 +144,7 @@ Available routes:
 - "inventory" → Orders and Inventory Agent (stock availability, shipping status, tracking numbers, delivery dates)
 - "order_inventory" → Order & Inventory Agent (purchase orders, supply orders, stock, procurement, warehouse operations)
 - "finish"          → End the conversation (goodbye, thank you, done, exit)
-- "returns"   → Returns and Refunds Agent (refund requests, damaged items, exchange policy, return labels, warranty claims)
+- "returns_refunds"   → Returns and Refunds Agent (refund requests, damaged items, exchange policy, return labels, warranty claims)
 - "recommend" → Product Recommendation Agent (browsing, searching, comparing products)
 - "sales"     → Sales Agent (cart actions, checkout, discounts, order history)
 - "finish"    → End the conversation (goodbye, thank you, done, exit)
@@ -132,8 +159,9 @@ Rules:
 1. If the message is about finding, browsing, comparing, or learning about products → "recommend".
 2. If the message is about cart, buying, discounts, checkout, or past orders → "sales".
 3. If the message is about stock levels, warehouse inventory, receiving stock, purchase orders, supply orders, supplier operations, or procurement → "order_inventory".
-4. If the message is a farewell or the user says they are done → "finish".
-5. When in doubt, prefer "recommend".
+4. If the message is about returning items, refunds, damaged goods, exchange, warranty, or complaints → "returns_refunds".
+5. If the message is a farewell or the user says they are done → "finish".
+6.. When in doubt, prefer "recommend".
 """
 
 # ── Coordinator node ────────────────────────────────────────────────────────────
@@ -202,6 +230,8 @@ def _keyword_route(text: str) -> str | None:
         return ROUTE_ORDER_INVENTORY
     if any(kw in text for kw in _SALES_KEYWORDS):
         return ROUTE_SALES
+    if any(kw in text for kw in _RETURNS_KEYWORDS): 
+        return ROUTE_RETURNS
     if any(kw in text for kw in _RECOMMEND_KEYWORDS):
         return ROUTE_RECOMMEND
     return None
@@ -214,7 +244,7 @@ def _parse_route(content: str) -> str:
         clean = re.sub(r"```[a-z]*\n?", "", content).strip()
         data = json.loads(clean)
         route = data.get("route", ROUTE_RECOMMEND)
-        if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_ORDER_INVENTORY,ROUTE_FINISH):
+        if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_ORDER_INVENTORY,ROUTE_RETURNS,ROUTE_FINISH):
             return ROUTE_RECOMMEND
         return route
     except (json.JSONDecodeError, AttributeError):
