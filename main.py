@@ -13,22 +13,6 @@ from graph.workflow import get_graph
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
-BANNER = """
-╔══════════════════════════════════════════════════════════╗
-║        🛒  E-Commerce Multi-Agent Assistant  🛒          ║
-║                                                          ║
-║  I can help you:                                         ║
-║   • Find and compare products                            ║
-║   • Get personalised recommendations                     ║
-║   • Manage your cart                                     ║
-║   • Apply discount codes & check out                     ║
-║                                                          ║
-║  Available discount codes: SAVE10 | SAVE20 | WELCOME     ║
-║  Type 'quit' or 'exit' to leave.                         ║
-╚══════════════════════════════════════════════════════════╝
-"""
-
-
 def _extract_last_ai_text(messages: list) -> str:
     """Pull the text content from the last AIMessage in the list."""
     for msg in reversed(messages):
@@ -48,7 +32,6 @@ def _extract_last_ai_text(messages: list) -> str:
 
 def run_interactive(user_id: str) -> None:
     """Start an interactive terminal session with the multi-agent system."""
-    print(BANNER)
     print(f"  Session user: {user_id}\n")
 
     graph = get_graph()

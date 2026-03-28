@@ -4,6 +4,7 @@ import os
 DB_DIR: str = os.path.join(os.path.dirname(__file__), "data")
 PRODUCTS_DB_PATH: str = os.path.join(DB_DIR, "products.db")
 CART_DB_PATH: str = os.path.join(DB_DIR, "cart.db")
+ORDER_INVENTORY_DB_PATH: str = os.path.join(DB_DIR, "order_inventory.db")
 CHECKPOINTER_DB_PATH: str = os.path.join(DB_DIR, "checkpoints.db")
 
 # ── Database data──────────────────────────────────────────────────────────────
