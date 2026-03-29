@@ -4,6 +4,7 @@
   - [Testing with fastapi](#testing-with-fastapi)
   - [chainlit\_app](#chainlit_app)
   - [Troubleshooting](#troubleshooting)
+  - [Appendix - Building Container](#appendix---building-container)
 
 
 ## Testing with fastapi
@@ -52,4 +53,14 @@ Reinstall Python libs in uv
 
 ```shell
 uv pip install chainlit --reinstall
+```
+
+
+## Appendix - Building Container
+
+```shell
+podman build -t shopbot .
+
+# podman run --env-file .env -p 8001:8001 shopbot
+podman run -e OPENAI_API_KEY=$OPENAI_API_KEY -p 8001:8001 shopbot
 ```

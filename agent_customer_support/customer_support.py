@@ -9,7 +9,7 @@ from observability.logger import log_event
 # from state import AgentState
 
 import os
-from langchain_ollama import OllamaLLM
+
 from langchain_openai import ChatOpenAI
 
 from config import OPENAI_API_KEY, LLM_MODEL, LLM_TEMPERATURE
@@ -23,6 +23,7 @@ _provider = os.getenv("LLM_PROVIDER", "openai").lower()
 if _provider == "openai":
     llm = ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE, api_key=OPENAI_API_KEY)
 else:
+    from langchain_ollama import OllamaLLM
     llm = OllamaLLM(model="llama3")
 
 # ==========================================================
