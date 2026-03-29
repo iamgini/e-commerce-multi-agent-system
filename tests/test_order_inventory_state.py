@@ -1,14 +1,14 @@
 import os
 import sys
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from agents.order_inventory_agent import order_inventory_agent_node
 
-load_dotenv()
+# load_dotenv()
 
 
 def create_test_state(user_query: str) -> dict:
@@ -23,7 +23,7 @@ def main():
     print("QUICK TEST - ORDER & INVENTORY AGENT RETURNED STATE")
     print("=" * 70)
 
-    if not os.getenv("OPENAI_API_KEY"):
+    if not os.environ.get("OPENAI_API_KEY"):
         print("OPENAI_API_KEY is not set, so this state-return test cannot call the LLM.")
         print("Set the key in your .env file, then run this file again.")
         return

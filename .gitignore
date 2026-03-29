@@ -38,7 +38,7 @@ Thumbs.db
 # Environment variables
 # ===============================
 .env
-.env.*
+.env.keys
 
 # ===============================
 # Build / Packaging
