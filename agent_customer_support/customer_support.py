@@ -2,22 +2,21 @@ import json
 from pathlib import Path
 from typing import Dict
 
-# Local LLM
+import os
 from langchain_ollama import OllamaLLM
-
-# cloud LLM
 from langchain_openai import ChatOpenAI
+from config import OPENAI_API_KEY
 
-from state import AgentState
-from observability.logger import log_event
+# Switch LLM provider via .env:
+# LLM_PROVIDER=ollama  → free, local
+# LLM_PROVIDER=openai  → uses OPENAI_API_KEY - (default)
 
+_provider = os.getenv("LLM_PROVIDER", "openai").lower()
 
-# ==========================================================
-# Local LLM Setup (free, offline)
-# ==========================================================
-llm = OllamaLLM(model="llama3")
-
-
+if _provider == "openai":
+    # llm = ChatOpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"))
+else:
+    llm = OllamaLLM(model="llama3")
 
 # ==========================================================
 # Load FAQ Knowledge Base
