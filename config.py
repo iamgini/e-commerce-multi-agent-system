@@ -34,11 +34,11 @@ ROUTE_FINISH: str = "finish"
 # ORDER_INVENTORY_DB_PATH: str = os.path.join(DB_DIR, "order_inventory.db")
 # CHECKPOINTER_DB_PATH: str = os.path.join(DB_DIR, "checkpoints.db")
 
-MAINTENANCE_DB_DSN = "postgresql://postgres:testing_only@192.168.50.111:5432/postgres?sslmode=disable"
-PRODUCTS_DB_DSN = "postgresql://postgres:testing_only@192.168.50.111:5432/products_db?sslmode=disable"
-CART_DB_DSN = "postgresql://postgres:testing_only@192.168.50.111:5432/cart_db?sslmode=disable"
-ORDER_INVENTORY_DB_DSN = "postgresql://postgres:testing_only@192.168.50.111:5432/order_inventory_db?sslmode=disable"
-CHECKPOINTER_DB_DSN = "postgresql://postgres:testing_only@192.168.50.111:5432/checkpoints_db?sslmode=disable"
+MAINTENANCE_DB_DSN = "postgresql://postgres:testing_only@felixpi:5432/postgres?sslmode=disable"
+PRODUCTS_DB_DSN = "postgresql://postgres:testing_only@felixpi:5432/products_db?sslmode=disable"
+CART_DB_DSN = "postgresql://postgres:testing_only@felixpi:5432/cart_db?sslmode=disable"
+ORDER_INVENTORY_DB_DSN = "postgresql://postgres:testing_only@felixpi:5432/order_inventory_db?sslmode=disable"
+CHECKPOINTER_DB_DSN = "postgresql://postgres:testing_only@felixpi:5432/checkpoints_db?sslmode=disable"
 
 # ── Discount rules ────────────────────────────────────────────────────────────
 DISCOUNT_CODES: dict[str, float] = {
