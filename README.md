@@ -23,7 +23,36 @@ ecommerce_multiagent/
 └── requirements.txt
 ```
 
-Agents Documentation
+## Testing main
+
+```shell
+
+```
+
+## Testing coordinator
+
+```shell
+e-commerce-multi-agent-system  $  uv run python test_coordinator_agent_quick.py
+
+Recommendation       | Can you recommend a good wireless mouse?
+route -> recommend
+--------------------------------------------------------------------------------
+Sales                | Add the keyboard to my cart and show my total
+route -> sales
+--------------------------------------------------------------------------------
+Order Inventory      | Create a purchase order and show low stock items
+route -> orders_inventory
+--------------------------------------------------------------------------------
+Support              | I need help with my account
+route -> customer_support
+--------------------------------------------------------------------------------
+Finish               | Thanks, bye
+route -> finish
+--------------------------------------------------------------------------------
+```
+
+
+## Agents Documentation
 
 - TODO
 
