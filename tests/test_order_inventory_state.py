@@ -1,14 +1,14 @@
 import os
 import sys
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from agents.order_inventory_agent import order_inventory_agent_node
 
-load_dotenv()
+# load_dotenv()
 
 
 def create_test_state(user_query: str) -> dict:
