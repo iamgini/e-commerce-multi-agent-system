@@ -4,7 +4,7 @@ import os
 # load_dotenv()
 
 # ── LLM ──────────────────────────────────────────────────────────────────────
-OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+OPENAI_API_KEY: str = os.environ.get("OPENAI_API_KEY")
 LLM_MODEL: str = "gpt-5-nano"  # model used by all agents
 LLM_TEMPERATURE: float = 0.0  # deterministic outputs
 

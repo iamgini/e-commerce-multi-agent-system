@@ -23,7 +23,7 @@ def main():
     print("QUICK TEST - ORDER & INVENTORY AGENT RETURNED STATE")
     print("=" * 70)
 
-    if not os.getenv("OPENAI_API_KEY"):
+    if not os.environ.get("OPENAI_API_KEY"):
         print("OPENAI_API_KEY is not set, so this state-return test cannot call the LLM.")
         print("Set the key in your .env file, then run this file again.")
         return
