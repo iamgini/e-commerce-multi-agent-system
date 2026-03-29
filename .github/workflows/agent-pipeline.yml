@@ -23,9 +23,7 @@ jobs:
           python-version: "3.11"
 
       - name: Add dotenvx to inject encrypted env vars
-        run: |
-             curl -sfS https://dotenvx.sh/install.sh | sh
-             dotenvx run -- python tests/test_order_inventory_state.py
+        run: curl -sfS https://dotenvx.sh/install.sh | sh 
         env:
           DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
   
@@ -35,8 +33,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run tests
-        run: |
-          python tests/test_order_inventory_state.py
+        run: dotenvx run -- python tests/test_order_inventory_state.py
 
   secret-detection:
     needs: setup
