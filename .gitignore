@@ -5,9 +5,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# ===============================
 # Virtual environments
+# ===============================
 venv/
-.env/
 .venv/
 
 # ===============================
@@ -64,11 +65,3 @@ htmlcov/
 uv.lock
 pyproject.toml
 .python-version
-
-
-# ===============================
-# Block for Sales-Recommendation agent
-# ===============================
-*.db
-**/main.py
-*.ipynb

@@ -30,14 +30,24 @@ def _extract_last_ai_text(messages: list) -> str:
     return "(no response)"
 
 
+def _make_config(user_id: str) -> dict:
+    """
+    Build the LangGraph config dict for a given user.
+
+    thread_id ties this invocation to a specific checkpoint row in
+    checkpoints.db.  Using user_id as the thread_id means each customer has
+    exactly one persistent conversation thread across sessions.
+    """
+    return {"configurable": {"thread_id": user_id}}
+
+
 def run_interactive(user_id: str) -> None:
     """Start an interactive terminal session with the multi-agent system."""
-    print(f"  Session user: {user_id}\n")
+    print(f"**Session user: {user_id}**")
+    print("**Checkpoint: data/checkpoints.db  (conversation persists)**\n")
 
     graph = get_graph()
-
-    # Persistent message history for the session
-    message_history: list = []
+    config = _make_config(user_id)
 
     while True:
         try:
@@ -52,12 +62,9 @@ def run_interactive(user_id: str) -> None:
             print("\nAssistant: Thank you for shopping with us! Goodbye! 👋\n")
             break
 
-        # Append the new human message
-        message_history.append(HumanMessage(content=user_input))
-
         # Run one turn through the graph
         state_input = {
-            "messages": message_history,
+            "messages": [HumanMessage(content=user_input)],
             "route": "",
             "current_agent": "",
             "user_id": user_id,
@@ -75,9 +82,6 @@ def run_interactive(user_id: str) -> None:
         reply = _extract_last_ai_text(result["messages"])
         agent_label = result.get("current_agent", "assistant").replace("_", " ").title()
         print(f"\n[{agent_label}]: {reply}\n")
-
-        # Update history with the full result messages (includes tool messages)
-        message_history = result["messages"]
 
 
 # def run_demo(user_id: str) -> None:
@@ -97,31 +101,30 @@ def run_interactive(user_id: str) -> None:
 #         "Thanks, goodbye!",
 #     ]
 
+#     demo_thread_id = f"{user_id}_demo"
+
 #     print(BANNER)
-#     print(f"  [DEMO MODE] user_id={user_id}\n")
+#     print(f"[DEMO MODE] user_id={user_id}  thread_id={demo_thread_id}\n")
 #     print("─" * 60)
 
 #     graph = get_graph()
-#     message_history: list = []
+#     config = _make_config(demo_thread_id)
 
 #     for turn in demo_turns:
 #         print(f"You: {turn}")
-#         message_history.append(HumanMessage(content=turn))
 
 #         state_input = {
-#             "messages": message_history,
+#             "messages": [HumanMessage(content=turn)],
 #             "route": "",
 #             "current_agent": "",
 #             "user_id": user_id,
 #         }
 
-#         result = graph.invoke(state_input)
+#         result = graph.invoke(state_input, config=config)
 #         reply = _extract_last_ai_text(result["messages"])
 #         agent_label = result.get("current_agent", "assistant").replace("_", " ").title()
 #         print(f"[{agent_label}]: {reply}\n")
 #         print("─" * 60)
-
-#         message_history = result["messages"]
 
 #         if result.get("route") == "finish":
 #             break
@@ -152,10 +155,10 @@ def main() -> None:
         print("Database setup complete. Exiting.")
         return
 
-    if args.demo:
-        run_demo(args.user)
-    else:
-        run_interactive(args.user)
+    # if args.demo:
+    #     run_demo(args.user)
+    # else:
+    run_interactive(args.user)
 
 
 if __name__ == "__main__":

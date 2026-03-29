@@ -13,7 +13,7 @@ COORDINATOR_NODE: str = "coordinator"
 SALES_NODE: str = "sales_agent"
 RECOMMENDATION_NODE: str = "recommendation_agent"
 CUSTOMER_SUPPORT_NODE: str = "customer_support_agent"
-ORDERS_INVENTORY_NODE: str = "orders_inventory_agent"
+ORDER_INVENTORY_NODE: str = "orders_inventory_agent"
 RETURNS_REFUNDS_NODE: str = "returns_refunds_agent"
 
 # ── Routing literals ──────────────────────────────────────────────────────────
@@ -23,6 +23,13 @@ ROUTE_SUPPORT: str = "customer_support"
 ROUTE_ORDER_INVENTORY: str = "orders_inventory"
 ROUTE_RETURNS: str = "returns_refunds"
 ROUTE_FINISH: str = "finish"
+
+# ── Database ──────────────────────────────────────────────────────────────────
+DB_DIR: str = os.path.join(os.path.dirname(__file__), "data")
+PRODUCTS_DB_PATH: str = os.path.join(DB_DIR, "products.db")
+CART_DB_PATH: str = os.path.join(DB_DIR, "cart.db")
+ORDER_INVENTORY_DB_PATH: str = os.path.join(DB_DIR, "order_inventory.db")
+CHECKPOINTER_DB_PATH: str = os.path.join(DB_DIR, "checkpoints.db")
 
 # ── Discount rules ────────────────────────────────────────────────────────────
 DISCOUNT_CODES: dict[str, float] = {
