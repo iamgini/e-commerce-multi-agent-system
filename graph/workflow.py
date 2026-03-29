@@ -4,7 +4,8 @@ import sys
 from typing import Annotated, TypedDict
 
 from langchain_core.messages import AIMessage, BaseMessage
-from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.postgres import PostgresSaver
+
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 
@@ -16,10 +17,9 @@ from agents.order_inventory_agent import order_inventory_agent_node
 from agents.recommendation_agent import recommendation_agent_node
 from agents.sales_agent import sales_agent_node
 from config import (
-    CHECKPOINTER_DB_PATH,
+    CHECKPOINTER_DB_DSN,
     COORDINATOR_NODE,
     CUSTOMER_SUPPORT_NODE,
-    DB_DIR,
     ORDER_INVENTORY_NODE,
     RECOMMENDATION_NODE,
     RETURNS_REFUNDS_NODE,
@@ -89,7 +89,7 @@ def should_continue_recommendation(state: AgentState) -> str:
 # ── Graph ──────────────────────────────────────────────────────────────────────
 
 
-def build_graph(checkpointer: SqliteSaver) -> StateGraph:
+def build_graph(checkpointer: PostgresSaver) -> StateGraph:
     """Assemble and compile the full multi-agent LangGraph."""
 
     builder = StateGraph(AgentState)
@@ -176,8 +176,8 @@ def get_graph():
     """
     global _graph, _checkpointer_ctx, _checkpointer
     if _graph is None:
-        os.makedirs(DB_DIR, exist_ok=True)
-        _checkpointer_ctx = SqliteSaver.from_conn_string(CHECKPOINTER_DB_PATH)
+        # os.makedirs(DB_DIR, exist_ok=True)
+        _checkpointer_ctx = PostgresSaver.from_conn_string(CHECKPOINTER_DB_DSN)
         _checkpointer = _checkpointer_ctx.__enter__()
         _graph = build_graph(checkpointer=_checkpointer)
     return _graph

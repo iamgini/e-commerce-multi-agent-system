@@ -7,7 +7,7 @@ from langchain_core.messages import HumanMessage, AIMessage
 # Ensure the project root is on the path so all imports resolve
 sys.path.insert(0, os.path.dirname(__file__))
 
-# from database.db_setup import initialise_databases
+from scripts.db_setup import initialise_databases
 from graph.workflow import get_graph
 
 
@@ -71,8 +71,7 @@ def run_interactive(user_id: str) -> None:
         }
 
         try:
-            # result = graph.invoke(state_input) ## ---- old
-            result = graph.invoke(state_input, config={"configurable": {"thread_id": user_id}})
+            result = graph.invoke(state_input, config=config)
 
         except Exception as exc:
             print(f"\n[ERROR] Agent error: {exc}\n")
@@ -149,7 +148,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # Always ensure databases exist
-    # initialise_databases()
+    initialise_databases()
 
     if args.setup_only:
         print("Database setup complete. Exiting.")

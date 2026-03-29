@@ -1,10 +1,13 @@
 import os
-# from dotenv import load_dotenv
 
-# load_dotenv()
+## Use load_dotenv for internal testing purposes
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ── LLM ──────────────────────────────────────────────────────────────────────
-OPENAI_API_KEY: str = os.environ.get("OPENAI_API_KEY")
+OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")
+# OPENAI_API_KEY: str = os.environ.get("OPENAI_API_KEY")
 LLM_MODEL: str = "gpt-5-nano"  # model used by all agents
 LLM_TEMPERATURE: float = 0.0  # deterministic outputs
 
@@ -25,11 +28,17 @@ ROUTE_RETURNS: str = "returns_refunds"
 ROUTE_FINISH: str = "finish"
 
 # ── Database ──────────────────────────────────────────────────────────────────
-DB_DIR: str = os.path.join(os.path.dirname(__file__), "data")
-PRODUCTS_DB_PATH: str = os.path.join(DB_DIR, "products.db")
-CART_DB_PATH: str = os.path.join(DB_DIR, "cart.db")
-ORDER_INVENTORY_DB_PATH: str = os.path.join(DB_DIR, "order_inventory.db")
-CHECKPOINTER_DB_PATH: str = os.path.join(DB_DIR, "checkpoints.db")
+# DB_DIR: str = os.path.join(os.path.dirname(__file__), "data")
+# PRODUCTS_DB_PATH: str = os.path.join(DB_DIR, "products.db")
+# CART_DB_PATH: str = os.path.join(DB_DIR, "cart.db")
+# ORDER_INVENTORY_DB_PATH: str = os.path.join(DB_DIR, "order_inventory.db")
+# CHECKPOINTER_DB_PATH: str = os.path.join(DB_DIR, "checkpoints.db")
+
+MAINTENANCE_DB_DSN = "postgresql://postgres:testing_only@192.168.50.111:5432/postgres?sslmode=disable"
+PRODUCTS_DB_DSN = "postgresql://postgres:testing_only@192.168.50.111:5432/products_db?sslmode=disable"
+CART_DB_DSN = "postgresql://postgres:testing_only@192.168.50.111:5432/cart_db?sslmode=disable"
+ORDER_INVENTORY_DB_DSN = "postgresql://postgres:testing_only@192.168.50.111:5432/order_inventory_db?sslmode=disable"
+CHECKPOINTER_DB_DSN = "postgresql://postgres:testing_only@192.168.50.111:5432/checkpoints_db?sslmode=disable"
 
 # ── Discount rules ────────────────────────────────────────────────────────────
 DISCOUNT_CODES: dict[str, float] = {

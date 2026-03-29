@@ -1,9 +1,11 @@
 import re
-import sqlite3
 from difflib import SequenceMatcher
 from typing import Optional
 
-from config import PRODUCTS_DB_PATH
+import psycopg
+from psycopg.rows import dict_row
+
+from config import PRODUCTS_DB_DSN
 
 # Stop-words that carry no search signal and should not be treated as tokens.
 _STOP_WORDS = {
@@ -33,12 +35,6 @@ _STOP_WORDS = {
     "want",
     "looking",
 }
-
-
-def _connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(PRODUCTS_DB_PATH)
-    conn.row_factory = sqlite3.Row  # access columns by name
-    return conn
 
 
 def _tokenise(text: str) -> list[str]:
@@ -97,6 +93,10 @@ def _relevance_score(product: dict, tokens: list[str], raw_query: str) -> float:
     return score
 
 
+def _connect() -> psycopg.Connection:
+    return psycopg.connect(PRODUCTS_DB_DSN)
+
+
 # ── Product queries ────────────────────────────────────────────────────────────
 def search_products(
     query: str,
@@ -131,7 +131,7 @@ def search_products(
         return []
 
     token_clauses = " OR ".join(
-        "(p.name LIKE ? OR p.description LIKE ? OR p.tags LIKE ?)" for _ in tokens
+        "(p.name LIKE %s OR p.description LIKE %s OR p.tags LIKE %s)" for _ in tokens
     )
     token_params = []
     for t in tokens:
@@ -147,22 +147,22 @@ def search_products(
     """
 
     if category:
-        sql += " AND c.name LIKE ?"
+        sql += " AND c.name LIKE %s"
         token_params.append(f"%{category}%")
     if max_price is not None:
-        sql += " AND p.price <= ?"
+        sql += " AND p.price <= %s"
         token_params.append(max_price)
     if min_rating is not None:
-        sql += " AND p.rating >= ?"
+        sql += " AND p.rating >= %s"
         token_params.append(min_rating)
 
-    sql += " LIMIT ?"
+    sql += " LIMIT %s"
     token_params.append(limit * 4)
 
     with _connect() as conn:
-        rows = conn.execute(sql, token_params).fetchall()
-
-    candidates = [dict(r) for r in rows]
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, token_params)
+            candidates = [dict(r) for r in cur.fetchall()]
 
     scored = [(row, _relevance_score(row, tokens, query)) for row in candidates]
     scored.sort(key=lambda x: x[1], reverse=True)
@@ -177,10 +177,12 @@ def get_product_by_id(product_id: int) -> Optional[dict]:
                p.rating, p.tags, c.name AS category
         FROM   products p
         JOIN   categories c ON c.id = p.category_id
-        WHERE  p.id = ?
+        WHERE  p.id = %s
     """
     with _connect() as conn:
-        row = conn.execute(sql, (product_id,)).fetchone()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, (product_id,))
+            row = cur.fetchone()
     return dict(row) if row else None
 
 
@@ -191,20 +193,22 @@ def get_products_by_category(category: str, limit: int = 10) -> list[dict]:
                p.rating, p.tags, c.name AS category
         FROM   products p
         JOIN   categories c ON c.id = p.category_id
-        WHERE  c.name LIKE ?
+        WHERE  c.name LIKE %s
         ORDER BY p.rating DESC
-        LIMIT ?
+        LIMIT %s
     """
     with _connect() as conn:
-        rows = conn.execute(sql, (f"%{category}%", limit)).fetchall()
-    return [dict(r) for r in rows]
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, (f"%{category}%", limit))
+            return [dict(r) for r in cur.fetchall()]
 
 
 def get_all_categories() -> list[dict]:
     """Return all available product categories."""
     with _connect() as conn:
-        rows = conn.execute("SELECT id, name, description FROM categories").fetchall()
-    return [dict(r) for r in rows]
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("SELECT id, name, description FROM categories")
+            return [dict(r) for r in cur.fetchall()]
 
 
 def reduce_stock(product_id: int, quantity: int) -> bool:
@@ -213,16 +217,17 @@ def reduce_stock(product_id: int, quantity: int) -> bool:
     Returns True if successful, False if insufficient stock.
     """
     with _connect() as conn:
-        row = conn.execute(
-            "SELECT stock FROM products WHERE id = ?", (product_id,)
-        ).fetchone()
-        if not row or row["stock"] < quantity:
-            return False
-        conn.execute(
-            "UPDATE products SET stock = stock - ? WHERE id = ?",
-            (quantity, product_id),
-        )
-        conn.commit()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "SELECT stock FROM products WHERE id = %s", (product_id,)
+            )
+            row = cur.fetchone()
+            if not row or row["stock"] < quantity:
+                return False
+            cur.execute(
+                "UPDATE products SET stock = stock - %s WHERE id = %s",
+                (quantity, product_id),
+            )
     return True
 
 
@@ -236,12 +241,13 @@ def get_user_purchase_history(user_id: str) -> list[dict]:
         FROM   user_purchase_history h
         JOIN   products p ON p.id = h.product_id
         JOIN   categories c ON c.id = p.category_id
-        WHERE  h.user_id = ?
+        WHERE  h.user_id = %s
         ORDER  BY h.purchased_at DESC
     """
     with _connect() as conn:
-        rows = conn.execute(sql, (user_id,)).fetchall()
-    return [dict(r) for r in rows]
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, (user_id,))
+            return [dict(r) for r in cur.fetchall()]
 
 
 def get_similar_products(product_id: int, limit: int = 5) -> list[dict]:
@@ -254,14 +260,15 @@ def get_similar_products(product_id: int, limit: int = 5) -> list[dict]:
                p.rating, p.tags, c.name AS category
         FROM   products p
         JOIN   categories c ON c.id = p.category_id
-        WHERE  p.category_id = (SELECT category_id FROM products WHERE id = ?)
-          AND  p.id != ?
+        WHERE  p.category_id = (SELECT category_id FROM products WHERE id = %s)
+          AND  p.id != %s
         ORDER  BY p.rating DESC
-        LIMIT  ?
+        LIMIT  %s
     """
     with _connect() as conn:
-        rows = conn.execute(sql, (product_id, product_id, limit)).fetchall()
-    return [dict(r) for r in rows]
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, (product_id, product_id, limit))
+            return [dict(r) for r in cur.fetchall()]
 
 
 def get_trending_products(limit: int = 5) -> list[dict]:
@@ -272,18 +279,19 @@ def get_trending_products(limit: int = 5) -> list[dict]:
         FROM   products p
         JOIN   categories c ON c.id = p.category_id
         ORDER  BY p.rating DESC
-        LIMIT  ?
+        LIMIT  %s
     """
     with _connect() as conn:
-        rows = conn.execute(sql, (limit,)).fetchall()
-    return [dict(r) for r in rows]
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, (limit,))
+            return [dict(r) for r in cur.fetchall()]
 
 
 def record_purchase_history(user_id: str, product_id: int) -> None:
     """Persist a purchase to the user's history (called after checkout)."""
     with _connect() as conn:
-        conn.execute(
-            "INSERT INTO user_purchase_history (user_id, product_id) VALUES (?, ?)",
-            (user_id, product_id),
-        )
-        conn.commit()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "INSERT INTO user_purchase_history (user_id, product_id) VALUES (%s, %s)",
+                (user_id, product_id),
+            )
