@@ -5,16 +5,17 @@ from typing import Dict
 import os
 from langchain_ollama import OllamaLLM
 from langchain_openai import ChatOpenAI
-from config import OPENAI_API_KEY
+
+from config import OPENAI_API_KEY, LLM_MODEL, LLM_TEMPERATURE
 
 # Switch LLM provider via .env:
-# LLM_PROVIDER=ollama  → free, local
-# LLM_PROVIDER=openai  → uses OPENAI_API_KEY - (default)
+# LLM_PROVIDER=ollama  → free, local (default)
+# LLM_PROVIDER=openai  → uses OPENAI_API_KEY
 
 _provider = os.getenv("LLM_PROVIDER", "openai").lower()
 
 if _provider == "openai":
-    # llm = ChatOpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY"))
+    llm = ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE, api_key=OPENAI_API_KEY)
 else:
     llm = OllamaLLM(model="llama3")
 
