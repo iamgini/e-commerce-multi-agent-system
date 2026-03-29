@@ -17,6 +17,7 @@ from config import (
     ROUTE_ORDER_INVENTORY,
     ROUTE_RECOMMEND,
     ROUTE_SALES,
+    ROUTE_SUPPORT,
     ROUTE_RETURNS
 )
 
@@ -133,6 +134,23 @@ _RETURNS_KEYWORDS = {
     "how do i return",
     "return process"}
 
+_SUPPORT_KEYWORDS = {
+    "help",
+    "support",
+    "contact",
+    "human agent",
+    "speak to someone",
+    "talk to agent",
+    "store hours",
+    "opening hours",
+    "account",
+    "login",
+    "password",
+    "technical issue",
+    "not working",
+    "error",
+    "problem with my account",
+}
 # ── System prompt ──────────────────────────────────────────────────────────────
 
 COORDINATOR_SYSTEM_PROMPT = """You are the Coordinator of an e-commerce multi-agent system.
@@ -188,7 +206,7 @@ def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
     if fast_route:
         return {"route": fast_route}
 
-    # Fallback: Ask the LLM to reason and route based on context 
+    # Fallback: Ask the LLM to reason and route based on context
     # and user intent
     llm = ChatOpenAI(
         model=LLM_MODEL,
@@ -230,10 +248,12 @@ def _keyword_route(text: str) -> str | None:
         return ROUTE_ORDER_INVENTORY
     if any(kw in text for kw in _SALES_KEYWORDS):
         return ROUTE_SALES
-    if any(kw in text for kw in _RETURNS_KEYWORDS): 
+    if any(kw in text for kw in _RETURNS_KEYWORDS):
         return ROUTE_RETURNS
     if any(kw in text for kw in _RECOMMEND_KEYWORDS):
         return ROUTE_RECOMMEND
+    if any(kw in text for kw in _SUPPORT_KEYWORDS):
+        return ROUTE_SUPPORT
     return None
 
 
@@ -244,7 +264,7 @@ def _parse_route(content: str) -> str:
         clean = re.sub(r"```[a-z]*\n?", "", content).strip()
         data = json.loads(clean)
         route = data.get("route", ROUTE_RECOMMEND)
-        if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_ORDER_INVENTORY,ROUTE_RETURNS,ROUTE_FINISH):
+        if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_ORDER_INVENTORY,ROUTE_RETURNS,ROUTE_SUPPORT, ROUTE_FINISH):
             return ROUTE_RECOMMEND
         return route
     except (json.JSONDecodeError, AttributeError):
