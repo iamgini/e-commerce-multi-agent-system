@@ -269,13 +269,13 @@ def _parse_route(content: str) -> str:
         # Strip markdown fences if present
         clean = re.sub(r"```[a-z]*\n?", "", content).strip()
         data = json.loads(clean)
-        # route = data.get("route", ROUTE_RECOMMEND)
-        route = data.get("route", ROUTE_SUPPORT)
+        route = data.get("route", ROUTE_RECOMMEND)
+        # route = data.get("route", ROUTE_SUPPORT)
         if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_ORDER_INVENTORY,ROUTE_RETURNS,ROUTE_SUPPORT, ROUTE_FINISH):
-            # return ROUTE_RECOMMEND
-            return ROUTE_SUPPORT
+            return ROUTE_RECOMMEND
+            # return ROUTE_SUPPORT
 
         return route
     except (json.JSONDecodeError, AttributeError):
-        # return ROUTE_RECOMMEND
-        return ROUTE_SUPPORT
+        return ROUTE_RECOMMEND
+        # return ROUTE_SUPPORT
