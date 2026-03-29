@@ -15,6 +15,7 @@ from agents.customer_support import customer_support_agent
 from agents.order_inventory_agent import order_inventory_agent_node
 from agents.recommendation_agent import recommendation_agent_node
 from agents.sales_agent import sales_agent_node
+from agents.returns_refunds_agent import returns_refunds_agent_node
 from config import (
     CHECKPOINTER_DB_PATH,
     COORDINATOR_NODE,
@@ -34,6 +35,7 @@ from config import (
 from tools.order_inventory_tools import ORDER_INVENTORY_TOOLS
 from tools.recommendation_tools import RECOMMENDATION_TOOLS
 from tools.sales_tools import SALES_TOOLS
+from tools.returns_tools import RETURNS_TOOLS
 
 # ── Shared state schema ────────────────────────────────────────────────────────
 
@@ -57,6 +59,8 @@ def route_from_coordinator(state: AgentState) -> str:
         return ORDER_INVENTORY_NODE
     if route == ROUTE_SUPPORT:
         return CUSTOMER_SUPPORT_NODE
+    if route == ROUTE_RETURNS:
+        return RETURNS_REFUNDS_NODE
     if route == ROUTE_FINISH:
         return END
     return RECOMMENDATION_NODE  # default
@@ -85,6 +89,17 @@ def should_continue_recommendation(state: AgentState) -> str:
         return "recommendation_tools"
     return END
 
+def should_continue_returns(state: AgentState) -> str:
+    """
+    After the returns agent runs:
+    - If it emitted tool calls  → go to the returns tool node.
+    - Otherwise                 → END and return response to user.
+    """
+    last = state["messages"][-1]
+    if isinstance(last, AIMessage) and last.tool_calls:
+        return "returns_tools"
+    return END
+
 
 # ── Graph ──────────────────────────────────────────────────────────────────────
 
@@ -100,14 +115,15 @@ def build_graph(checkpointer: SqliteSaver) -> StateGraph:
     builder.add_node(RECOMMENDATION_NODE, recommendation_agent_node)
     builder.add_node(ORDER_INVENTORY_NODE, order_inventory_agent_node)
     builder.add_node(CUSTOMER_SUPPORT_NODE, customer_support_agent)
-    # builder.add_node(RETURNS_REFUNDS_NODE, )  ## Insert your agent node here
+    builder.add_node(RETURNS_REFUNDS_NODE, returns_refunds_agent_node)
 
     # Tool executor nodes (LangGraph's built-in ToolNode handles tool dispatch)
     builder.add_node("sales_tools", ToolNode(SALES_TOOLS))
     builder.add_node("recommendation_tools", ToolNode(RECOMMENDATION_TOOLS))
     builder.add_node("order_inventory_tools", ToolNode(ORDER_INVENTORY_TOOLS))
+    builder.add_node("returns_tools", ToolNode(RETURNS_TOOLS))
     # builder.add_node() ## Insert your tool node here
-    # builder.add_node() ## Insert your tool node here
+   
 
 
     # ── Edges ──────────────────────────────────────────────────────────────────
@@ -121,6 +137,7 @@ def build_graph(checkpointer: SqliteSaver) -> StateGraph:
             RECOMMENDATION_NODE: RECOMMENDATION_NODE,
             CUSTOMER_SUPPORT_NODE: CUSTOMER_SUPPORT_NODE,
             ORDER_INVENTORY_NODE: ORDER_INVENTORY_NODE,
+            RETURNS_REFUNDS_NODE: RETURNS_REFUNDS_NODE,
             END: END,
         },
     )
@@ -151,10 +168,19 @@ def build_graph(checkpointer: SqliteSaver) -> StateGraph:
             END: END,
         },
     )
+    builder.add_conditional_edges(
+        RETURNS_REFUNDS_NODE,
+        should_continue_returns,
+        {
+            "returns_tools": "returns_tools",
+            END: END,
+        },
+    )
 
     builder.add_edge("sales_tools", SALES_NODE)
     builder.add_edge("recommendation_tools", RECOMMENDATION_NODE)
     builder.add_edge("order_inventory_tools", ORDER_INVENTORY_NODE)
+    builder.add_edge("returns_tools", RETURNS_REFUNDS_NODE)
     # builder.add_edge(CUSTOMER_SUPPORT_NODE, END) ## Not required
 
     return builder.compile(checkpointer=checkpointer)

@@ -8,6 +8,8 @@ from helpers.observability.logger import log_event
 from state import AgentState
 
 import os
+from dotenv import load_dotenv
+
 # from langchain_ollama import OllamaLLM
 from langchain_openai import ChatOpenAI
 
