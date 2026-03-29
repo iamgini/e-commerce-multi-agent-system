@@ -8,7 +8,7 @@ from langchain_openai import ChatOpenAI
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from config import LLM_MODEL, LLM_TEMPERATURE, OPENAI_API_KEY
-from tools.order_inventory_tools import ORDER_INVENTORY_TOOLS
+from agent_order_inventory.tools.order_inventory_tools import ORDER_INVENTORY_TOOLS
 
 
 ORDER_INVENTORY_SYSTEM_PROMPT = """You are the Order & Inventory Management Agent for an e-commerce business.
