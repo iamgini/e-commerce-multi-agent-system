@@ -4,8 +4,9 @@ from typing import Dict
 
 # Logger
 from observability.logger import log_event
-# State
-from state import AgentState
+
+# State reference (fields: user_query, user_id, intent, response, escalate, confidence, explanation)
+# from state import AgentState
 
 import os
 from langchain_ollama import OllamaLLM
@@ -86,16 +87,24 @@ def estimate_confidence(response: str) -> float:
 # Main Agent Function (LangGraph Node)
 # ==========================================================
 
-def customer_support_agent(state: AgentState) -> AgentState:
+# def customer_support_agent(state: AgentState) -> AgentState:
+def customer_support_agent(state: dict) -> dict:
     log_event("Customer Support Agent invoked")
 
+    # Extract query from messages (LangGraph) or direct user_query (test)
+    if "user_query" in state and state["user_query"]:
+        query = state["user_query"]
+    elif "messages" in state and state["messages"]:
+        from langchain_core.messages import HumanMessage
+        query = next(
+            (m.content for m in reversed(state["messages"]) if isinstance(m, HumanMessage)),
+            ""
+        )
+    else:
+        query = ""
+
     faq_context = load_faq()
-
-    prompt = build_prompt(
-        query=state["user_query"],
-        faq_context=faq_context
-    )
-
+    prompt = build_prompt(query=query, faq_context=faq_context)
     result = llm.invoke(prompt)
     if hasattr(result, "content"):
         result = result.content
@@ -111,6 +120,17 @@ def customer_support_agent(state: AgentState) -> AgentState:
         state["confidence"] = estimate_confidence(result)
         state["explanation"] = "Response generated using internal FAQ knowledge base."
 
-    log_event(f"Support Response Generated | Escalate={state['escalate']}")
+    log_event(f"Support Response Generated | Escalate={state.get('escalate', False)}")
 
+    # When called from LangGraph (messages-based state)
+    if "messages" in state:
+        from langchain_core.messages import AIMessage
+        reply = "I'm sorry, I don't have that information. Let me connect you with a human agent." \
+            if state.get("escalate") else state.get("response", "")
+        return {
+            "messages": [AIMessage(content=reply)],
+            "current_agent": "customer_support_agent",
+        }
+
+    # When called directly from test file
     return state
