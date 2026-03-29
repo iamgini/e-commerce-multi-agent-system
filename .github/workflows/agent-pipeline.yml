@@ -16,25 +16,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Add dotenvx to inject encrypted env vars
-      - run: curl -sfS https://dotenvx.sh/install.sh | sh
-      - run: dotenvx run -- python tests/test_order_inventory_state.py
+        run: curl -sfS https://dotenvx.sh/install.sh | sh
+        run: dotenvx run -- python tests/test_order_inventory_state.py
         env:
           DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
   
       - name: Install dependencies
-      - run: |
+        run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run tests
-      - run: |
+        run: |
           python tests/test_order_inventory_state.py
 
   secret-detection:
