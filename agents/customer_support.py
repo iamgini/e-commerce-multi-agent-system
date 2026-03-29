@@ -86,9 +86,7 @@ def estimate_confidence(response: str) -> float:
 # Main Agent Function (LangGraph Node)
 # ==========================================================
 
-# def customer_support_agent(state: AgentState) -> AgentState:
-def customer_support_agent(state: dict) -> dict:
-# def customer_support_agent(state: AgentState) -> AgentState:
+
 def customer_support_agent(state: dict) -> dict:
     log_event("Customer Support Agent invoked")
 
