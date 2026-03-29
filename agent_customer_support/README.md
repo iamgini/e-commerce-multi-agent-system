@@ -170,6 +170,12 @@ Ask something: exit
 Goodbye!
 ```
 
+```shell
+You: I need help with my account
+You: how do I contact support
+You: what payment methods do you accept
+```
+
 ## TODO
 
 - state file

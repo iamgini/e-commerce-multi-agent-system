@@ -64,7 +64,9 @@ def run_interactive(user_id: str) -> None:
         }
 
         try:
-            result = graph.invoke(state_input)
+            # result = graph.invoke(state_input) ## ---- old
+            result = graph.invoke(state_input, config={"configurable": {"thread_id": user_id}})
+
         except Exception as exc:
             print(f"\n[ERROR] Agent error: {exc}\n")
             continue

@@ -150,6 +150,12 @@ _SUPPORT_KEYWORDS = {
     "not working",
     "error",
     "problem with my account",
+    "shipping",
+    "how long does shipping",
+    "delivery time",
+    "how long",
+    "payment methods",
+    "payment"
 }
 # ── System prompt ──────────────────────────────────────────────────────────────
 
@@ -263,9 +269,13 @@ def _parse_route(content: str) -> str:
         # Strip markdown fences if present
         clean = re.sub(r"```[a-z]*\n?", "", content).strip()
         data = json.loads(clean)
-        route = data.get("route", ROUTE_RECOMMEND)
+        # route = data.get("route", ROUTE_RECOMMEND)
+        route = data.get("route", ROUTE_SUPPORT)
         if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_ORDER_INVENTORY,ROUTE_RETURNS,ROUTE_SUPPORT, ROUTE_FINISH):
-            return ROUTE_RECOMMEND
+            # return ROUTE_RECOMMEND
+            return ROUTE_SUPPORT
+
         return route
     except (json.JSONDecodeError, AttributeError):
-        return ROUTE_RECOMMEND
+        # return ROUTE_RECOMMEND
+        return ROUTE_SUPPORT
