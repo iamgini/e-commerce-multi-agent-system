@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from agent_coordinator.coordinator import coordinator_node
 from agent_sales_recommendation.agents.recommendation_agent import recommendation_agent_node
 from agent_sales_recommendation.agents.sales_agent import sales_agent_node
-from agent_order_inventory_agent import order_inventory_agent_node
+from agent_order_inventory.agents.order_inventory_agent import order_inventory_agent_node
 from agent_customer_support.customer_support import customer_support_agent
 from agent_sales_recommendation.tools.recommendation_tools import RECOMMENDATION_TOOLS
 from agent_sales_recommendation.tools.sales_tools import SALES_TOOLS
