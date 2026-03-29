@@ -2,6 +2,11 @@ import json
 from pathlib import Path
 from typing import Dict
 
+# Logger
+from observability.logger import log_event
+# State
+from state import AgentState
+
 import os
 from langchain_ollama import OllamaLLM
 from langchain_openai import ChatOpenAI
@@ -92,6 +97,8 @@ def customer_support_agent(state: AgentState) -> AgentState:
     )
 
     result = llm.invoke(prompt)
+    if hasattr(result, "content"):
+        result = result.content
 
     if "ESCALATE" in result:
         state["response"] = None
