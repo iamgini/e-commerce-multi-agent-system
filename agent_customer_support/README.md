@@ -80,9 +80,17 @@ Install and setup uv
 
 ```shell
 $ sudo dnf install uv
+```
 
-$ uv venv
+Setup uv and Python version
+
+```shell
+$ uv python install 3.12
+$ uv venv --python 3.12
 # will create .venv but will be ignored in .gitignore
+
+$ source .venv/bin/activate
+
 $ uv pip install -r requirements.txt
 
 # for ollma

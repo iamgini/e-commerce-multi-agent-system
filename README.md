@@ -26,7 +26,7 @@ ecommerce_multiagent/
 ## Testing main
 
 ```shell
-
+$ uv run python main.py
 ```
 
 ## Testing coordinator

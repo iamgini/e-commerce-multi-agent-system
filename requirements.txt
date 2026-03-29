@@ -8,3 +8,7 @@ ddgs
 openai
 pydantic
 pydantic-core
+fastapi
+uvicorn[standard]
+chainlit
+# langchain-ollama - optional for local testing
