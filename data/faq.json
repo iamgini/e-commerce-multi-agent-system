@@ -10,5 +10,13 @@
   {
     "question": "What payment methods are accepted?",
     "answer": "We accept credit cards and PayPal."
+  },
+  {
+      "question": "How do I contact support?",
+      "answer": "You can contact our support team via email at support@store.com or call 1-800-123-4567."
+  },
+  {
+      "question": "How do I reset my password?",
+      "answer": "Click 'Forgot Password' on the login page and follow the instructions sent to your email."
   }
 ]

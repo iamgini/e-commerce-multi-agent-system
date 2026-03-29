@@ -1,5 +1,0 @@
-langchain
-langchain-openai
-langchain-core
-langgraph
-python-dotenv

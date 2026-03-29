@@ -10,29 +10,30 @@ from langgraph.prebuilt import ToolNode
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from agent_coordinator.coordinator import coordinator_node
-from agent_sales_recommendation.agents.recommendation_agent import recommendation_agent_node
-from agent_sales_recommendation.agents.sales_agent import sales_agent_node
-from agent_order_inventory.agents.order_inventory_agent import order_inventory_agent_node
-from agent_customer_support.customer_support import customer_support_agent
-from agent_sales_recommendation.tools.recommendation_tools import RECOMMENDATION_TOOLS
-from agent_sales_recommendation.tools.sales_tools import SALES_TOOLS
+from agents.coordinator import coordinator_node
+from agents.customer_support import customer_support_agent
+from agents.order_inventory_agent import order_inventory_agent_node
+from agents.recommendation_agent import recommendation_agent_node
+from agents.sales_agent import sales_agent_node
 from config import (
+    CHECKPOINTER_DB_PATH,
     COORDINATOR_NODE,
-    SALES_NODE,
-    RECOMMENDATION_NODE,
     CUSTOMER_SUPPORT_NODE,
+    DB_DIR,
     ORDER_INVENTORY_NODE,
+    RECOMMENDATION_NODE,
     RETURNS_REFUNDS_NODE,
-    ROUTE_SALES,
-    ROUTE_INVENTORY,
+    ROUTE_FINISH,
     ROUTE_ORDER_INVENTORY,
     ROUTE_RECOMMEND,
-    ROUTE_SUPPORT,
     ROUTE_RETURNS,
-    ROUTE_FINISH
+    ROUTE_SALES,
+    ROUTE_SUPPORT,
+    SALES_NODE,
 )
-from config_db import CHECKPOINTER_DB_PATH, DB_DIR
+from tools.order_inventory_tools import ORDER_INVENTORY_TOOLS
+from tools.recommendation_tools import RECOMMENDATION_TOOLS
+from tools.sales_tools import SALES_TOOLS
 
 # ── Shared state schema ────────────────────────────────────────────────────────
 
@@ -99,17 +100,16 @@ def build_graph(checkpointer: SqliteSaver) -> StateGraph:
     builder.add_node(RECOMMENDATION_NODE, recommendation_agent_node)
     builder.add_node(ORDER_INVENTORY_NODE, order_inventory_agent_node)
     builder.add_node(CUSTOMER_SUPPORT_NODE, customer_support_agent)
-    ##builder.add_node(ORDERS_INVENTORY_NODE, ) ## Insert your agent node here
-    builder.add_node(RETURNS_REFUNDS_NODE, )  ## Insert your agent node here
+    # builder.add_node(RETURNS_REFUNDS_NODE, )  ## Insert your agent node here
 
     # Tool executor nodes (LangGraph's built-in ToolNode handles tool dispatch)
     builder.add_node("sales_tools", ToolNode(SALES_TOOLS))
     builder.add_node("recommendation_tools", ToolNode(RECOMMENDATION_TOOLS))
-    builder.add_node() ## Insert your tool node here
-    builder.add_node() ## Insert your tool node here
-    builder.add_node() ## Insert your tool node here
-    builder.add_node() ## Insert your tool node here
-    builder.add_node() ## Insert your tool node here
+    builder.add_node("order_inventory_tools", ToolNode(ORDER_INVENTORY_TOOLS))
+    # builder.add_node() ## Insert your tool node here
+    # builder.add_node() ## Insert your tool node here
+    # builder.add_node() ## Insert your tool node here
+    # builder.add_node() ## Insert your tool node here
 
     # ── Edges ──────────────────────────────────────────────────────────────────
     builder.add_edge(START, COORDINATOR_NODE)
@@ -144,9 +144,19 @@ def build_graph(checkpointer: SqliteSaver) -> StateGraph:
         },
     )
 
+    builder.add_conditional_edges(
+        ORDER_INVENTORY_NODE,
+        should_continue_sales,
+        {
+            "order_inventory_tools": "order_inventory_tools",
+            END: END,
+        },
+    )
+
     builder.add_edge("sales_tools", SALES_NODE)
     builder.add_edge("recommendation_tools", RECOMMENDATION_NODE)
-    builder.add_edge(CUSTOMER_SUPPORT_NODE, END)
+    builder.add_edge("order_inventory_tools", ORDER_INVENTORY_NODE)
+    # builder.add_edge(CUSTOMER_SUPPORT_NODE, END) ## Not required
 
     return builder.compile(checkpointer=checkpointer)
 
