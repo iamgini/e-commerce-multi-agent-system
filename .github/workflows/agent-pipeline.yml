@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: curl -sfS https://dotenvx.sh/install.sh | sh
-      - run: dotenvx run -- python build.py
+      - run: dotenvx run -- python tests/test_order_inventory_state.py
         env:
           DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
   
