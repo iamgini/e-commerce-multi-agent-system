@@ -14,13 +14,13 @@ test_queries = [
 ]
 
 print("=" * 60)
-print("RETURNS & REFUNDS AGENT-TESTING")
+print("RETURNS & REFUNDS AGENT - TESTING")
 print("=" * 60)
 
 for query in test_queries:
-    print(f"\n📝 User: {query}")
+    print(f"\n User: {query}")
     
-    # Create empty state (matches teammates' AgentState structure)
+    # Create empty state
     state = create_empty_state(user_id="test_user_001")
     
     # Add user message to state (like real system does via coordinator)
@@ -33,8 +33,8 @@ for query in test_queries:
     if result.get("messages"):
         last_msg = result["messages"][-1]
         response = last_msg.content if hasattr(last_msg, 'content') else str(last_msg)
-        print(f"🤖 Agent: {response}")
+        print(f"Agent: {response}")
     
     print("-" * 60)
 
-print("\n✅ All tests completed!")
+print("\n All tests completed!")
