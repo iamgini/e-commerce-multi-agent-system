@@ -6,7 +6,7 @@ from config import (
     MAINTENANCE_DB_DSN,
     CART_DB_DSN,
     CHECKPOINTER_DB_DSN,
-    ORDER_INVENTORY_DB_DSN,
+    # ORDER_INVENTORY_DB_DSN,
     PRODUCTS_DB_DSN,
 )
 from scripts.seed_data import SEED_CATEGORIES, SEED_PRODUCTS

@@ -1,25 +1,28 @@
 import argparse
-import sys
+import logging
 import os
+import sys
 
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
 # Ensure the project root is on the path so all imports resolve
 sys.path.insert(0, os.path.dirname(__file__))
 
-from scripts.db_setup import initialise_databases
 from graph.workflow import get_graph
+from scripts.db_setup import initialise_databases
+from scripts.logger_setup import initialise_logger
+
+initialise_logger()
+logger = logging.getLogger(__name__)
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
-
 def _extract_last_ai_text(messages: list) -> str:
     """Pull the text content from the last AIMessage in the list."""
     for msg in reversed(messages):
         if isinstance(msg, AIMessage):
             if isinstance(msg.content, str):
                 return msg.content
-            # content can be a list of blocks (Anthropic format)
             if isinstance(msg.content, list):
                 parts = [
                     block.get("text", "")
@@ -43,45 +46,56 @@ def _make_config(user_id: str) -> dict:
 
 def run_interactive(user_id: str) -> None:
     """Start an interactive terminal session with the multi-agent system."""
-    print(f"**Session user: {user_id}**")
+    print(f"\n\n**Session user: {user_id}**")
     print("**Checkpoint: data/checkpoints.db  (conversation persists)**\n")
 
     graph = get_graph()
     config = _make_config(user_id)
 
-    while True:
-        try:
-            user_input = input("You: ").strip()
-        except (EOFError, KeyboardInterrupt):
-            print("\n\nGoodbye! 👋")
-            break
+    try:
+        while True:
+            try:
+                user_input = input("You: ").strip()
+                logger.info(user_input)
+            except (EOFError, KeyboardInterrupt):
+                print("\n\nGoodbye! 👋")
+                logger.info("SESSION_TERMINATED: Interrupted by user")
+                break
 
-        if not user_input:
-            continue
-        if user_input.lower() in ("quit", "exit", "q"):
-            print("\nAssistant: Thank you for shopping with us! Goodbye! 👋\n")
-            break
+            if not user_input:
+                continue
+            if user_input.lower() in ("quit", "exit", "q"):
+                end_message = "\nAssistant: Thank you for shopping with us! Goodbye! 👋\n"
+                print(end_message)
+                logger.info("SESSION_ENDED: Intentional quit")
+                break
 
-        # Run one turn through the graph
-        state_input = {
-            "messages": [HumanMessage(content=user_input)],
-            "route": "",
-            "current_agent": "",
-            "user_id": user_id,
-        }
+            # Run one turn through the graph
+            state_input = {
+                "messages": [HumanMessage(content=user_input)],
+                "route": "",
+                "current_agent": "",
+                "user_id": user_id,
+            }
 
-        try:
-            result = graph.invoke(state_input, config=config)
+            try:
+                result = graph.invoke(state_input, config=config)
+                # log_result = str(result).encode('utf-8', errors='replace').decode('utf-8')
+                # logger.info(f"GRAPH_INVOKE_SUCCESS: ResultState={log_result}")
 
-        except Exception as exc:
-            print(f"\n[ERROR] Agent error: {exc}\n")
-            continue
+            except Exception as exc:
+                print("Your question seems to be lost in transit. Please try again.")
+                logger.error(f"\n[ERROR] Agent error: {exc}\n")
+                continue
 
-        # Extract and display the assistant's reply
-        reply = _extract_last_ai_text(result["messages"])
-        agent_label = result.get("current_agent", "assistant").replace("_", " ").title()
-        print(f"\n[{agent_label}]: {reply}\n")
+            # Extract and display the assistant's reply
+            reply = _extract_last_ai_text(result["messages"])
+            agent_label = result.get("current_agent", "assistant").replace("_", " ").title()
 
+            print(f"\n[{agent_label}]: {reply}\n")
+
+    finally:
+        logging.shutdown()
 
 # def run_demo(user_id: str) -> None:
 #     """
@@ -147,7 +161,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # Always ensure databases exist
+    # Ensures databases exists and loaded
     initialise_databases()
 
     if args.setup_only:

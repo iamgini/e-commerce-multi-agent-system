@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import re
 import sys
@@ -8,7 +9,6 @@ from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 from config import (
     LLM_MODEL,
     LLM_TEMPERATURE,
@@ -16,10 +16,14 @@ from config import (
     ROUTE_FINISH,
     ROUTE_ORDER_INVENTORY,
     ROUTE_RECOMMEND,
+    ROUTE_RETURNS,
     ROUTE_SALES,
     ROUTE_SUPPORT,
-    ROUTE_RETURNS
 )
+from helpers.observability.log_formatting import format_agent_response
+
+logger = logging.getLogger(__name__)
+
 
 # ── Routing keywords ───────────────────────────────────────────────────────────
 _ORDER_INVENTORY_KEYWORDS = {
@@ -212,8 +216,8 @@ def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
     if fast_route:
         return {"route": fast_route}
 
-    # Fallback: Ask the LLM to reason and route based on context
-    # and user intent
+    # Fallback: Ask the LLM to reason and route 
+    # based on context and user intent
     llm = ChatOpenAI(
         model=LLM_MODEL,
         temperature=LLM_TEMPERATURE,
@@ -228,6 +232,12 @@ def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
 
     response = llm.invoke(messages, config=config)
     route = _parse_route(response.content)
+
+    user_id = config.get("configurable", {}).get("thread_id", "unknown_user")
+    logger.info(
+       f"USER_ID: {user_id} | "
+       f"{format_agent_response(response)}"
+       )
 
     return {"route": route}
 

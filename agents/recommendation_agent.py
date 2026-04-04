@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -8,7 +9,10 @@ from langchain_openai import ChatOpenAI
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from config import LLM_MODEL, LLM_TEMPERATURE, OPENAI_API_KEY
+from helpers.observability.log_formatting import format_agent_response
 from tools.recommendation_tools import RECOMMENDATION_TOOLS
+
+logger = logging.getLogger(__name__)
 
 # ── System prompt ──────────────────────────────────────────────────────────────
 
@@ -117,16 +121,22 @@ def create_recommendation_agent() -> ChatOpenAI:
 def recommendation_agent_node(state: dict, config: RunnableConfig = None) -> dict:
     """
     LangGraph node for the recommendation agent.
-
+ 
     Receives the shared graph state (which includes `messages`) and appends
     the agent's response to the message list.
     """
     llm_with_tools = create_recommendation_agent()
-
+ 
     # Prepend the system prompt so the LLM always has its persona
     messages = [SystemMessage(content=RECOMMENDATION_SYSTEM_PROMPT)] + state["messages"]
     response = llm_with_tools.invoke(messages, config=config)
-
+    
+    user_id = config.get("configurable", {}).get("thread_id", "unknown_user")
+    logger.info(
+       f"USER_ID: {user_id} | "
+       f"{format_agent_response(response)}"
+       )
+    
     return {
         "messages": [response],
         "current_agent": "recommendation_agent",

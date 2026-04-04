@@ -2,11 +2,9 @@ langchain
 langchain-openai
 langchain-core
 langgraph
-# langgraph-checkpoint-sqlite
 langgraph-checkpoint-postgres
 python-dotenv
 ddgs
-openai
 pydantic
-pydantic-core
 psycopg[binary]
+s3-log-handler
