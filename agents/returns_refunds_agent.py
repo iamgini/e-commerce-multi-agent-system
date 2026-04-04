@@ -38,12 +38,14 @@ Available tools:
 - file_complaint(order_id, issue): File damage claim
 - get_return_policy(): Get policy details
 
-When responding:
-1. Be empathetic and professional
-2. Understand customer needs clearly
-3. Provide clear next steps
-4. Offer solutions and alternatives
-5. Be helpful and solution-oriented"""
+When customer mentions:
+- "return" → Use get_return_policy() or create_return_request()
+- "damage" or "damaged" → Use file_complaint()
+- "eligible" or "can I return" → Use check_return_eligibility()
+- "refund" → Use get_refund_status()
+- "status" → Use get_return_status()
+ 
+Use tools IMMEDIATELY. Do not ask for more info first."""
 
 # ── Agent ──────────────────────────────────────────────────────────────────────
 

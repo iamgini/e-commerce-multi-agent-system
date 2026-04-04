@@ -3,6 +3,7 @@ import os
 ## Use load_dotenv for internal testing purposes
 from dotenv import load_dotenv
 load_dotenv()
+# load_dotenv(".env.local")
 
 # ── LLM ──────────────────────────────────────────────────────────────────────
 OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")           # Use this for internal testing
@@ -31,6 +32,7 @@ ROUTE_FINISH: str = "finish"
 # PRODUCTS_DB_PATH: str = os.path.join(DB_DIR, "products.db")
 # CART_DB_PATH: str = os.path.join(DB_DIR, "cart.db")
 # ORDER_INVENTORY_DB_PATH: str = os.path.join(DB_DIR, "order_inventory.db")
+# RETURNS_DB_PATH = os.path.join(DB_DIR, "returns.db")
 # CHECKPOINTER_DB_PATH: str = os.path.join(DB_DIR, "checkpoints.db")
 
 # Use this for internal testing

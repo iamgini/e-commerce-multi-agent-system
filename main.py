@@ -4,6 +4,7 @@ import os
 import sys
 
 from langchain_core.messages import AIMessage, HumanMessage
+from scripts.db_setup import initialise_databases
 
 # Ensure the project root is on the path so all imports resolve
 sys.path.insert(0, os.path.dirname(__file__))
