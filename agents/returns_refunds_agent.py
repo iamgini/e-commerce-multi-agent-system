@@ -60,7 +60,7 @@ def create_returns_agent() -> ChatOpenAI:
         temperature=LLM_TEMPERATURE,
         api_key=OPENAI_API_KEY,
     )
-    return llm.bind_tools(RETURNS_TOOLS)
+    return llm.bind_tools(RETURNS_TOOLS, tool_choice="auto")
 
 
 # ── LangGraph node ─────────────────────────────────────────────────────────────
