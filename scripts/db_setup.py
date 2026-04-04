@@ -7,7 +7,7 @@ from config import (
     CART_DB_DSN,
     CHECKPOINTER_DB_DSN,
     # ORDER_INVENTORY_DB_DSN,
-    # RETURNS_DB_PATH
+    RETURNS_DB_DSN,
     PRODUCTS_DB_DSN,
 )
 from scripts.seed_data import SEED_CATEGORIES, SEED_PRODUCTS
@@ -260,18 +260,21 @@ def seed_products(conn: psycopg.Connection) -> None:
             """,
             SEED_PRODUCTS,
         )
-#def _create_returns_schema(conn: sqlite3.Connection) -> None:
-#    """Create returns table."""
-#    conn.executescript("""
-#        CREATE TABLE IF NOT EXISTS returns (
-#            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-#            order_id    TEXT NOT NULL,
-#            user_id     TEXT NOT NULL,
-#            reason      TEXT,
-#            status      TEXT DEFAULT 'created',
-#            created_at  TEXT DEFAULT (datetime('now'))
-#        );
-#    """)
+        
+def _create_returns_schema(conn: psycopg.Connection) -> None:
+    """Create returns table in PostgreSQL."""
+    with conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS returns (
+                id          SERIAL PRIMARY KEY,
+                order_id    TEXT NOT NULL,
+                user_id     TEXT NOT NULL,
+                reason      TEXT,
+                status      TEXT DEFAULT 'created',
+                created_at  TIMESTAMP DEFAULT NOW()
+            );
+        """)
+        conn.commit()
 
 
 
@@ -314,10 +317,10 @@ def initialise_databases() -> None:
         _create_cart_schema(conn)
         print(f"[DB] Cart database ready → {TARGET_DB}")
     
-    #with sqlite3.connect(RETURNS_DB_PATH) as conn:
-    #    _create_returns_schema(conn)
-    #    conn.commit()
-    #    print(f"[DB] Returns database ready → {RETURNS_DB_PATH}")
+    with psycopg.connect(RETURNS_DB_DSN) as conn:
+        TARGET_DB = "returns_db"
+        _create_returns_schema(conn)
+        print(f"[DB] Returns database ready → {TARGET_DB}")
 
     # with psycopg.connect(ORDER_INVENTORY_DB_DSN) as conn:
     #     TARGET_DB = "order_inventory_db"

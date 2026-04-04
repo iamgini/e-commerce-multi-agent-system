@@ -40,6 +40,7 @@ MAINTENANCE_DB_DSN: str = os.getenv("MAINTENANCE_DB_DSN")
 PRODUCTS_DB_DSN: str = os.getenv("PRODUCTS_DB_DSN")
 CART_DB_DSN: str = os.getenv("CART_DB_DSN")
 ORDER_INVENTORY_DB_DSN: str = os.getenv("ORDER_INVENTORY_DB_DSN")
+RETURNS_DB_DSN: str = os.getenv("RETURNS_DB_DSN")
 CHECKPOINTER_DB_DSN = os.getenv("CHECKPOINTER_DB_DSN")
 
 # Use this for actual deployment
