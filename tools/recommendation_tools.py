@@ -1,22 +1,28 @@
 import json
+import logging
 import os
 import sys
 from typing import Annotated, Literal, Optional
 
 from ddgs import DDGS
+from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from langgraph.prebuilt import InjectedState
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from scripts.seed_data import SEED_CATEGORIES
 from helpers.database import product_db
+from helpers.observability.log_formatting import tool_tracing
+from scripts.seed_data import SEED_CATEGORIES
 
 categories = (SEED_CATEGORIES[i][0] for i in range(len(SEED_CATEGORIES)))
 
+logger = logging.getLogger(__name__)
 
 @tool
+@tool_tracing
 def search_products(
+    config: RunnableConfig,
     query: str,
     category: Optional[Literal[*categories]] = None,
     max_price: Optional[float] = None,
@@ -47,7 +53,8 @@ def search_products(
 
 
 @tool
-def get_product_details(product_id: int) -> str:
+@tool_tracing
+def get_product_details(product_id: int, config: RunnableConfig) -> str:
     """
     Retrieve full details for a specific product.
 
@@ -64,7 +71,8 @@ def get_product_details(product_id: int) -> str:
 
 
 @tool
-def browse_by_category(category: str) -> str:
+@tool_tracing
+def browse_by_category(category: str, config: RunnableConfig) -> str:
     """
     List the top-rated products in a specific product category.
 
@@ -82,7 +90,8 @@ def browse_by_category(category: str) -> str:
 
 
 @tool
-def list_categories() -> str:
+@tool_tracing
+def list_categories(config: RunnableConfig) -> str:
     """
     Return all available product categories in the store.
 
@@ -94,7 +103,8 @@ def list_categories() -> str:
 
 
 @tool
-def get_similar_products(product_id: int) -> str:
+@tool_tracing
+def get_similar_products(product_id: int, config: RunnableConfig) -> str:
     """
     Find products similar to a given product (same category, different item).
     Useful for showing alternatives or complementary items.
@@ -112,7 +122,8 @@ def get_similar_products(product_id: int) -> str:
 
 
 @tool
-def get_trending_products() -> str:
+@tool_tracing
+def get_trending_products(config: RunnableConfig) -> str:
     """
     Return the current top-rated / trending products across all categories.
     Use this when the user wants popular picks or doesn't know what to look for.
@@ -125,8 +136,10 @@ def get_trending_products() -> str:
 
 
 @tool
+@tool_tracing
 def get_personalised_recommendations(
     user_id: Annotated[str, InjectedState("user_id")],
+    config: RunnableConfig
 ) -> str:
     """
     Generate personalised product recommendations based on the user's
@@ -144,7 +157,7 @@ def get_personalised_recommendations(
         trending = product_db.get_trending_products(limit=5)
         return json.dumps(
             {
-                "note": "No purchase history found – showing trending products instead.",
+                "note": "No purchase history found - showing trending products instead.",
                 "recommendations": trending,
             },
             indent=2,
@@ -181,7 +194,9 @@ def get_personalised_recommendations(
 
 
 @tool
+@tool_tracing
 def web_search_product_comparison(
+    config: RunnableConfig,
     query: str,
     max_results: Optional[int] = 5,
 ) -> str:

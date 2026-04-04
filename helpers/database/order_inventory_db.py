@@ -1,21 +1,22 @@
-import sqlite3
 from typing import Optional
 
-from config import ORDER_INVENTORY_DB_PATH
+import psycopg
+from psycopg.rows import dict_row
+
+from config import ORDER_INVENTORY_DB_DSN
 
 
-def _connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(ORDER_INVENTORY_DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+def _connect() -> psycopg.Connection:
+    return psycopg.connect(ORDER_INVENTORY_DB_DSN)
 
 
-def _get_product_name(conn: sqlite3.Connection, product_id: int) -> str:
-    row = conn.execute(
-        "SELECT name FROM inventory_products WHERE id = ?",
-        (product_id,),
-    ).fetchone()
+def _get_product_name(conn: psycopg.Connection, product_id: int) -> str:
+    with conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            "SELECT name FROM inventory_products WHERE id = %s",
+            (product_id,),
+        )
+        row = cur.fetchone()
     if not row:
         raise ValueError(f"Product with ID {product_id} not found.")
     return row["name"]
@@ -36,60 +37,63 @@ def create_purchase_order(
         raise ValueError("Purchase order must contain at least one item.")
 
     with _connect() as conn:
-        cursor = conn.execute(
-            """
-            INSERT INTO purchase_orders (supplier_name, status, expected_date, notes)
-            VALUES (?, ?, ?, ?)
-            """,
-            (supplier_name, status, expected_date, notes),
-        )
-        purchase_order_id = cursor.lastrowid
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                INSERT INTO purchase_orders (supplier_name, status, expected_date, notes)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+                """,
+                (supplier_name, status, expected_date, notes),
+            )
+            purchase_order_id = cur.fetchone()["id"]
 
         for item in items:
             product_name = _get_product_name(conn, item["product_id"])
-            conn.execute(
-                """
-                INSERT INTO purchase_order_items
-                    (purchase_order_id, product_id, product_name, quantity, unit_cost)
-                VALUES (?, ?, ?, ?, ?)
-                """,
-                (
-                    purchase_order_id,
-                    item["product_id"],
-                    product_name,
-                    item["quantity"],
-                    item["unit_cost"],
-                ),
-            )
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute(
+                    """
+                    INSERT INTO purchase_order_items
+                        (purchase_order_id, product_id, product_name, quantity, unit_cost)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (
+                        purchase_order_id,
+                        item["product_id"],
+                        product_name,
+                        item["quantity"],
+                        item["unit_cost"],
+                    ),
+                )
 
-        conn.execute(
-            """
-            UPDATE purchase_orders
-            SET updated_at = datetime('now')
-            WHERE id = ?
-            """,
-            (purchase_order_id,),
-        )
-        conn.commit()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                UPDATE purchase_orders
+                SET updated_at = NOW()
+                WHERE id = %s
+                """,
+                (purchase_order_id,),
+            )
 
     return get_purchase_order(purchase_order_id)
 
 
 def list_purchase_orders(status: Optional[str] = None) -> list[dict]:
     with _connect() as conn:
-        if status:
-            rows = conn.execute(
-                """
-                SELECT * FROM purchase_orders
-                WHERE status = ?
-                ORDER BY created_at DESC
-                """,
-                (status,),
-            ).fetchall()
-        else:
-            rows = conn.execute(
-                "SELECT * FROM purchase_orders ORDER BY created_at DESC"
-            ).fetchall()
+        with conn.cursor(row_factory=dict_row) as cur:
+            if status:
+                cur.execute(
+                    """
+                    SELECT * FROM purchase_orders
+                    WHERE status = %s
+                    ORDER BY created_at DESC
+                    """,
+                    (status,),
+                )
+            else:
+                cur.execute("SELECT * FROM purchase_orders ORDER BY created_at DESC")
+            rows = cur.fetchall()
     return [dict(r) for r in rows]
 
 
@@ -100,46 +104,53 @@ def update_purchase_order(
     notes: Optional[str] = None,
 ) -> dict:
     with _connect() as conn:
-        row = conn.execute(
-            "SELECT * FROM purchase_orders WHERE id = ?",
-            (purchase_order_id,),
-        ).fetchone()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "SELECT * FROM purchase_orders WHERE id = %s",
+                (purchase_order_id,),
+            )
+            row = cur.fetchone()
         if not row:
             raise ValueError(f"Purchase order #{purchase_order_id} not found.")
 
-        conn.execute(
-            """
-            UPDATE purchase_orders
-            SET status = COALESCE(?, status),
-                expected_date = COALESCE(?, expected_date),
-                notes = COALESCE(?, notes),
-                updated_at = datetime('now')
-            WHERE id = ?
-            """,
-            (status, expected_date, notes, purchase_order_id),
-        )
-        conn.commit()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                UPDATE purchase_orders
+                SET status = COALESCE(%s, status),
+                    expected_date = COALESCE(%s, expected_date),
+                    notes = COALESCE(%s, notes),
+                    updated_at = NOW()
+                WHERE id = %s
+                """,
+                (status, expected_date, notes, purchase_order_id),
+            )
 
     return get_purchase_order(purchase_order_id)
 
 
 def get_purchase_order(purchase_order_id: int) -> dict:
     with _connect() as conn:
-        row = conn.execute(
-            "SELECT * FROM purchase_orders WHERE id = ?",
-            (purchase_order_id,),
-        ).fetchone()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "SELECT * FROM purchase_orders WHERE id = %s",
+                (purchase_order_id,),
+            )
+            row = cur.fetchone()
         if not row:
             raise ValueError(f"Purchase order #{purchase_order_id} not found.")
-        items = conn.execute(
-            """
-            SELECT product_id, product_name, quantity, unit_cost
-            FROM purchase_order_items
-            WHERE purchase_order_id = ?
-            ORDER BY id
-            """,
-            (purchase_order_id,),
-        ).fetchall()
+
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                SELECT product_id, product_name, quantity, unit_cost
+                FROM purchase_order_items
+                WHERE purchase_order_id = %s
+                ORDER BY id
+                """,
+                (purchase_order_id,),
+            )
+            items = cur.fetchall()
     return {**dict(row), "items": [dict(i) for i in items]}
 
 
@@ -158,59 +169,62 @@ def create_supply_order(
         raise ValueError("Supply order must contain at least one item.")
 
     with _connect() as conn:
-        cursor = conn.execute(
-            """
-            INSERT INTO supply_orders (supplier_name, status, reference, notes)
-            VALUES (?, ?, ?, ?)
-            """,
-            (supplier_name, status, reference, notes),
-        )
-        supply_order_id = cursor.lastrowid
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                INSERT INTO supply_orders (supplier_name, status, reference, notes)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id
+                """,
+                (supplier_name, status, reference, notes),
+            )
+            supply_order_id = cur.fetchone()["id"]
 
         for item in items:
             product_name = _get_product_name(conn, item["product_id"])
-            conn.execute(
-                """
-                INSERT INTO supply_order_items
-                    (supply_order_id, product_id, product_name, quantity)
-                VALUES (?, ?, ?, ?)
-                """,
-                (
-                    supply_order_id,
-                    item["product_id"],
-                    product_name,
-                    item["quantity"],
-                ),
-            )
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute(
+                    """
+                    INSERT INTO supply_order_items
+                        (supply_order_id, product_id, product_name, quantity)
+                    VALUES (%s, %s, %s, %s)
+                    """,
+                    (
+                        supply_order_id,
+                        item["product_id"],
+                        product_name,
+                        item["quantity"],
+                    ),
+                )
 
-        conn.execute(
-            """
-            UPDATE supply_orders
-            SET updated_at = datetime('now')
-            WHERE id = ?
-            """,
-            (supply_order_id,),
-        )
-        conn.commit()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                UPDATE supply_orders
+                SET updated_at = NOW()
+                WHERE id = %s
+                """,
+                (supply_order_id,),
+            )
 
     return get_supply_order(supply_order_id)
 
 
 def list_supply_orders(status: Optional[str] = None) -> list[dict]:
     with _connect() as conn:
-        if status:
-            rows = conn.execute(
-                """
-                SELECT * FROM supply_orders
-                WHERE status = ?
-                ORDER BY created_at DESC
-                """,
-                (status,),
-            ).fetchall()
-        else:
-            rows = conn.execute(
-                "SELECT * FROM supply_orders ORDER BY created_at DESC"
-            ).fetchall()
+        with conn.cursor(row_factory=dict_row) as cur:
+            if status:
+                cur.execute(
+                    """
+                    SELECT * FROM supply_orders
+                    WHERE status = %s
+                    ORDER BY created_at DESC
+                    """,
+                    (status,),
+                )
+            else:
+                cur.execute("SELECT * FROM supply_orders ORDER BY created_at DESC")
+            rows = cur.fetchall()
     return [dict(r) for r in rows]
 
 
@@ -221,46 +235,53 @@ def update_supply_order(
     notes: Optional[str] = None,
 ) -> dict:
     with _connect() as conn:
-        row = conn.execute(
-            "SELECT * FROM supply_orders WHERE id = ?",
-            (supply_order_id,),
-        ).fetchone()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "SELECT * FROM supply_orders WHERE id = %s",
+                (supply_order_id,),
+            )
+            row = cur.fetchone()
         if not row:
             raise ValueError(f"Supply order #{supply_order_id} not found.")
 
-        conn.execute(
-            """
-            UPDATE supply_orders
-            SET status = COALESCE(?, status),
-                reference = COALESCE(?, reference),
-                notes = COALESCE(?, notes),
-                updated_at = datetime('now')
-            WHERE id = ?
-            """,
-            (status, reference, notes, supply_order_id),
-        )
-        conn.commit()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                UPDATE supply_orders
+                SET status = COALESCE(%s, status),
+                    reference = COALESCE(%s, reference),
+                    notes = COALESCE(%s, notes),
+                    updated_at = NOW()
+                WHERE id = %s
+                """,
+                (status, reference, notes, supply_order_id),
+            )
 
     return get_supply_order(supply_order_id)
 
 
 def get_supply_order(supply_order_id: int) -> dict:
     with _connect() as conn:
-        row = conn.execute(
-            "SELECT * FROM supply_orders WHERE id = ?",
-            (supply_order_id,),
-        ).fetchone()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "SELECT * FROM supply_orders WHERE id = %s",
+                (supply_order_id,),
+            )
+            row = cur.fetchone()
         if not row:
             raise ValueError(f"Supply order #{supply_order_id} not found.")
-        items = conn.execute(
-            """
-            SELECT product_id, product_name, quantity
-            FROM supply_order_items
-            WHERE supply_order_id = ?
-            ORDER BY id
-            """,
-            (supply_order_id,),
-        ).fetchall()
+
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                SELECT product_id, product_name, quantity
+                FROM supply_order_items
+                WHERE supply_order_id = %s
+                ORDER BY id
+                """,
+                (supply_order_id,),
+            )
+            items = cur.fetchall()
     return {**dict(row), "items": [dict(i) for i in items]}
 
 
@@ -275,35 +296,37 @@ def receive_stock(
         raise ValueError("Received quantity must be greater than zero.")
 
     with _connect() as conn:
-        row = conn.execute(
-            """
-            SELECT id, name, stock, reorder_level, unit_cost, unit_price
-            FROM inventory_products
-            WHERE id = ?
-            """,
-            (product_id,),
-        ).fetchone()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                SELECT id, name, stock, reorder_level, unit_cost, unit_price
+                FROM inventory_products
+                WHERE id = %s
+                """,
+                (product_id,),
+            )
+            row = cur.fetchone()
         if not row:
             raise ValueError(f"Product with ID {product_id} not found.")
 
-        conn.execute(
-            """
-            UPDATE inventory_products
-            SET stock = stock + ?,
-                updated_at = datetime('now')
-            WHERE id = ?
-            """,
-            (quantity, product_id),
-        )
-        conn.execute(
-            """
-            INSERT INTO inventory_movements
-                (product_id, movement_type, quantity, reference_type, reference_id, note)
-            VALUES (?, 'stock_in', ?, ?, ?, ?)
-            """,
-            (product_id, quantity, reference_type, reference_id, note),
-        )
-        conn.commit()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                UPDATE inventory_products
+                SET stock = stock + %s,
+                    updated_at = NOW()
+                WHERE id = %s
+                """,
+                (quantity, product_id),
+            )
+            cur.execute(
+                """
+                INSERT INTO inventory_movements
+                    (product_id, movement_type, quantity, reference_type, reference_id, note)
+                VALUES (%s, 'stock_in', %s, %s, %s, %s)
+                """,
+                (product_id, quantity, reference_type, reference_id, note),
+            )
 
     return view_stock_by_product(product_id=product_id)
 
@@ -326,14 +349,16 @@ def reduce_stock_on_customer_sale(
         computed_total = 0.0
 
         for item in items:
-            row = conn.execute(
-                """
-                SELECT id, name, stock, unit_price
-                FROM inventory_products
-                WHERE id = ?
-                """,
-                (item["product_id"],),
-            ).fetchone()
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute(
+                    """
+                    SELECT id, name, stock, unit_price
+                    FROM inventory_products
+                    WHERE id = %s
+                    """,
+                    (item["product_id"],),
+                )
+                row = cur.fetchone()
             if not row:
                 raise ValueError(f"Product with ID {item['product_id']} not found.")
 
@@ -357,54 +382,55 @@ def reduce_stock_on_customer_sale(
             )
 
         order_total = round(total_amount or computed_total, 2)
-        cursor = conn.execute(
-            """
-            INSERT INTO customer_orders (user_id, status, total_amount)
-            VALUES (?, ?, ?)
-            """,
-            (user_id, status, order_total),
-        )
-        order_id = cursor.lastrowid
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                INSERT INTO customer_orders (user_id, status, total_amount)
+                VALUES (%s, %s, %s)
+                RETURNING id
+                """,
+                (user_id, status, order_total),
+            )
+            order_id = cur.fetchone()["id"]
 
         for item in prepared_items:
-            conn.execute(
-                """
-                INSERT INTO customer_order_items
-                    (order_id, product_id, product_name, quantity, unit_price)
-                VALUES (?, ?, ?, ?, ?)
-                """,
-                (
-                    order_id,
-                    item["product_id"],
-                    item["product_name"],
-                    item["quantity"],
-                    item["unit_price"],
-                ),
-            )
-            conn.execute(
-                """
-                UPDATE inventory_products
-                SET stock = stock - ?,
-                    updated_at = datetime('now')
-                WHERE id = ?
-                """,
-                (item["quantity"], item["product_id"]),
-            )
-            conn.execute(
-                """
-                INSERT INTO inventory_movements
-                    (product_id, movement_type, quantity, reference_type, reference_id, note)
-                VALUES (?, 'sale_out', ?, 'customer_order', ?, ?)
-                """,
-                (
-                    item["product_id"],
-                    -item["quantity"],
-                    order_id,
-                    f"Customer sale for user {user_id}",
-                ),
-            )
-
-        conn.commit()
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute(
+                    """
+                    INSERT INTO customer_order_items
+                        (order_id, product_id, product_name, quantity, unit_price)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (
+                        order_id,
+                        item["product_id"],
+                        item["product_name"],
+                        item["quantity"],
+                        item["unit_price"],
+                    ),
+                )
+                cur.execute(
+                    """
+                    UPDATE inventory_products
+                    SET stock = stock - %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                    """,
+                    (item["quantity"], item["product_id"]),
+                )
+                cur.execute(
+                    """
+                    INSERT INTO inventory_movements
+                        (product_id, movement_type, quantity, reference_type, reference_id, note)
+                    VALUES (%s, 'sale_out', %s, 'customer_order', %s, %s)
+                    """,
+                    (
+                        item["product_id"],
+                        -item["quantity"],
+                        order_id,
+                        f"Customer sale for user {user_id}",
+                    ),
+                )
 
     return get_order(order_id)
 
@@ -423,11 +449,11 @@ def view_stock_by_product(
     params: list = []
 
     if product_id is not None:
-        conditions.append("id = ?")
+        conditions.append("id = %s")
         params.append(product_id)
 
     if query:
-        conditions.append("(name LIKE ? OR sku LIKE ?)")
+        conditions.append("(name ILIKE %s OR sku ILIKE %s)")
         params.extend([f"%{query}%", f"%{query}%"])
 
     if low_stock_only:
@@ -439,7 +465,9 @@ def view_stock_by_product(
     base_sql += " ORDER BY name"
 
     with _connect() as conn:
-        rows = conn.execute(base_sql, params).fetchall()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(base_sql, params)
+            rows = cur.fetchall()
 
     results = [dict(r) for r in rows]
     if product_id is not None:
@@ -451,32 +479,39 @@ def view_stock_by_product(
 
 def get_order(order_id: int) -> dict:
     with _connect() as conn:
-        row = conn.execute(
-            "SELECT * FROM customer_orders WHERE id = ?",
-            (order_id,),
-        ).fetchone()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "SELECT * FROM customer_orders WHERE id = %s",
+                (order_id,),
+            )
+            row = cur.fetchone()
         if not row:
             raise ValueError(f"Order #{order_id} not found.")
-        items = conn.execute(
-            """
-            SELECT product_id, product_name, quantity, unit_price
-            FROM customer_order_items
-            WHERE order_id = ?
-            ORDER BY id
-            """,
-            (order_id,),
-        ).fetchall()
+
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                SELECT product_id, product_name, quantity, unit_price
+                FROM customer_order_items
+                WHERE order_id = %s
+                ORDER BY id
+                """,
+                (order_id,),
+            )
+            items = cur.fetchall()
     return {**dict(row), "items": [dict(i) for i in items]}
 
 
 def get_user_orders(user_id: str) -> list[dict]:
     with _connect() as conn:
-        rows = conn.execute(
-            """
-            SELECT * FROM customer_orders
-            WHERE user_id = ?
-            ORDER BY created_at DESC, id DESC
-            """,
-            (user_id,),
-        ).fetchall()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """
+                SELECT * FROM customer_orders
+                WHERE user_id = %s
+                ORDER BY created_at DESC, id DESC
+                """,
+                (user_id,),
+            )
+            rows = cur.fetchall()
     return [dict(r) for r in rows]

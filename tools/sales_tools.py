@@ -1,22 +1,26 @@
 import json
+import logging
 import os
 import sys
 from typing import Annotated, Optional
 
+from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from langgraph.prebuilt import InjectedState
 
-from helpers.database import product_db
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from helpers.database import cart_db
+from helpers.database import cart_db, product_db
+from helpers.observability.log_formatting import tool_tracing
+
+logger = logging.getLogger(__name__)
 
 # ── Product lookup tool ────────────────────────────────────────────────────────
 
 
 @tool
-def find_product(query: str) -> str:
+@tool_tracing
+def find_product(query: str, config: RunnableConfig) -> str:
     """
     Find a product by name or description and return its ID, price, and stock.
 
@@ -64,7 +68,8 @@ def find_product(query: str) -> str:
 
 
 @tool
-def view_cart(user_id: Annotated[str, InjectedState("user_id")]) -> str:
+@tool_tracing
+def view_cart(user_id: Annotated[str, InjectedState("user_id")], config: RunnableConfig) -> str:
     """
     Retrieve the current contents of a user's shopping cart,
     including all items, quantities, unit prices, and the grand total.
@@ -80,7 +85,9 @@ def view_cart(user_id: Annotated[str, InjectedState("user_id")]) -> str:
 
 
 @tool
+@tool_tracing
 def add_to_cart(
+    config: RunnableConfig,
     user_id: Annotated[str, InjectedState("user_id")],
     product_id: int,
     quantity: int = 1,
@@ -127,8 +134,11 @@ def add_to_cart(
 
 
 @tool
+@tool_tracing
 def remove_from_cart(
-    user_id: Annotated[str, InjectedState("user_id")], product_id: int
+    user_id: Annotated[str, InjectedState("user_id")], 
+    product_id: int, 
+    config: RunnableConfig
 ) -> str:
     """
     Remove a product line entirely from the user's cart.
@@ -152,8 +162,12 @@ def remove_from_cart(
 
 
 @tool
+@tool_tracing
 def update_cart_quantity(
-    user_id: Annotated[str, InjectedState("user_id")], product_id: int, quantity: int
+    user_id: Annotated[str, InjectedState("user_id")],
+    product_id: int,
+    quantity: int,
+    config: RunnableConfig
 ) -> str:
     """
     Change the quantity of a specific product already in the cart.
@@ -187,7 +201,8 @@ def update_cart_quantity(
 
 
 @tool
-def validate_discount_code(code: str) -> str:
+@tool_tracing
+def validate_discount_code(code: str, config: RunnableConfig) -> str:
     """
     Check whether a discount/promo code is valid and return its value.
 
@@ -205,7 +220,9 @@ def validate_discount_code(code: str) -> str:
 
 
 @tool
+@tool_tracing
 def preview_order_total(
+    config: RunnableConfig,
     user_id: Annotated[str, InjectedState("user_id")],
     discount_code: Optional[str] = None,
 ) -> str:
@@ -257,7 +274,9 @@ def preview_order_total(
 
 
 @tool
+@tool_tracing
 def checkout(
+    config: RunnableConfig,
     user_id: Annotated[str, InjectedState("user_id")],
     discount_code: Optional[str] = None,
 ) -> str:
@@ -330,7 +349,11 @@ def checkout(
 
 
 @tool
-def get_order_history(user_id: Annotated[str, InjectedState("user_id")]) -> str:
+@tool_tracing
+def get_order_history(
+    user_id: Annotated[str, InjectedState("user_id")],
+    config: RunnableConfig
+) -> str:
     """
     Retrieve a summary of all past orders placed by the user.
 
@@ -347,7 +370,8 @@ def get_order_history(user_id: Annotated[str, InjectedState("user_id")]) -> str:
 
 
 @tool
-def get_order_details(order_id: int) -> str:
+@tool_tracing
+def get_order_details(order_id: int, config: RunnableConfig) -> str:
     """
     Fetch full details for a specific order, including line items.
 

@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -9,6 +10,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from config import LLM_MODEL, LLM_TEMPERATURE, OPENAI_API_KEY
 from tools.sales_tools import SALES_TOOLS
+from helpers.observability.log_formatting import format_agent_response
+
+logger = logging.getLogger(__name__)
+
 
 # ── System prompt ──────────────────────────────────────────────────────────────
 
@@ -109,6 +114,12 @@ def sales_agent_node(state: dict, config: RunnableConfig = None) -> dict:
 
     messages = [SystemMessage(content=SALES_SYSTEM_PROMPT)] + state["messages"]
     response = llm_with_tools.invoke(messages, config=config)
+
+    user_id = config.get("configurable", {}).get("thread_id", "unknown_user")
+    logger.info(
+       f"USER_ID: {user_id} | "
+       f"{format_agent_response(response)}"
+       )
 
     return {
         "messages": [response],

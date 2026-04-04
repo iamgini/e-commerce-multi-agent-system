@@ -1,10 +1,12 @@
 import os
-# from dotenv import load_dotenv
 
-# load_dotenv()
+## Use load_dotenv for internal testing purposes
+from dotenv import load_dotenv
+load_dotenv()
 
 # ── LLM ──────────────────────────────────────────────────────────────────────
-OPENAI_API_KEY: str = os.environ.get("OPENAI_API_KEY")
+OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")           # Use this for internal testing
+# OPENAI_API_KEY: str = os.environ.get("OPENAI_API_KEY")    # Use this for actual deployment
 LLM_MODEL: str = "gpt-5-nano"  # model used by all agents
 LLM_TEMPERATURE: float = 0.0  # deterministic outputs
 
@@ -25,11 +27,23 @@ ROUTE_RETURNS: str = "returns_refunds"
 ROUTE_FINISH: str = "finish"
 
 # ── Database ──────────────────────────────────────────────────────────────────
-DB_DIR: str = os.path.join(os.path.dirname(__file__), "data")
-PRODUCTS_DB_PATH: str = os.path.join(DB_DIR, "products.db")
-CART_DB_PATH: str = os.path.join(DB_DIR, "cart.db")
-ORDER_INVENTORY_DB_PATH: str = os.path.join(DB_DIR, "order_inventory.db")
-CHECKPOINTER_DB_PATH: str = os.path.join(DB_DIR, "checkpoints.db")
+# DB_DIR: str = os.path.join(os.path.dirname(__file__), "data")
+# PRODUCTS_DB_PATH: str = os.path.join(DB_DIR, "products.db")
+# CART_DB_PATH: str = os.path.join(DB_DIR, "cart.db")
+# ORDER_INVENTORY_DB_PATH: str = os.path.join(DB_DIR, "order_inventory.db")
+# CHECKPOINTER_DB_PATH: str = os.path.join(DB_DIR, "checkpoints.db")
+
+MAINTENANCE_DB_DSN: str = os.getenv("MAINTENANCE_DB_DSN")
+PRODUCTS_DB_DSN: str = os.getenv("PRODUCTS_DB_DSN")
+CART_DB_DSN: str = os.getenv("CART_DB_DSN")
+ORDER_INVENTORY_DB_DSN: str = os.getenv("ORDER_INVENTORY_DB_DSN")
+CHECKPOINTER_DB_DSN = os.getenv("CHECKPOINTER_DB_DSN")
+
+# ── S3 Logging ────────────────────────────────────────────────────────────────
+S3_ENDPOINT: str = os.getenv("S3_ENDPOINT")
+S3_ACCESS_KEY: str = os.getenv("S3_ACCESS_KEY")
+S3_SECRET_KEY: str = os.getenv("S3_SECRET_KEY")  
+S3_REGION: str = os.getenv("S3_REGION")
 
 # ── Discount rules ────────────────────────────────────────────────────────────
 DISCOUNT_CODES: dict[str, float] = {

@@ -1,14 +1,13 @@
-import sqlite3
 from typing import Optional
 
-from config import DISCOUNT_CODES, CART_DB_PATH
+import psycopg
+from psycopg.rows import dict_row
+
+from config import CART_DB_DSN, DISCOUNT_CODES
 
 
-def _connect() -> sqlite3.Connection:
-    conn = sqlite3.connect(CART_DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+def _connect() -> psycopg.Connection:
+    return psycopg.connect(CART_DB_DSN)
 
 
 # ── Cart CRUD ──────────────────────────────────────────────────────────────────
@@ -17,14 +16,16 @@ def _connect() -> sqlite3.Connection:
 def get_or_create_cart(user_id: str) -> int:
     """Return the cart ID for a user, creating one if necessary."""
     with _connect() as conn:
-        row = conn.execute(
-            "SELECT id FROM carts WHERE user_id = ?", (user_id,)
-        ).fetchone()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("SELECT id FROM carts WHERE user_id = %s", (user_id,))
+            row = cur.fetchone()
         if row:
             return row["id"]
-        cursor = conn.execute("INSERT INTO carts (user_id) VALUES (?)", (user_id,))
-        conn.commit()
-        return cursor.lastrowid
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "INSERT INTO carts (user_id) VALUES (%s) RETURNING id", (user_id,)
+            )
+            return cur.fetchone()["id"]
 
 
 def get_cart_contents(user_id: str) -> list[dict]:
@@ -37,10 +38,12 @@ def get_cart_contents(user_id: str) -> list[dict]:
                ci.quantity * ci.unit_price AS subtotal
         FROM   cart_items ci
         JOIN   carts c ON c.id = ci.cart_id
-        WHERE  c.user_id = ?
+        WHERE  c.user_id = %s
     """
     with _connect() as conn:
-        rows = conn.execute(sql, (user_id,)).fetchall()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, (user_id,))
+            rows = cur.fetchall()
     return [dict(r) for r in rows]
 
 
@@ -66,25 +69,27 @@ def add_item_to_cart(
     """
     cart_id = get_or_create_cart(user_id)
     with _connect() as conn:
-        existing = conn.execute(
-            "SELECT id, quantity FROM cart_items WHERE cart_id = ? AND product_id = ?",
-            (cart_id, product_id),
-        ).fetchone()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "SELECT id, quantity FROM cart_items WHERE cart_id = %s AND product_id = %s",
+                (cart_id, product_id),
+            )
+            existing = cur.fetchone()
         if existing:
-            conn.execute(
-                "UPDATE cart_items SET quantity = quantity + ? WHERE id = ?",
-                (quantity, existing["id"]),
-            )
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute(
+                    "UPDATE cart_items SET quantity = quantity + %s WHERE id = %s",
+                    (quantity, existing["id"]),
+                )
         else:
-            conn.execute(
-                """INSERT INTO cart_items (cart_id, product_id, quantity, unit_price)
-                   VALUES (?, ?, ?, ?)""",
-                (cart_id, product_id, quantity, unit_price),
-            )
-        conn.execute(
-            "UPDATE carts SET updated_at = datetime('now') WHERE id = ?", (cart_id,)
-        )
-        conn.commit()
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute(
+                    """INSERT INTO cart_items (cart_id, product_id, quantity, unit_price)
+                       VALUES (%s, %s, %s, %s)""",
+                    (cart_id, product_id, quantity, unit_price),
+                )
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("UPDATE carts SET updated_at = NOW() WHERE id = %s", (cart_id,))
     return get_cart_summary(user_id)
 
 
@@ -92,11 +97,11 @@ def remove_item_from_cart(user_id: str, product_id: int) -> dict:
     """Remove a product line from the cart. Returns updated cart summary."""
     cart_id = get_or_create_cart(user_id)
     with _connect() as conn:
-        conn.execute(
-            "DELETE FROM cart_items WHERE cart_id = ? AND product_id = ?",
-            (cart_id, product_id),
-        )
-        conn.commit()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "DELETE FROM cart_items WHERE cart_id = %s AND product_id = %s",
+                (cart_id, product_id),
+            )
     return get_cart_summary(user_id)
 
 
@@ -106,11 +111,11 @@ def update_item_quantity(user_id: str, product_id: int, quantity: int) -> dict:
         return remove_item_from_cart(user_id, product_id)
     cart_id = get_or_create_cart(user_id)
     with _connect() as conn:
-        conn.execute(
-            "UPDATE cart_items SET quantity = ? WHERE cart_id = ? AND product_id = ?",
-            (quantity, cart_id, product_id),
-        )
-        conn.commit()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "UPDATE cart_items SET quantity = %s WHERE cart_id = %s AND product_id = %s",
+                (quantity, cart_id, product_id),
+            )
     return get_cart_summary(user_id)
 
 
@@ -118,8 +123,8 @@ def clear_cart(user_id: str) -> None:
     """Remove all items from the user's cart (called after checkout)."""
     cart_id = get_or_create_cart(user_id)
     with _connect() as conn:
-        conn.execute("DELETE FROM cart_items WHERE cart_id = ?", (cart_id,))
-        conn.commit()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("DELETE FROM cart_items WHERE cart_id = %s", (cart_id,))
 
 
 # ── Discount logic ─────────────────────────────────────────────────────────────
@@ -172,32 +177,34 @@ def create_order(
     final_amount = round(total - discount_amount, 2)
 
     with _connect() as conn:
-        cursor = conn.execute(
-            """INSERT INTO orders
-                   (user_id, total_amount, discount_code, discount_amount, final_amount, status)
-               VALUES (?, ?, ?, ?, ?, 'confirmed')""",
-            (user_id, total, discount_code, discount_amount, final_amount),
-        )
-        order_id = cursor.lastrowid
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                """INSERT INTO orders
+                       (user_id, total_amount, discount_code, discount_amount, final_amount, status)
+                   VALUES (%s, %s, %s, %s, %s, 'confirmed')
+                   RETURNING id""",
+                (user_id, total, discount_code, discount_amount, final_amount),
+            )
+            order_id = cur.fetchone()["id"]
 
         # Snapshot cart items into order_items
         # (product names must be fetched from products.db separately by the tool layer)
         for item in summary["items"]:
             pid = item["product_id"]
             name = product_names.get(pid, f"Product #{pid}")
-            conn.execute(
-                """INSERT INTO order_items
-                       (order_id, product_id, product_name, quantity, unit_price)
-                   VALUES (?, ?, ?, ?, ?)""",
-                (
-                    order_id,
-                    pid,
-                    name,
-                    item["quantity"],
-                    item["unit_price"],
-                ),
-            )
-        conn.commit()
+            with conn.cursor(row_factory=dict_row) as cur:
+                cur.execute(
+                    """INSERT INTO order_items
+                           (order_id, product_id, product_name, quantity, unit_price)
+                       VALUES (%s, %s, %s, %s, %s)""",
+                    (
+                        order_id,
+                        pid,
+                        name,
+                        item["quantity"],
+                        item["unit_price"],
+                    ),
+                )
 
     return {
         "order_id": order_id,
@@ -214,20 +221,24 @@ def create_order(
 def get_order(order_id: int) -> Optional[dict]:
     """Fetch a single order by ID."""
     with _connect() as conn:
-        row = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("SELECT * FROM orders WHERE id = %s", (order_id,))
+            row = cur.fetchone()
         if not row:
             return None
-        items = conn.execute(
-            "SELECT * FROM order_items WHERE order_id = ?", (order_id,)
-        ).fetchall()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute("SELECT * FROM order_items WHERE order_id = %s", (order_id,))
+            items = cur.fetchall()
     return {**dict(row), "items": [dict(i) for i in items]}
 
 
 def get_user_orders(user_id: str) -> list[dict]:
     """Return all past orders for a user, newest first."""
     with _connect() as conn:
-        rows = conn.execute(
-            "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC",
-            (user_id,),
-        ).fetchall()
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(
+                "SELECT * FROM orders WHERE user_id = %s ORDER BY created_at DESC",
+                (user_id,),
+            )
+            rows = cur.fetchall()
     return [dict(r) for r in rows]
