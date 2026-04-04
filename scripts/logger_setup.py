@@ -1,8 +1,10 @@
-import sys
-import os
 import logging
+import os
+import sys
+
 from botocore.config import Config
-from config import S3_ACCESS_KEY, S3_SECRET_KEY, S3_ENDPOINT, S3_REGION
+
+from config import S3_ACCESS_KEY, S3_BUCKETNAME, S3_ENDPOINT, S3_REGION, S3_SECRET_KEY
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -25,7 +27,7 @@ def initialise_logger() -> None:
     
     handler = AsyncS3PipeHandler(
         client_params=client_params,
-        bucket_name="ecommerce-logs",
+        bucket_name=S3_BUCKETNAME,
         filename="backend.log"
         )
     

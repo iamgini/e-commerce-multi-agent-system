@@ -1,0 +1,41 @@
+# Compose file for setting up garage and garage-webui
+# Locally hosted S3 equivalent
+services:
+  garage:
+    container_name: garage
+    image: docker.io/dxflrs/garage:v2.2.0
+    # user: 1000:1000
+    ports:
+      - 4900:3900
+      - 4901:3901
+      - 4903:3903
+    restart: unless-stopped
+    networks:
+      - garage_net
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+      - ./meta:/var/lib/garage/meta:Z
+      - ./data:/var/lib/garage/data:Z
+
+  webui:
+    image: docker.io/khairul169/garage-webui:latest
+    container_name: garage-webui
+    restart: unless-stopped
+    volumes:
+      - ./garage.toml:/etc/garage.toml:Z
+    ports:
+      - 4909:3909
+    networks:
+      - garage_net
+    environment:
+      API_BASE_URL: "http://garage:4903"      # Since both containers are in the same network, mapping by container name
+      S3_ENDPOINT_URL: "http://garage:4900"   # Since both containers are in the same network, mapping by container name
+
+networks:
+  garage_net:
+    name: garage_net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: xxx.xxx.xx.xx/xx    # to define
+          gateway: xxx.xxx.xx.xx/xx   # to define
