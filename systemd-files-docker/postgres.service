@@ -16,7 +16,7 @@ ExecStart=/usr/bin/docker run \
         -e POSTGRES_DB=postgres \
         -v /home/shopbot/postgres/data:/var/lib/postgresql \
         --network=pg_net \
-        -p 6432:5432 \
+        --expose 5432 \
         --shm-size 128mb \
         docker.io/library/postgres:18-alpine
 ExecStop=/usr/bin/docker stop -t 10 postgres
