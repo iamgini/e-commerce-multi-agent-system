@@ -1,0 +1,20 @@
+[Unit]
+Description=Docker container - adminer
+Wants=network-online.target
+After=network-online.target docker.service postgres.service
+Requires=docker.service postgres.service
+
+[Service]
+Restart=always
+TimeoutStopSec=70
+
+ExecStartPre=-/usr/bin/docker rm -f adminer
+ExecStart=/usr/bin/docker run \
+        --name=adminer \
+        --network=pg_net \
+        -p 8081:8080 \
+        docker.io/library/adminer:latest
+ExecStop=/usr/bin/docker stop -t 10 adminer
+
+[Install]
+WantedBy=default.target

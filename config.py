@@ -15,14 +15,14 @@ COORDINATOR_NODE: str = "coordinator"
 SALES_NODE: str = "sales_agent"
 RECOMMENDATION_NODE: str = "recommendation_agent"
 CUSTOMER_SUPPORT_NODE: str = "customer_support_agent"
-ORDER_INVENTORY_NODE: str = "orders_inventory_agent"
+ORDER_INVENTORY_NODE: str = "order_inventory_agent"
 RETURNS_REFUNDS_NODE: str = "returns_refunds_agent"
 
 # ── Routing literals ──────────────────────────────────────────────────────────
 ROUTE_SALES: str = "sales"
 ROUTE_RECOMMEND: str = "recommend"
 ROUTE_SUPPORT: str = "customer_support"
-ROUTE_ORDER_INVENTORY: str = "orders_inventory"
+ROUTE_ORDER_INVENTORY: str = "order_inventory"
 ROUTE_RETURNS: str = "returns_refunds"
 ROUTE_FINISH: str = "finish"
 ROUTE_ALERT: str = "alert"
@@ -32,6 +32,7 @@ ROUTE_ALERT: str = "alert"
 # PRODUCTS_DB_PATH: str = os.path.join(DB_DIR, "products.db")
 # CART_DB_PATH: str = os.path.join(DB_DIR, "cart.db")
 # ORDER_INVENTORY_DB_PATH: str = os.path.join(DB_DIR, "order_inventory.db")
+# RETURNS_DB_PATH = os.path.join(DB_DIR, "returns.db")
 # CHECKPOINTER_DB_PATH: str = os.path.join(DB_DIR, "checkpoints.db")
 
 # Use this for internal testing
