@@ -144,7 +144,6 @@ sudo chmod 640 /etc/nginx/certs/cloudflare-origin.key
 sudo chown root:nginx /etc/nginx/certs/
 sudo chmod 750 /etc/nginx/certs/
 
-
 sudo semanage fcontext -a -t cert_t "/etc/nginx/certs(/.*)?"
 sudo restorecon -Rv /etc/nginx/certs/
 ```
