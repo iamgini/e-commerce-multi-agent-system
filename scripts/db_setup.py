@@ -302,6 +302,7 @@ def initialise_databases() -> None:
             with conn.cursor() as cur:
                 cur.execute("CREATE DATABASE products_db")
                 cur.execute("CREATE DATABASE cart_db")
+                cur.execute("CREATE DATABASE returns_db")
                 cur.execute("CREATE DATABASE order_inventory_db")
                 
     except errors.DuplicateDatabase:
