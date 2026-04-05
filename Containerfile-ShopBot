@@ -1,7 +1,4 @@
 # Containerfile — e-commerce multi-agent system
-# Build:  podman build -t shopbot .
-# Run:    podman run --env-file .env -p 8001:8001 shopbot
-
 FROM python:3.12-slim
 
 # System deps (sqlite is needed by langgraph-checkpoint-sqlite)

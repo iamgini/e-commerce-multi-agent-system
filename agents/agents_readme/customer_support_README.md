@@ -104,7 +104,7 @@ $ pip install -r requirements.txt
 Test the customer support agent using `test_support_agent.py`
 
 ```shell
-$  uv run --python 3.12 python -m tests.test_customer_support_agent
+$ uv run --python 3.12 python -m tests.test_customer_support_agent
 ```
 
 ### Scenarios and cases:

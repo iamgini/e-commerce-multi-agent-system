@@ -1,5 +1,18 @@
 # ShopBot - e-Commerce Multi-Agent System
 
+- [ShopBot - e-Commerce Multi-Agent System](#shopbot---e-commerce-multi-agent-system)
+  - [Directory structure](#directory-structure)
+  - [Testing main](#testing-main)
+  - [Testing coordinator](#testing-coordinator)
+  - [Agents Documentation](#agents-documentation)
+  - [Try to cover all learning from 4 modules](#try-to-cover-all-learning-from-4-modules)
+    - [Module 1 – Responsible \& Explainable AI](#module-1--responsible--explainable-ai)
+    - [Module 2 – AI \& Cybersecurity](#module-2--ai--cybersecurity)
+    - [Module 3 – Architecting Agentic AI](#module-3--architecting-agentic-ai)
+    - [Module 4 – Integration \& Deployment](#module-4--integration--deployment)
+  - [Presentation Notes and Tips](#presentation-notes-and-tips)
+
+
 ## Directory structure
 
 TODO
@@ -13,7 +26,7 @@ TODO
 ## Testing coordinator
 
 ```shell
-e-commerce-multi-agent-system  $  uv run python test_coordinator_agent_quick.py
+e-commerce-multi-agent-system $ uv run --python 3.12 python -m tests.test_coordinator_agent_quick
 
 Recommendation       | Can you recommend a good wireless mouse?
 route -> recommend
