@@ -226,7 +226,17 @@ docker run -d \
   -p 8001:8001 \
   -e DOTENV_PRIVATE_KEY_PRODUCTION=$DOTENV_PRIVATE_KEY_PRODUCTION \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  quay.io/iamgini/shopbot:13d6ca4276db11811a23766502e095830ccca21f
+  quay.io/iamgini/shopbot:5af7e9a8b6835022b491ed1de2c73c089a385955
+
+docker run -d \
+  --name shopbot \
+  --network pg_net \
+  --network garage_net \
+  -p 8001:8001 \
+  -e DOTENV_PRIVATE_KEY_CI=$DOTENV_PRIVATE_KEY_CI \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  quay.io/iamgini/shopbot:5af7e9a8b6835022b491ed1de2c73c089a385955
+
 
 ```
 
