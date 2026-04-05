@@ -64,6 +64,49 @@ def find_product(query: str, config: RunnableConfig) -> str:
     return json.dumps(compact, indent=2)
 
 
+@tool
+@tool_tracing
+def find_product_by_id(product_id: int, config: RunnableConfig) -> str:
+    """
+    Find a product by ID or description and return its name.
+
+    Use this tool BEFORE calling view_cart whenever you have a product_id
+    but not yet a product name. 
+
+    Args:
+        query: Product ID, e.g. "1", "2", "3".
+
+    Returns:
+        A JSON array of matches, each containing:
+          id            - integer product ID required by add_to_cart
+          name          - full product name
+          description   - description of the product
+          price         - unit price in USD
+          stock         - units currently available
+          rating        - average customer rating
+          category      - product category name
+        Or a plain-text message if no products are found.
+    """
+    results = product_db.get_product_by_id(product_id)
+    if not results:
+        return f"No products found matching '{product_id}'."
+
+    compact = [
+        {
+            "id": r["id"],
+            "name": r["name"],
+            "description": r["description"],
+            "price": r["price"],
+            "stock": r["stock"],
+            "rating": r["rating"],
+            "category": r["category"],
+        }
+        for r in results
+    ]
+    return json.dumps(compact, indent=2)
+
+
+
 # ── Cart tools ─────────────────────────────────────────────────────────────────
 
 
@@ -391,6 +434,7 @@ def get_order_details(order_id: int, config: RunnableConfig) -> str:
 
 SALES_TOOLS = [
     find_product,
+    find_product_by_id,
     view_cart,
     add_to_cart,
     remove_from_cart,
