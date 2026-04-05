@@ -229,9 +229,11 @@ systemctl --user enable postgres adminer garage garage-webui
 # Enable lingering so services start on boot without login
 sudo loginctl enable-linger shopbot
 
+systemctl --user status postgres
+systemctl --user status garage
+
 # Run container once manually, then generate systemd unit
-podman generate systemd --name shopbot --restart-policy=always --new > \
-  /etc/systemd/system/shopbot.service
+podman generate systemd --name shopbot --restart-policy=always --new > /etc/systemd/system/shopbot.service
 
 systemctl daemon-reload
 systemctl enable --now shopbot
