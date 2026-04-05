@@ -82,7 +82,7 @@ $ uv run --python 3.12 chainlit run chainlit_app.py --port 8001
 ## Appendix - Building Container
 
 ```shell
-podman build -t shopbot .
+$ podman build -t shopbot --file Containerfile-ShopBot
 
 # podman run --env-file .env -p 8001:8001 shopbot
 podman run -e OPENAI_API_KEY=$OPENAI_API_KEY -p 8001:8001 shopbot

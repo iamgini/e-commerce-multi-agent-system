@@ -72,3 +72,43 @@ jobs:
 
       - name: Scan dependencies for vulnerabilities
         run: pip-audit -r agent_customer_support/requirements.txt
+
+  build-and-push:
+    needs: [secret-detection, lint, vulnerability-scan]  # only build if all checks pass
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'  # only deploy from main
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Quay
+        run: echo "${{ secrets.QUAY_PASSWORD }}" | podman login quay.io -u "${{ secrets.QUAY_USERNAME }}" --password-stdin
+
+      - name: Build image
+        run: podman build --file Containerfile-ShopBot -t quay.io/iamgini/shopbot:${{ github.sha }} -t quay.io/iamgini/shopbot:latest .
+
+      - name: Push image
+        run: |
+          podman push quay.io/iamgini/shopbot:${{ github.sha }}
+          podman push quay.io/iamgini/shopbot:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && vars.EC2_READY == 'true'
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            podman pull quay.io/iamgini/shopbot:latest
+            podman stop shopbot || true
+            podman rm shopbot || true
+            podman run -d \
+              --name shopbot \
+              --env-file /home/ec2-user/.env \
+              --network host \
+              -p 8001:8001 \
+              quay.io/iamgini/shopbot:latest
