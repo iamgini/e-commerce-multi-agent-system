@@ -13,6 +13,8 @@ EC2 instance
   - [EC2 Setup](#ec2-setup)
     - [Start or Stop EC2](#start-or-stop-ec2)
   - [Cloudflare DNS](#cloudflare-dns)
+  - [Garage (S3) and PostgreSQL](#garage-s3-and-postgresql)
+    - [Accessing UI from localhost](#accessing-ui-from-localhost)
   - [Add user public keys](#add-user-public-keys)
 
 ## Security Group
@@ -174,7 +176,25 @@ Proxy:   ON (orange cloud ✅)
 TTL:     Auto
 ```
 
+## Garage (S3) and PostgreSQL
 
+### Accessing UI from localhost
+
+Keep that terminal open — tunnels stay alive as long as the SSH session is.
+
+```shell
+ssh -L 4900:localhost:4900 \
+    -L 4901:localhost:4901 \
+    -L 4903:localhost:4903 \
+    -L 4909:localhost:4909 \
+    -L 6432:localhost:6432 \
+    -L 8081:localhost:8081 \
+    ec2-user@47.130.15.25
+```
+http://localhost:4909 → garage webui
+http://localhost:4900 → garage S3 API
+http://localhost:6432 → postgres
+http://localhost:8081 → your other service
 
 ## Add user public keys
 
