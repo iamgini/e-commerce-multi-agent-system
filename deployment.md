@@ -17,6 +17,8 @@ EC2 instance
     - [Accessing component UI from localhost](#accessing-component-ui-from-localhost)
   - [Run Shopbot container](#run-shopbot-container)
   - [Setup systemd for containers](#setup-systemd-for-containers)
+    - [Docker](#docker)
+    - [Podman](#podman)
   - [Appendix](#appendix)
     - [Add user public keys](#add-user-public-keys)
 
@@ -210,7 +212,14 @@ $ podman run -d \
   quay.io/iamgini/shopbot:latest
 ```
 
+
 ## Setup systemd for containers
+
+### Docker
+
+Refer to the [systemd-files-docker](systemd-files-docker) directory.
+
+### Podman
 
 ```shell
 # Create user systemd directory
