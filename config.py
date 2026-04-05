@@ -49,6 +49,10 @@ CART_DB_DSN: str = os.environ.get("CART_DB_DSN")
 ORDER_INVENTORY_DB_DSN: str = os.environ.get("ORDER_INVENTORY_DB_DSN")
 CHECKPOINTER_DB_DSN = os.environ.get("CHECKPOINTER_DB_DSN")
 
+#--------------------------------------------------------------------------
+#Config.py needs to define this or else imports during runtime will fail.
+RETURNS_DB_DSN: str = os.environ.get("RETURNS_DB_DSN")
+
 # ── S3 Logging ────────────────────────────────────────────────────────────────
 # Use this for internal testing
 # S3_ENDPOINT: str = os.getenv("S3_ENDPOINT")
