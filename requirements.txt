@@ -15,3 +15,4 @@ fastapi
 uvicorn[standard]
 chainlit
 # langchain-ollama - optional for local testing
+dotenvx
