@@ -226,7 +226,7 @@ docker run -d \
   -p 8001:8001 \
   -e DOTENV_PRIVATE_KEY_PRODUCTION=$DOTENV_PRIVATE_KEY_PRODUCTION \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  quay.io/iamgini/shopbot:latest
+  quay.io/iamgini/shopbot:13d6ca4276db11811a23766502e095830ccca21f
 
 ```
 
