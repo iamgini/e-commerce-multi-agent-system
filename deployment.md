@@ -235,9 +235,19 @@ docker run -d \
   -p 8001:8001 \
   -e DOTENV_PRIVATE_KEY_CI=$DOTENV_PRIVATE_KEY_CI \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  quay.io/iamgini/shopbot:5af7e9a8b6835022b491ed1de2c73c089a385955
+  quay.io/iamgini/shopbot:3af3bd22114bd33b06e4dfe4c37c3fec8b18cc5f
 
 
+```
+
+Test secrets
+
+```shell
+$ docker run --rm  \
+    --network pg_net   \
+    -e DOTENV_PRIVATE_KEY_CI=$DOTENV_PRIVATE_KEY_CI   \
+    quay.io/iamgini/shopbot:3af3bd22114bd33b06e4dfe4c37c3fec8b18cc5f   \
+    dotenvx run -f .env.ci -- printenv MAINTENANCE_DB_DSN
 ```
 
 ### Podman
