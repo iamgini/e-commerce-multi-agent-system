@@ -18,4 +18,8 @@ COPY . .
 
 EXPOSE 8001
 
-CMD ["chainlit", "run", "chainlit_app.py", "--port", "8001", "--host", "0.0.0.0"]
+# Before (broken — dotenvx never runs, .env.ci stays encrypted)
+# CMD ["chainlit", "run", "chainlit_app.py", "--port", "8001", "--host", "0.0.0.0"]
+
+# After (correct — dotenvx decrypts .env.ci first, then starts chainlit)
+CMD ["dotenvx", "run", "-f", ".env.ci", "--", "chainlit", "run", "chainlit_app.py", "--port", "8001", "--host", "0.0.0.0"]
