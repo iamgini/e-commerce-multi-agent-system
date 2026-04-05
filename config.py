@@ -16,14 +16,14 @@ COORDINATOR_NODE: str = "coordinator"
 SALES_NODE: str = "sales_agent"
 RECOMMENDATION_NODE: str = "recommendation_agent"
 CUSTOMER_SUPPORT_NODE: str = "customer_support_agent"
-ORDER_INVENTORY_NODE: str = "orders_inventory_agent"
+ORDER_INVENTORY_NODE: str = "order_inventory_agent"
 RETURNS_REFUNDS_NODE: str = "returns_refunds_agent"
 
 # ── Routing literals ──────────────────────────────────────────────────────────
 ROUTE_SALES: str = "sales"
 ROUTE_RECOMMEND: str = "recommend"
 ROUTE_SUPPORT: str = "customer_support"
-ROUTE_ORDER_INVENTORY: str = "orders_inventory"
+ROUTE_ORDER_INVENTORY: str = "order_inventory"
 ROUTE_RETURNS: str = "returns_refunds"
 ROUTE_FINISH: str = "finish"
 
