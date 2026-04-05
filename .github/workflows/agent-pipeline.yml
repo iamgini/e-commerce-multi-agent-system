@@ -137,9 +137,9 @@ jobs:
           script: |
             IMAGE=quay.io/iamgini/shopbot:${{ needs.build-and-push.outputs.image_tag }}
 
-            podman pull $IMAGE
-            podman stop shopbot || true
-            podman rm shopbot || true
+            docker pull $IMAGE
+            docker stop shopbot || true
+            docker rm shopbot || true
 
             docker run -d \
               --name shopbot \
