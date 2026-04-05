@@ -156,6 +156,8 @@ sudo chmod 750 /etc/nginx/certs/
 
 sudo semanage fcontext -a -t cert_t "/etc/nginx/certs(/.*)?"
 sudo restorecon -Rv /etc/nginx/certs/
+
+
 ```
 
 ### Start or Stop EC2
@@ -211,7 +213,8 @@ ssh -L 4900:localhost:4900 \
 ```shell
 $ docker run -d \
   --name shopbot \
-  --network host \
+  --network pg_net \
+  --network garage_net \
   -p 8001:8001 \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
   quay.io/iamgini/shopbot:latest
@@ -221,8 +224,10 @@ docker run -d \
   --network pg_net \
   --network garage_net \
   -p 8001:8001 \
+  -e DOTENV_PRIVATE_KEY_PRODUCTION=$DOTENV_PRIVATE_KEY_PRODUCTION \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
   quay.io/iamgini/shopbot:latest
+
 ```
 
 ### Podman
