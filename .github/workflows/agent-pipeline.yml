@@ -80,18 +80,29 @@ jobs:
     needs: [secret-detection, vulnerability-scan]  # only build if all checks pass
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'  # only deploy from main
+    outputs:
+      image_tag: ${{ steps.meta.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Log in to Quay
         run: echo "${{ secrets.QUAY_PASSWORD }}" | podman login quay.io -u "${{ secrets.QUAY_USERNAME }}" --password-stdin
 
+      - name: Generate image tag
+        id: meta
+        run: echo "version=${{ github.sha }}" >> $GITHUB_OUTPUT
+
       - name: Build image
-        run: podman build --file Containerfile-ShopBot -t quay.io/iamgini/shopbot:${{ github.sha }} -t quay.io/iamgini/shopbot:latest .
+        # run: podman build --file Containerfile-ShopBot -t quay.io/iamgini/shopbot:${{ github.sha }} -t quay.io/iamgini/shopbot:latest .
+        run: |
+          podman build --file Containerfile-ShopBot \
+            -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
+            -t quay.io/iamgini/shopbot:latest \
+            .
 
       - name: Push image
         run: |
-          podman push quay.io/iamgini/shopbot:${{ github.sha }}
+          podman push quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
           podman push quay.io/iamgini/shopbot:latest
 
   deploy:
