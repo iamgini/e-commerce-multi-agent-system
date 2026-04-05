@@ -141,7 +141,7 @@ jobs:
             podman stop shopbot || true
             podman rm shopbot || true
 
-            podman run -d \
+            docker run -d \
               --name shopbot \
               --network pg_net \
               --network garage_net \
