@@ -4,13 +4,12 @@ from typing import Dict
 
 # Logger
 from helpers.observability.logger import log_event
+
 # State
-from state import AgentState
+# from state import AgentState
 
 import os
-from dotenv import load_dotenv
 
-# from langchain_ollama import OllamaLLM
 from langchain_openai import ChatOpenAI
 
 from config import OPENAI_API_KEY, LLM_MODEL, LLM_TEMPERATURE
@@ -23,8 +22,9 @@ _provider = os.getenv("LLM_PROVIDER", "openai").lower()
 
 if _provider == "openai":
     llm = ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE, api_key=OPENAI_API_KEY)
-# else:
-#     llm = OllamaLLM(model="llama3")
+else:
+    from langchain_ollama import OllamaLLM
+    llm = OllamaLLM(model="llama3")
 
 # ==========================================================
 # Load FAQ Knowledge Base
@@ -118,7 +118,6 @@ def customer_support_agent(state: dict) -> dict:
 
     faq_context = load_faq()
     prompt = build_prompt(query=query, faq_context=faq_context)
-    prompt = build_prompt(query=query, faq_context=faq_context)
     result = llm.invoke(prompt)
     if hasattr(result, "content"):
         result = result.content
@@ -134,7 +133,6 @@ def customer_support_agent(state: dict) -> dict:
         state["confidence"] = estimate_confidence(result)
         state["explanation"] = "Response generated using internal FAQ knowledge base."
 
-    log_event(f"Support Response Generated | Escalate={state.get('escalate', False)}")
     log_event(f"Support Response Generated | Escalate={state.get('escalate', False)}")
 
     # When called from LangGraph (messages-based state)
