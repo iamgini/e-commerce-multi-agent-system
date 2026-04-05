@@ -169,9 +169,7 @@ should handle it. You must respond with ONLY a valid JSON object - no prose.
 
 Available routes:
 - "support"   → Customer Support Agent (general inquiries, store hours, technical issues, human agent requests, account help)
-- "inventory" → Orders and Inventory Agent (stock availability, shipping status, tracking numbers, delivery dates)
 - "order_inventory" → Order & Inventory Agent (purchase orders, supply orders, stock, procurement, warehouse operations)
-- "finish"          → End the conversation (goodbye, thank you, done, exit)
 - "returns_refunds"   → Returns and Refunds Agent (refund requests, damaged items, exchange policy, return labels, warranty claims)
 - "recommend" → Product Recommendation Agent (browsing, searching, comparing products)
 - "sales"     → Sales Agent (cart actions, checkout, discounts, order history)
@@ -179,7 +177,7 @@ Available routes:
 
 Response format (strict JSON, nothing else):
 {
-  "route": "<recommend|sales|order_inventory|finish>",
+  "route": "<recommend|sales|order_inventory|customer_support|returns_refunds|finish>",
   "reason": "<one sentence rationale>"
 }
 
@@ -189,7 +187,7 @@ Rules:
 3. If the message is about stock levels, warehouse inventory, receiving stock, purchase orders, supply orders, supplier operations, or procurement → "order_inventory".
 4. If the message is about returning items, refunds, damaged goods, exchange, warranty, or complaints → "returns_refunds".
 5. If the message is a farewell or the user says they are done → "finish".
-6.. When in doubt, prefer "recommend".
+6. When in doubt, prefer "recommend".
 """
 
 # ── Coordinator node ────────────────────────────────────────────────────────────
