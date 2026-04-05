@@ -14,6 +14,7 @@ from config import (
     LLM_TEMPERATURE,
     OPENAI_API_KEY,
     ROUTE_FINISH,
+    ROUTE_ALERT,
     ROUTE_ORDER_INVENTORY,
     ROUTE_RECOMMEND,
     ROUTE_RETURNS,
@@ -60,6 +61,7 @@ _ORDER_INVENTORY_KEYWORDS = {
     "deduct stock",
     "adjust stock",
 }
+
 _SALES_KEYWORDS = {
     "add to cart",
     "remove from cart",
@@ -167,27 +169,50 @@ COORDINATOR_SYSTEM_PROMPT = """You are the Coordinator of an e-commerce multi-ag
 Your only job is to read the customer's latest message and decide which agent
 should handle it. You must respond with ONLY a valid JSON object - no prose.
 
-Available routes:
+## Available routes:
 - "support"   → Customer Support Agent (general inquiries, store hours, technical issues, human agent requests, account help)
 - "order_inventory" → Order & Inventory Agent (purchase orders, supply orders, stock, procurement, warehouse operations)
 - "returns_refunds"   → Returns and Refunds Agent (refund requests, damaged items, exchange policy, return labels, warranty claims)
 - "recommend" → Product Recommendation Agent (browsing, searching, comparing products)
-- "sales"     → Sales Agent (cart actions, checkout, discounts, order history)
+- "sales"     → Sales Agent (cart actions, checkout, discounts, customer order history)
 - "finish"    → End the conversation (goodbye, thank you, done, exit)
 
-Response format (strict JSON, nothing else):
+
+## Response format (strict JSON, nothing else):
 {
-  "route": "<recommend|sales|order_inventory|customer_support|returns_refunds|finish>",
+  "route": "<recommend|sales|order_inventory|support|returns_refunds|finish>",
   "reason": "<one sentence rationale>"
 }
 
-Rules:
-1. If the message is about finding, browsing, comparing, or learning about products → "recommend".
-2. If the message is about cart, buying, discounts, checkout, or past orders → "sales".
-3. If the message is about stock levels, warehouse inventory, receiving stock, purchase orders, supply orders, supplier operations, or procurement → "order_inventory".
-4. If the message is about returning items, refunds, damaged goods, exchange, warranty, or complaints → "returns_refunds".
-5. If the message is a farewell or the user says they are done → "finish".
-6. When in doubt, prefer "recommend".
+
+## Safety Rule (Highest Priority):
+If the user's request involves illegal activity, fraud, abuse, or requests assistance in wrongdoing
+(e.g., hacking, scams, bypassing payment systems, stealing, counterfeit goods, exploiting systems),
+you MUST NOT route to any agent.
+
+Disallowed intents include (but are not limited to):
+- Payment fraud, stolen credit cards, chargeback abuse
+- Bypassing checkout, getting items for free illegitimately
+- Account hacking or accessing other users' data
+- Selling or sourcing illegal or counterfeit goods
+- Exploiting system bugs or loopholes
+
+Instead, respond with:
+{
+  "route": "alert",
+  "reason": "[ALERT] Your request contains disallowed or potentially illegal activity."
+}
+
+
+## Rules:
+1. Always check the user message against the safety rule first.
+2. If the message is about finding, browsing, comparing, or learning about products → "recommend".
+3. If the message is about cart, buying, discounts, checkout, or past customer orders → "sales".
+4. If the message is about stock levels, warehouse inventory, receiving stock, purchase orders, supply orders, supplier operations, or procurement → "order_inventory".
+5. If the message is about returning items, refunds, damaged goods, exchange, warranty, or complaints → "returns_refunds".
+6. If the message is about general inquiries, technical issues and seeking support → "support"
+7. If the message is a farewell or the user says they are done → "finish".
+8. When in doubt, prefer "recommend".
 """
 
 # ── Coordinator node ────────────────────────────────────────────────────────────
@@ -202,6 +227,7 @@ def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
     is somehow reached after an AI turn), default to ROUTE_RECOMMEND rather
     than re-routing mid-response.
     """
+    user_id = config.get("configurable", {}).get("thread_id", "unknown_user")
     # Guard: Only route when the most recent message is from the human,
     # prevents accidental re-entry if the graph topology is ever extended
     last_msg = state["messages"][-1] if state["messages"] else None
@@ -210,9 +236,17 @@ def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
 
     # Fast keyword-based pre-routing (skips LLM call)
     last_human = _last_human_text(state["messages"])
-    fast_route = _keyword_route(last_human)
+    fast_route, log_text = _keyword_route(last_human)
     if fast_route:
-        return {"route": fast_route}
+        logger.info(
+            f"USER_ID: {user_id} | "
+            f"ROUTE: {fast_route} | "
+            f"{log_text}"
+            )
+        return {
+            "route": fast_route,
+            "current_agent": "coordinator"
+            }
 
     # Fallback: Ask the LLM to reason and route 
     # based on context and user intent
@@ -229,15 +263,30 @@ def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
     )
 
     response = llm.invoke(messages, config=config)
-    route = _parse_route(response.content)
+    route, reason = _parse_route(response.content)
 
-    user_id = config.get("configurable", {}).get("thread_id", "unknown_user")
     logger.info(
        f"USER_ID: {user_id} | "
+       f"ROUTE: {route} | "
        f"{format_agent_response(response)}"
        )
 
-    return {"route": route}
+    if route == ROUTE_ALERT:
+        # Current code triggers an alert message and terminates the conversation
+        # In reality, this can be piped to a database for monitoring of individuals
+        # that may be attempting to break the agentic AI workflow, or used to monitor
+        # potentially dangerous users
+        return {
+            "route": route,
+            "messages": [AIMessage(content=reason)],
+            "current_agent": "coordinator"
+        }
+    
+    else:
+        return {
+            "route": route,
+            "current_agent": "coordinator"
+            }
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -251,39 +300,52 @@ def _last_human_text(messages: list) -> str:
     return ""
 
 
-def _keyword_route(text: str) -> str | None:
+def _keyword_route(text: str) -> tuple | None:
     """Return a route if obvious keywords are present, else None."""
-    if any(
-        kw in text
-        for kw in ("bye", "goodbye", "thank you", "thanks", "done", "exit", "quit")
-    ):
-        return ROUTE_FINISH
+    if any(kw in text for kw in (
+        "bye", "goodbye", "thank you", "thanks", "done", "exit", "quit", "q"
+    )):
+        log_text = "Fast route to 'finish'"
+        return ROUTE_FINISH, log_text
+    
     if any(kw in text for kw in _ORDER_INVENTORY_KEYWORDS):
-        return ROUTE_ORDER_INVENTORY
+        log_text = "Fast route to 'order_inventory'"
+        return ROUTE_ORDER_INVENTORY, log_text
+    
     if any(kw in text for kw in _SALES_KEYWORDS):
-        return ROUTE_SALES
+        log_text = "Fast route to 'sales'"
+        return ROUTE_SALES, log_text
+    
     if any(kw in text for kw in _RETURNS_KEYWORDS):
-        return ROUTE_RETURNS
+        log_text = "Fast route to 'returns_refunds'"
+        return ROUTE_RETURNS, log_text
+    
     if any(kw in text for kw in _RECOMMEND_KEYWORDS):
-        return ROUTE_RECOMMEND
+        log_text = "Fast route to 'recommend'"
+        return ROUTE_RECOMMEND, log_text
+    
     if any(kw in text for kw in _SUPPORT_KEYWORDS):
-        return ROUTE_SUPPORT
-    return None
+        log_text = "Fast route to 'support'"
+        return ROUTE_SUPPORT, log_text
+    return None, None
 
 
-def _parse_route(content: str) -> str:
+def _parse_route(content: str) -> tuple:
     """Extract the route value from the LLM JSON response."""
     try:
         # Strip markdown fences if present
         clean = re.sub(r"```[a-z]*\n?", "", content).strip()
         data = json.loads(clean)
-        route = data.get("route", ROUTE_RECOMMEND)
+        route = data.get("route", "")
+        reason = data.get("reason", "")
         # route = data.get("route", ROUTE_SUPPORT)
-        if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_ORDER_INVENTORY,ROUTE_RETURNS,ROUTE_SUPPORT, ROUTE_FINISH):
-            return ROUTE_RECOMMEND
+        if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_ORDER_INVENTORY, ROUTE_RETURNS, ROUTE_SUPPORT, ROUTE_FINISH, ROUTE_ALERT):
+            return ROUTE_RECOMMEND, reason
             # return ROUTE_SUPPORT
-
-        return route
+            
+        else:
+            return route, reason
+    
     except (json.JSONDecodeError, AttributeError):
-        return ROUTE_RECOMMEND
+        return ROUTE_RECOMMEND, ""
         # return ROUTE_SUPPORT

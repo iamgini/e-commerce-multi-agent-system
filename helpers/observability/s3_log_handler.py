@@ -85,7 +85,7 @@ class AsyncS3PipeHandler(logging.handlers.QueueHandler):
         log_path = Path(log_dir)
         log_path.mkdir(parents=True, exist_ok=True)
         full_path = log_path / filename
-
+        
         self.log_queue = queue.Queue(-1)
         super().__init__(self.log_queue)
 
@@ -105,7 +105,7 @@ class AsyncS3PipeHandler(logging.handlers.QueueHandler):
 
         # Use listener to bridge the queue to the file
         self.listener = logging.handlers.QueueListener(
-            self.log_queue, 
+            self.log_queue,
             s3_handler, 
             # respect_handler_level=True
         )

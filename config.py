@@ -1,13 +1,12 @@
 import os
 
 ## Use load_dotenv for internal testing purposes
-from dotenv import load_dotenv
-load_dotenv()
-# load_dotenv(".env.local")
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # ── LLM ──────────────────────────────────────────────────────────────────────
-OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")           # Use this for internal testing
-# OPENAI_API_KEY: str = os.environ.get("OPENAI_API_KEY")    # Use this for actual deployment
+# OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")           # Use this for internal testing
+OPENAI_API_KEY: str = os.environ.get("OPENAI_API_KEY")    # Use this for actual deployment
 LLM_MODEL: str = "gpt-5-nano"                               # model used by all agents
 LLM_TEMPERATURE: float = 0.0                                # deterministic outputs
 
@@ -26,6 +25,7 @@ ROUTE_SUPPORT: str = "customer_support"
 ROUTE_ORDER_INVENTORY: str = "order_inventory"
 ROUTE_RETURNS: str = "returns_refunds"
 ROUTE_FINISH: str = "finish"
+ROUTE_ALERT: str = "alert"
 
 # ── Database ──────────────────────────────────────────────────────────────────
 # DB_DIR: str = os.path.join(os.path.dirname(__file__), "data")
@@ -36,34 +36,33 @@ ROUTE_FINISH: str = "finish"
 # CHECKPOINTER_DB_PATH: str = os.path.join(DB_DIR, "checkpoints.db")
 
 # Use this for internal testing
-MAINTENANCE_DB_DSN: str = os.getenv("MAINTENANCE_DB_DSN")
-PRODUCTS_DB_DSN: str = os.getenv("PRODUCTS_DB_DSN")
-CART_DB_DSN: str = os.getenv("CART_DB_DSN")
-ORDER_INVENTORY_DB_DSN: str = os.getenv("ORDER_INVENTORY_DB_DSN")
-RETURNS_DB_DSN: str = os.getenv("RETURNS_DB_DSN")
-CHECKPOINTER_DB_DSN = os.getenv("CHECKPOINTER_DB_DSN")
+# MAINTENANCE_DB_DSN: str = os.getenv("MAINTENANCE_DB_DSN")
+# PRODUCTS_DB_DSN: str = os.getenv("PRODUCTS_DB_DSN")
+# CART_DB_DSN: str = os.getenv("CART_DB_DSN")
+# ORDER_INVENTORY_DB_DSN: str = os.getenv("ORDER_INVENTORY_DB_DSN")
+# CHECKPOINTER_DB_DSN = os.getenv("CHECKPOINTER_DB_DSN")
 
 # Use this for actual deployment
-# MAINTENANCE_DB_DSN: str = os.environ.get("MAINTENANCE_DB_DSN")
-# PRODUCTS_DB_DSN: str = os.environ.get("PRODUCTS_DB_DSN")
-# CART_DB_DSN: str = os.environ.get("CART_DB_DSN")
-# ORDER_INVENTORY_DB_DSN: str = os.environ.get("ORDER_INVENTORY_DB_DSN")
-# CHECKPOINTER_DB_DSN = os.environ.get("CHECKPOINTER_DB_DSN")
+MAINTENANCE_DB_DSN: str = os.environ.get("MAINTENANCE_DB_DSN")
+PRODUCTS_DB_DSN: str = os.environ.get("PRODUCTS_DB_DSN")
+CART_DB_DSN: str = os.environ.get("CART_DB_DSN")
+ORDER_INVENTORY_DB_DSN: str = os.environ.get("ORDER_INVENTORY_DB_DSN")
+CHECKPOINTER_DB_DSN = os.environ.get("CHECKPOINTER_DB_DSN")
 
 # ── S3 Logging ────────────────────────────────────────────────────────────────
 # Use this for internal testing
-S3_ENDPOINT: str = os.getenv("S3_ENDPOINT")
-S3_ACCESS_KEY: str = os.getenv("S3_ACCESS_KEY")
-S3_SECRET_KEY: str = os.getenv("S3_SECRET_KEY")  
-S3_REGION: str = os.getenv("S3_REGION")
-S3_BUCKETNAME: str = os.getenv("S3_BUCKETNAME")
+# S3_ENDPOINT: str = os.getenv("S3_ENDPOINT")
+# S3_ACCESS_KEY: str = os.getenv("S3_ACCESS_KEY")
+# S3_SECRET_KEY: str = os.getenv("S3_SECRET_KEY")  
+# S3_REGION: str = os.getenv("S3_REGION")
+# S3_BUCKETNAME: str = os.getenv("S3_BUCKETNAME")
 
 # Use this for actual deployment
-# S3_ENDPOINT: str = os.environ.get("S3_ENDPOINT")
-# S3_ACCESS_KEY: str = os.environ.get("S3_ACCESS_KEY")
-# S3_SECRET_KEY: str = os.environ.get("S3_SECRET_KEY")  
-# S3_REGION: str = os.environ.get("S3_REGION")
-# S3_BUCKETNAME: str = os.environ.get("S3_BUCKETNAME")
+S3_ENDPOINT: str = os.environ.get("S3_ENDPOINT")
+S3_ACCESS_KEY: str = os.environ.get("S3_ACCESS_KEY")
+S3_SECRET_KEY: str = os.environ.get("S3_SECRET_KEY")  
+S3_REGION: str = os.environ.get("S3_REGION")
+S3_BUCKETNAME: str = os.environ.get("S3_BUCKETNAME")
 
 # ── Discount rules ────────────────────────────────────────────────────────────
 DISCOUNT_CODES: dict[str, float] = {

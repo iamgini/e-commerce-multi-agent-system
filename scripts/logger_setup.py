@@ -28,10 +28,16 @@ def initialise_logger() -> None:
     handler = AsyncS3PipeHandler(
         client_params=client_params,
         bucket_name=S3_BUCKETNAME,
+        chunk_size=100*1024,
         filename="backend.log"
         )
     
     logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    logger.propagate = True
+    
+    if logger.hasHandlers():
+        logger.handlers.clear()
     logger.addHandler(handler)
-
+   
     print("[Logger] Logging initialized.")

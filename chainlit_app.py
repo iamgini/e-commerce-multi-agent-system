@@ -10,9 +10,11 @@ Environment variables (same as the rest of the project):
 """
 
 import asyncio
+import logging
 import os
 import sys
-from functools import partial
+# from functools import partial
+# from venv import logger
 
 import chainlit as cl
 from langchain_core.messages import AIMessage, HumanMessage
@@ -21,6 +23,11 @@ from langchain_core.messages import AIMessage, HumanMessage
 sys.path.insert(0, os.path.dirname(__file__))
 
 from graph.workflow import get_graph
+from scripts.db_setup import initialise_databases
+from scripts.logger_setup import initialise_logger
+
+initialise_databases()
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -57,6 +64,10 @@ def _agent_label(result: dict) -> str:
 @cl.on_chat_start
 async def on_chat_start():
     """Called once when a user opens the chat window."""
+    global logger
+    initialise_logger()
+    logger  = logging.getLogger(__name__)
+    
     cl.user_session.set("message_history", [])
     cl.user_session.set("user_id", "user_001")
 
@@ -79,7 +90,9 @@ async def on_message(message: cl.Message):
     """Called on every user message."""
     history: list = cl.user_session.get("message_history", [])
     user_id: str = cl.user_session.get("user_id", "user_001")
-
+    
+    logger.info(message.content) 
+    
     # Append user turn
     history.append(HumanMessage(content=message.content))
 
@@ -100,9 +113,12 @@ async def on_message(message: cl.Message):
                 state_input,
                 {"configurable": {"thread_id": user_id}},
             )
+            
         except Exception as exc:
             await cl.Message(content=f"⚠️ Error: {exc}").send()
+            logger.error(f"\n[ERROR] Agent error: {exc}\n")
             return
+        
         finally:
             await step.remove()
 
@@ -115,3 +131,4 @@ async def on_message(message: cl.Message):
 
     # Send reply with agent label as author
     await cl.Message(content=reply, author=agent).send()
+    

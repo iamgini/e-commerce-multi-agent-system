@@ -25,6 +25,7 @@ from config import (
     RECOMMENDATION_NODE,
     RETURNS_REFUNDS_NODE,
     ROUTE_FINISH,
+    ROUTE_ALERT,
     ROUTE_ORDER_INVENTORY,
     ROUTE_RECOMMEND,
     ROUTE_RETURNS,
@@ -61,6 +62,8 @@ def route_from_coordinator(state: AgentState) -> str:
         return CUSTOMER_SUPPORT_NODE
     if route == ROUTE_RETURNS:
         return RETURNS_REFUNDS_NODE
+    if route in ROUTE_ALERT:
+        return END
     if route == ROUTE_FINISH:
         return END
     return RECOMMENDATION_NODE  # default

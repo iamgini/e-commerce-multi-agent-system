@@ -52,24 +52,24 @@ def run_interactive(user_id: str) -> None:
 
     graph = get_graph()
     config = _make_config(user_id)
-
+    continue_session = True
+    
     try:
-        while True:
+        while continue_session:
             try:
                 user_input = input("You: ").strip()
                 logger.info(user_input)
+
             except (EOFError, KeyboardInterrupt):
-                print("\n\nGoodbye! 👋")
                 logger.info("SESSION_TERMINATED: Interrupted by user")
                 break
 
             if not user_input:
                 continue
-            if user_input.lower() in ("quit", "exit", "q"):
-                end_message = "\nAssistant: Thank you for shopping with us! Goodbye! 👋\n"
-                print(end_message)
-                logger.info("SESSION_ENDED: Intentional quit")
-                break
+            
+            # if user_input.lower() in ("quit", "exit", "q"):
+            #     logger.info("SESSION_ENDED: Intentional quit")
+            #     break
 
             # Run one turn through the graph
             state_input = {
@@ -81,22 +81,26 @@ def run_interactive(user_id: str) -> None:
 
             try:
                 result = graph.invoke(state_input, config=config)
-                # log_result = str(result).encode('utf-8', errors='replace').decode('utf-8')
-                # logger.info(f"GRAPH_INVOKE_SUCCESS: ResultState={log_result}")
 
             except Exception as exc:
                 print("Your question seems to be lost in transit. Please try again.")
                 logger.error(f"\n[ERROR] Agent error: {exc}\n")
                 continue
-
-            # Extract and display the assistant's reply
-            reply = _extract_last_ai_text(result["messages"])
-            agent_label = result.get("current_agent", "assistant").replace("_", " ").title()
-
-            print(f"\n[{agent_label}]: {reply}\n")
-
+            
+            # Extract and display the assistant's reply     
+            if result.get("route") not in "finish":
+                reply = _extract_last_ai_text(result["messages"])
+                agent_label = result.get("current_agent", "assistant").replace("_", " ").title()
+                print(f"\n[{agent_label}]: {reply}\n")
+            
+            # Forcibly terminates the loop by checking for session continuity
+            continue_session = False if result.get("route") in ["finish", "alert"] else True
+            
     finally:
+        print("Goodbye!")
+        logger.info("SESSION_ENDED: Intentional quit by user or forcibly quit by agent")
         logging.shutdown()
+
 
 # def run_demo(user_id: str) -> None:
 #     """
