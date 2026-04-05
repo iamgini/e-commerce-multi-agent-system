@@ -11,7 +11,9 @@ TimeoutStopSec=70
 ExecStartPre=-/usr/bin/docker rm -f garage
 ExecStart=/usr/bin/docker run \
         --name=garage \
-        -v /home/shopbot/garage/garage.toml:/etc/garage.toml \
+        -e RUST_BACKTRACE=1 \
+        -e RUST_LOG=garage=info \
+        -v /home/shopbot/garage/garage.toml:/etc/garage.toml:ro \
         -v /home/shopbot/garage/meta:/var/lib/garage/meta \
         -v /home/shopbot/garage/data:/var/lib/garage/data \
         --network=garage_net \
