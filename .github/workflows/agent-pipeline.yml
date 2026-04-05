@@ -54,8 +54,8 @@ jobs:
           python-version: "3.11"
       - name: Install ruff
         run: pip install ruff
-      - name: Lint customer support agent
-        run: ruff check agent_customer_support/
+      - name: Lint agents files
+        run: ruff check agents/
 
   vulnerability-scan:
     needs: setup
