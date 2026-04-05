@@ -25,6 +25,7 @@ ROUTE_SUPPORT: str = "customer_support"
 ROUTE_ORDER_INVENTORY: str = "orders_inventory"
 ROUTE_RETURNS: str = "returns_refunds"
 ROUTE_FINISH: str = "finish"
+ROUTE_ALERT: str = "alert"
 
 # ── Database ──────────────────────────────────────────────────────────────────
 # DB_DIR: str = os.path.join(os.path.dirname(__file__), "data")

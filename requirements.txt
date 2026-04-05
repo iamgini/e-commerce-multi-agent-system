@@ -8,3 +8,4 @@ ddgs
 pydantic
 psycopg[binary]
 s3-log-handler
+chainlit

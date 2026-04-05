@@ -10,7 +10,7 @@ from agents.coordinator import coordinator_node
 
 def run_case(label: str, text: str):
     state = {"messages": [HumanMessage(content=text)]}
-    result = coordinator_node(state)
+    result = coordinator_node(state, {"configurable": {"thread_id": "user_001"}})
     print(f"{label:20} | {text}")
     print("route ->", result.get("route"))
     print("-" * 80)
