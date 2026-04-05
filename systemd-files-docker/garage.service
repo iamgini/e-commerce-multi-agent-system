@@ -1,0 +1,27 @@
+[Unit]
+Description=Docker container - garage
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+TimeoutStopSec=70
+
+ExecStartPre=-/usr/bin/docker rm -f garage
+ExecStart=/usr/bin/docker run \
+        --name=garage \
+        -e RUST_BACKTRACE=1 \
+        -e RUST_LOG=garage=info \
+        -v /home/shopbot/garage/garage.toml:/etc/garage.toml:ro \
+        -v /home/shopbot/garage/meta:/var/lib/garage/meta \
+        -v /home/shopbot/garage/data:/var/lib/garage/data \
+        --network=garage_net \
+        -expose 3900 \
+        -expose 3901 \
+        -expose 3903 \
+        docker.io/dxflrs/garage:v2.2.0
+ExecStop=/usr/bin/docker stop -t 10 garage
+
+[Install]
+WantedBy=default.target

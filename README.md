@@ -1,62 +1,21 @@
-# e-Commerce Multi-Agent System
+# ShopBot - e-Commerce Multi-Agent System
 
-Directory structure
+- [ShopBot - e-Commerce Multi-Agent System](#shopbot---e-commerce-multi-agent-system)
+  - [Directory structure](#directory-structure)
+  - [Testing main](#testing-main)
+  - [Testing coordinator](#testing-coordinator)
+  - [Agents Documentation](#agents-documentation)
+  - [Try to cover all learning from 4 modules](#try-to-cover-all-learning-from-4-modules)
+    - [Module 1 – Responsible \& Explainable AI](#module-1--responsible--explainable-ai)
+    - [Module 2 – AI \& Cybersecurity](#module-2--ai--cybersecurity)
+    - [Module 3 – Architecting Agentic AI](#module-3--architecting-agentic-ai)
+    - [Module 4 – Integration \& Deployment](#module-4--integration--deployment)
+  - [Presentation Notes and Tips](#presentation-notes-and-tips)
 
-```shell
-e-commerce_multi-agent-system/
-├── main.py                     # builds LangGraph
-├── requirements.txt
-├── README.md
-├── config.py
-│
-├── agents/
-│   ├── conversation.py
-│   ├── coordinator.py
-│   ├── customer_support.py
-│   ├── sales_recommendation.py
-│   ├── order_inventory.py
-│   └── returns_refunds.py
-│
-├── data/
-│   ├── cart.db
-│   ├── order_inventory.db
-│   ├── products.db
-│   ├── checkpointer.db
-│   └── faq.json
-│
-├── graph/
-│   └── workflow.py         ## Contains the graph map and state
-│
-├── helpers/
-│   ├── database/
-│   │   ├── db_setup.py
-│   │   ├── cart_db.py
-│   │   ├── order_inventory_db.py
-│   │   ├── product_db.py
-│   │   └── compliance.py
-│   │
-├── ├── observability/
-│   │   └── logger.py
-│   │
-│   └── policy/
-│       └── compliance.py
-│
-├── scripts/
-│   ├── db_setup.py
-│   └── seed_data.py
-│
-├── tests/
-│   ├── test_coordinator_agent_quick.py
-│   ├── test_customer_support_agent.py
-│   ├── test_order_inventory_agent_quick.py
-│   ├── test_order_inventory_state.py
-│   └── test_returns_agent_quick.py
-│
-├── tools/
-│   ├── order_inventory_tools.py
-│   ├── recommendation_tools.py
-│   └── sales_tools.py
-```
+
+## Directory structure
+
+TODO
 
 ## Testing main
 
@@ -67,7 +26,7 @@ e-commerce_multi-agent-system/
 ## Testing coordinator
 
 ```shell
-e-commerce-multi-agent-system  $  uv run python test_coordinator_agent_quick.py
+e-commerce-multi-agent-system $ uv run --python 3.12 python -m tests.test_coordinator_agent_quick
 
 Recommendation       | Can you recommend a good wireless mouse?
 route -> recommend

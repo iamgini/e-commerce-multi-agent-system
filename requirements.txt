@@ -8,3 +8,11 @@ ddgs
 pydantic
 psycopg[binary]
 s3-log-handler
+# langgraph-checkpoint-sqlite
+# openai
+# pydantic-core
+fastapi
+uvicorn[standard]
+chainlit
+# langchain-ollama - optional for local testing
+dotenvx

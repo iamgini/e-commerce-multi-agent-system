@@ -25,6 +25,7 @@ from config import (
     RECOMMENDATION_NODE,
     RETURNS_REFUNDS_NODE,
     ROUTE_FINISH,
+    ROUTE_ALERT,
     ROUTE_ORDER_INVENTORY,
     ROUTE_RECOMMEND,
     ROUTE_RETURNS,
@@ -61,6 +62,8 @@ def route_from_coordinator(state: AgentState) -> str:
         return CUSTOMER_SUPPORT_NODE
     if route == ROUTE_RETURNS:
         return RETURNS_REFUNDS_NODE
+    if route in ROUTE_ALERT:
+        return END
     if route == ROUTE_FINISH:
         return END
     return RECOMMENDATION_NODE  # default
@@ -100,6 +103,16 @@ def should_continue_returns(state: AgentState) -> str:
         return "returns_tools"
     return END
 
+def should_continue_order_inventory(state: AgentState) -> str:
+    """
+    After the order & inventory agent runs:
+    - If it emitted tool calls  → go to the order inventory tool node.
+    - Otherwise                 → END and return response to user.
+    """
+    last = state["messages"][-1]
+    if isinstance(last, AIMessage) and last.tool_calls:
+        return "order_inventory_tools"
+    return END
 
 # ── Graph ──────────────────────────────────────────────────────────────────────
 
@@ -162,7 +175,7 @@ def build_graph(checkpointer: PostgresSaver) -> StateGraph:
 
     builder.add_conditional_edges(
         ORDER_INVENTORY_NODE,
-        should_continue_sales,
+        should_continue_order_inventory,
         {
             "order_inventory_tools": "order_inventory_tools",
             END: END,

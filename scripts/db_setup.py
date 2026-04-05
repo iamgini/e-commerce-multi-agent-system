@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
 import psycopg
 from psycopg import errors
 from langgraph.checkpoint.postgres import PostgresSaver
@@ -6,7 +10,8 @@ from config import (
     MAINTENANCE_DB_DSN,
     CART_DB_DSN,
     CHECKPOINTER_DB_DSN,
-    # ORDER_INVENTORY_DB_DSN,
+    ORDER_INVENTORY_DB_DSN,
+    RETURNS_DB_DSN,
     PRODUCTS_DB_DSN,
 )
 from scripts.seed_data import SEED_CATEGORIES, SEED_PRODUCTS
@@ -105,135 +110,145 @@ def _create_cart_schema(conn: psycopg.Connection) -> None:
         )
 
 
-# def _create_order_schema(conn: psycopg.Connection) -> None:
-#     with conn.cursor() as cur:
-#         cur.execute("""
-#             CREATE TABLE IF NOT EXISTS inventory_products (
-#                 id            SERIAL PRIMARY KEY,
-#                 sku           TEXT UNIQUE,
-#                 name          TEXT NOT NULL,
-#                 description   TEXT DEFAULT '',
-#                 stock         INTEGER NOT NULL DEFAULT 0,
-#                 reorder_level INTEGER NOT NULL DEFAULT 10,
-#                 unit_cost     REAL DEFAULT 0.0,
-#                 unit_price    REAL DEFAULT 0.0,
-#                 updated_at    TIMESTAMP DEFAULT NOW()
-#             );
+def _create_order_schema(conn: psycopg.Connection) -> None:
+    with conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS inventory_products (
+                id            SERIAL PRIMARY KEY,
+                sku           TEXT UNIQUE,
+                name          TEXT NOT NULL,
+                description   TEXT DEFAULT '',
+                stock         INTEGER NOT NULL DEFAULT 0,
+                reorder_level INTEGER NOT NULL DEFAULT 10,
+                unit_cost     REAL DEFAULT 0.0,
+                unit_price    REAL DEFAULT 0.0,
+                updated_at    TIMESTAMP DEFAULT NOW()
+            );
 
-#             CREATE TABLE IF NOT EXISTS customer_orders (
-#                 id           SERIAL PRIMARY KEY,
-#                 user_id      TEXT NOT NULL,
-#                 status       TEXT NOT NULL DEFAULT 'confirmed',
-#                 total_amount REAL NOT NULL DEFAULT 0.0,
-#                 created_at   TIMESTAMP DEFAULT NOW()
-#             );
+            CREATE TABLE IF NOT EXISTS customer_orders (
+                id           SERIAL PRIMARY KEY,
+                user_id      TEXT NOT NULL,
+                status       TEXT NOT NULL DEFAULT 'confirmed',
+                total_amount REAL NOT NULL DEFAULT 0.0,
+                created_at   TIMESTAMP DEFAULT NOW()
+            );
 
-#             CREATE TABLE IF NOT EXISTS customer_order_items (
-#                 id            SERIAL PRIMARY KEY,
-#                 order_id      INTEGER NOT NULL REFERENCES customer_orders(id),
-#                 product_id    INTEGER NOT NULL REFERENCES inventory_products(id),
-#                 product_name  TEXT NOT NULL,
-#                 quantity      INTEGER NOT NULL,
-#                 unit_price    REAL NOT NULL
-#             );
+            CREATE TABLE IF NOT EXISTS customer_order_items (
+                id            SERIAL PRIMARY KEY,
+                order_id      INTEGER NOT NULL REFERENCES customer_orders(id),
+                product_id    INTEGER NOT NULL REFERENCES inventory_products(id),
+                product_name  TEXT NOT NULL,
+                quantity      INTEGER NOT NULL,
+                unit_price    REAL NOT NULL
+            );
 
-#             CREATE TABLE IF NOT EXISTS purchase_orders (
-#                 id            SERIAL PRIMARY KEY,
-#                 supplier_name TEXT NOT NULL,
-#                 status        TEXT NOT NULL DEFAULT 'draft',
-#                 expected_date TEXT,
-#                 notes         TEXT DEFAULT '',
-#                 created_at    TIMESTAMP DEFAULT NOW(),
-#                 updated_at    TIMESTAMP DEFAULT NOW()
-#             );
+            CREATE TABLE IF NOT EXISTS purchase_orders (
+                id            SERIAL PRIMARY KEY,
+                supplier_name TEXT NOT NULL,
+                status        TEXT NOT NULL DEFAULT 'draft',
+                expected_date TEXT,
+                notes         TEXT DEFAULT '',
+                created_at    TIMESTAMP DEFAULT NOW(),
+                updated_at    TIMESTAMP DEFAULT NOW()
+            );
 
-#             CREATE TABLE IF NOT EXISTS purchase_order_items (
-#                 id                SERIAL PRIMARY KEY,
-#                 purchase_order_id INTEGER NOT NULL REFERENCES purchase_orders(id),
-#                 product_id        INTEGER NOT NULL REFERENCES inventory_products(id),
-#                 product_name      TEXT NOT NULL,
-#                 quantity          INTEGER NOT NULL,
-#                 unit_cost         REAL NOT NULL
-#             );
+            CREATE TABLE IF NOT EXISTS purchase_order_items (
+                id                SERIAL PRIMARY KEY,
+                purchase_order_id INTEGER NOT NULL REFERENCES purchase_orders(id),
+                product_id        INTEGER NOT NULL REFERENCES inventory_products(id),
+                product_name      TEXT NOT NULL,
+                quantity          INTEGER NOT NULL,
+                unit_cost         REAL NOT NULL
+            );
 
-#             CREATE TABLE IF NOT EXISTS supply_orders (
-#                 id            SERIAL PRIMARY KEY,
-#                 supplier_name TEXT NOT NULL,
-#                 status        TEXT NOT NULL DEFAULT 'draft',
-#                 reference     TEXT DEFAULT '',
-#                 notes         TEXT DEFAULT '',
-#                 created_at    TIMESTAMP DEFAULT NOW(),
-#                 updated_at    TIMESTAMP DEFAULT NOW()
-#             );
+            CREATE TABLE IF NOT EXISTS supply_orders (
+                id            SERIAL PRIMARY KEY,
+                supplier_name TEXT NOT NULL,
+                status        TEXT NOT NULL DEFAULT 'draft',
+                reference     TEXT DEFAULT '',
+                notes         TEXT DEFAULT '',
+                created_at    TIMESTAMP DEFAULT NOW(),
+                updated_at    TIMESTAMP DEFAULT NOW()
+            );
 
-#             CREATE TABLE IF NOT EXISTS supply_order_items (
-#                 id              SERIAL PRIMARY KEY,
-#                 supply_order_id INTEGER NOT NULL REFERENCES supply_orders(id),
-#                 product_id      INTEGER NOT NULL REFERENCES inventory_products(id),
-#                 product_name    TEXT NOT NULL,
-#                 quantity        INTEGER NOT NULL
-#             );
+            CREATE TABLE IF NOT EXISTS supply_order_items (
+                id              SERIAL PRIMARY KEY,
+                supply_order_id INTEGER NOT NULL REFERENCES supply_orders(id),
+                product_id      INTEGER NOT NULL REFERENCES inventory_products(id),
+                product_name    TEXT NOT NULL,
+                quantity        INTEGER NOT NULL
+            );
 
-#             CREATE TABLE IF NOT EXISTS inventory_movements (
-#                 id             SERIAL PRIMARY KEY,
-#                 product_id     INTEGER NOT NULL REFERENCES inventory_products(id),
-#                 movement_type  TEXT NOT NULL,
-#                 quantity       INTEGER NOT NULL,
-#                 reference_type TEXT DEFAULT '',
-#                 reference_id   INTEGER,
-#                 note           TEXT DEFAULT '',
-#                 created_at     TIMESTAMP DEFAULT NOW()
-#             );
-#         """
-#         )
+            CREATE TABLE IF NOT EXISTS inventory_movements (
+                id             SERIAL PRIMARY KEY,
+                product_id     INTEGER NOT NULL REFERENCES inventory_products(id),
+                movement_type  TEXT NOT NULL,
+                quantity       INTEGER NOT NULL,
+                reference_type TEXT DEFAULT '',
+                reference_id   INTEGER,
+                note           TEXT DEFAULT '',
+                created_at     TIMESTAMP DEFAULT NOW()
+            );
+        """
+        )
 
 
-# def _seed_demo_data(conn: psycopg.Connection) -> None:
-#     with conn.cursor() as cur:
-#         cur.execute("SELECT COUNT(*) FROM inventory_products")
-#         if cur.fetchone()[0] > 0:
-#             return  # already seeded
+def _seed_demo_data(conn: psycopg.Connection) -> None:
+    with conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) FROM inventory_products")
+        if cur.fetchone()[0] > 0:
+            return  # already seeded
 
-#         cur.executemany(
-#             """
-#             INSERT INTO inventory_products
-#                 (sku, name, description, stock, reorder_level, unit_cost, unit_price)
-#             VALUES (%s, %s, %s, %s, %s, %s, %s)
-#             """,
-#             [
-#                 ("LAP-001", "14-inch Laptop", "Mid-range productivity laptop", 25, 8, 550.0, 899.0),
-#                 ("MOU-001", "Wireless Mouse", "Bluetooth mouse", 80, 20, 12.0, 29.99),
-#                 ("KEY-001", "Mechanical Keyboard", "Backlit keyboard", 40, 10, 35.0, 89.99),
-#                 ("MON-001", "27-inch Monitor", "QHD display", 18, 6, 170.0, 299.99),
-#             ],
-#         )
+        cur.executemany(
+            """
+            INSERT INTO inventory_products
+                (sku, name, description, stock, reorder_level, unit_cost, unit_price)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """,
+            [
+                ("LAP-001", "14-inch Laptop", "Mid-range productivity laptop", 25, 8, 550.0, 899.0),
+                ("MOU-001", "Wireless Mouse", "Bluetooth mouse", 80, 20, 12.0, 29.99),
+                ("KEY-001", "Mechanical Keyboard", "Backlit keyboard", 40, 10, 35.0, 89.99),
+                ("MON-001", "27-inch Monitor", "QHD display", 18, 6, 170.0, 299.99),
+            ],
+        )
 
-#         cur.execute(
-#             "INSERT INTO customer_orders (user_id, status, total_amount) VALUES (%s, %s, %s)",
-#             ("user_123", "delivered", 59.98),
-#         )
+        #cur.execute(
+        #    "INSERT INTO customer_orders (user_id, status, total_amount) VALUES (%s, %s, %s)",
+        #    ("user_123", "delivered", 59.98),
+        #)
     
-#         order_id = cur.execute("SELECT last_insert_rowid()").fetchone()[0]
+        #order_id = cur.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+        cur.execute(
+            """
+            INSERT INTO customer_orders (user_id, status, total_amount)
+            VALUES (%s, %s, %s)
+            RETURNING id
+            """,
+            ("user_123", "delivered", 59.98),
+        )
+        order_id = cur.fetchone()[0]
     
-#         cur.executemany(
-#             """
-#             INSERT INTO customer_order_items
-#                 (order_id, product_id, product_name, quantity, unit_price)
-#             VALUES (%s, %s, %s, %s, %s)
-#             """,
-#             [
-#                 (order_id, 2, "Wireless Mouse", 2, 29.99),
-#             ],
-#         )
+        cur.executemany(
+            """
+            INSERT INTO customer_order_items
+                (order_id, product_id, product_name, quantity, unit_price)
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            [
+                (order_id, 2, "Wireless Mouse", 2, 29.99),
+            ],
+        )
     
-#         cur.execute(
-#             """
-#             INSERT INTO inventory_movements
-#                 (product_id, movement_type, quantity, reference_type, reference_id, note)
-#             VALUES (%s, 'sale_out', %s, 'customer_order', %s, %s)
-#             """,
-#             (2, -2, order_id, "Seed demo sale"),
-#         )
+        cur.execute(
+            """
+            INSERT INTO inventory_movements
+                (product_id, movement_type, quantity, reference_type, reference_id, note)
+            VALUES (%s, 'sale_out', %s, 'customer_order', %s, %s)
+            """,
+            (2, -2, order_id, "Seed demo sale"),
+        )
 
 
 def seed_products(conn: psycopg.Connection) -> None:
@@ -259,6 +274,22 @@ def seed_products(conn: psycopg.Connection) -> None:
             """,
             SEED_PRODUCTS,
         )
+        
+def _create_returns_schema(conn: psycopg.Connection) -> None:
+    """Create returns table in PostgreSQL."""
+    with conn.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS returns (
+                id          SERIAL PRIMARY KEY,
+                order_id    TEXT NOT NULL,
+                user_id     TEXT NOT NULL,
+                reason      TEXT,
+                status      TEXT DEFAULT 'created',
+                created_at  TIMESTAMP DEFAULT NOW()
+            );
+        """)
+        conn.commit()
+
 
 
 # ── Entrypoint in main.py ──────────────────────────────────────────────────────
@@ -299,12 +330,17 @@ def initialise_databases() -> None:
         TARGET_DB = "cart_db"
         _create_cart_schema(conn)
         print(f"[DB] Cart database ready → {TARGET_DB}")
+    
+    with psycopg.connect(RETURNS_DB_DSN) as conn:
+        TARGET_DB = "returns_db"
+        _create_returns_schema(conn)
+        print(f"[DB] Returns database ready → {TARGET_DB}")
 
-    # with psycopg.connect(ORDER_INVENTORY_DB_DSN) as conn:
-    #     TARGET_DB = "order_inventory_db"
-    #     _create_order_schema(conn)
-    #     _seed_demo_data(conn)
-    #     print(f"[DB] Order & inventory database ready → {TARGET_DB}")
+    with psycopg.connect(ORDER_INVENTORY_DB_DSN) as conn:
+        TARGET_DB = "order_inventory_db"
+        _create_order_schema(conn)
+        _seed_demo_data(conn)
+        print(f"[DB] Order & inventory database ready → {TARGET_DB}")
 
 if __name__ == "__main__":
     initialise_databases()

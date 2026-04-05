@@ -1,0 +1,23 @@
+[Unit]
+Description=Docker container - garage-webui
+Wants=network-online.target
+After=network-online.target docker.service garage.service
+Requires=docker.service garage.service
+
+[Service]
+Restart=always
+TimeoutStopSec=70
+
+ExecStartPre=-/usr/bin/docker rm -f garage-webui
+ExecStart=/usr/bin/docker run \
+        --name=garage-webui \
+        -e API_BASE_URL=http://garage:4903 \
+        -e S3_ENDPOINT_URL=http://garage:4900 \
+        -v /home/shopbot/garage/garage.toml:/etc/garage.toml \
+        --network=garage_net \
+        -p 4909:3909 \
+        docker.io/khairul169/garage-webui:latest
+ExecStop=/usr/bin/docker stop -t 10 garage-webui
+
+[Install]
+WantedBy=default.target

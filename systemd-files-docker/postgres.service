@@ -1,0 +1,25 @@
+[Unit]
+Description=Docker container - postgres
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+TimeoutStopSec=70
+
+ExecStartPre=-/usr/bin/docker rm -f postgres
+ExecStart=/usr/bin/docker run \
+        --name=postgres \
+        -e POSTGRES_USER=postgres \
+        -e POSTGRES_PASSWORD=xxx \
+        -e POSTGRES_DB=postgres \
+        -v /home/shopbot/postgres/data:/var/lib/postgresql \
+        --network=pg_net \
+        --expose 5432 \
+        --shm-size 128mb \
+        docker.io/library/postgres:18-alpine
+ExecStop=/usr/bin/docker stop -t 10 postgres
+
+[Install]
+WantedBy=default.target
