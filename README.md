@@ -1,62 +1,8 @@
-# e-Commerce Multi-Agent System
+# ShopBot - e-Commerce Multi-Agent System
 
-Directory structure
+## Directory structure
 
-```shell
-e-commerce_multi-agent-system/
-├── main.py                     # builds LangGraph
-├── requirements.txt
-├── README.md
-├── config.py
-│
-├── agents/
-│   ├── conversation.py
-│   ├── coordinator.py
-│   ├── customer_support.py
-│   ├── sales_recommendation.py
-│   ├── order_inventory.py
-│   └── returns_refunds.py
-│
-├── data/
-│   ├── cart.db
-│   ├── order_inventory.db
-│   ├── products.db
-│   ├── checkpointer.db
-│   └── faq.json
-│
-├── graph/
-│   └── workflow.py         ## Contains the graph map and state
-│
-├── helpers/
-│   ├── database/
-│   │   ├── db_setup.py
-│   │   ├── cart_db.py
-│   │   ├── order_inventory_db.py
-│   │   ├── product_db.py
-│   │   └── compliance.py
-│   │
-├── ├── observability/
-│   │   └── logger.py
-│   │
-│   └── policy/
-│       └── compliance.py
-│
-├── scripts/
-│   ├── db_setup.py
-│   └── seed_data.py
-│
-├── tests/
-│   ├── test_coordinator_agent_quick.py
-│   ├── test_customer_support_agent.py
-│   ├── test_order_inventory_agent_quick.py
-│   ├── test_order_inventory_state.py
-│   └── test_returns_agent_quick.py
-│
-├── tools/
-│   ├── order_inventory_tools.py
-│   ├── recommendation_tools.py
-│   └── sales_tools.py
-```
+TODO
 
 ## Testing main
 
