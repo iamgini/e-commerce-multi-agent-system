@@ -71,7 +71,7 @@ jobs:
         run: pip install pip-audit
 
       - name: Scan dependencies for vulnerabilities
-        run: pip-audit -r agent_customer_support/requirements.txt
+        run: pip-audit -r requirements.txt
 
   build-and-push:
     needs: [secret-detection, lint, vulnerability-scan]  # only build if all checks pass
