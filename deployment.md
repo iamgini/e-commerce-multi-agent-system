@@ -19,6 +19,7 @@ EC2 instance
   - [Setup systemd for containers](#setup-systemd-for-containers)
     - [Docker](#docker)
     - [Podman](#podman)
+    - [Reload systemd and enable all](#reload-systemd-and-enable-all)
   - [Appendix](#appendix)
     - [Add user public keys](#add-user-public-keys)
 
@@ -230,8 +231,11 @@ podman generate systemd --name postgres --restart-policy=always --new > ~/.confi
 podman generate systemd --name adminer --restart-policy=always --new > ~/.config/systemd/user/adminer.service
 podman generate systemd --name garage --restart-policy=always --new > ~/.config/systemd/user/garage.service
 podman generate systemd --name garage-webui --restart-policy=always --new > ~/.config/systemd/user/garage-webui.service
+```
 
-# Reload systemd and enable all
+### Reload systemd and enable all
+
+```shell
 systemctl --user daemon-reload
 systemctl --user enable postgres adminer garage garage-webui
 
