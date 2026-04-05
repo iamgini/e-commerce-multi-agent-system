@@ -14,8 +14,11 @@ EC2 instance
     - [Start or Stop EC2](#start-or-stop-ec2)
   - [Cloudflare DNS](#cloudflare-dns)
   - [Garage (S3) and PostgreSQL](#garage-s3-and-postgresql)
-    - [Accessing UI from localhost](#accessing-ui-from-localhost)
-  - [Add user public keys](#add-user-public-keys)
+    - [Accessing component UI from localhost](#accessing-component-ui-from-localhost)
+  - [Run Shopbot container](#run-shopbot-container)
+  - [Setup systemd for containers](#setup-systemd-for-containers)
+  - [Appendix](#appendix)
+    - [Add user public keys](#add-user-public-keys)
 
 ## Security Group
 
@@ -178,7 +181,7 @@ TTL:     Auto
 
 ## Garage (S3) and PostgreSQL
 
-### Accessing UI from localhost
+### Accessing component UI from localhost
 
 Keep that terminal open — tunnels stay alive as long as the SSH session is.
 
@@ -196,10 +199,52 @@ http://localhost:4900 → garage S3 API
 http://localhost:6432 → postgres
 http://localhost:8081 → your other service
 
-## Add user public keys
+## Run Shopbot container
+
+```shell
+$ podman run -d \
+  --name shopbot \
+  --env-file /home/ec2-user/.env \
+  --network host \
+  -p 8001:8001 \
+  quay.io/iamgini/shopbot:latest
+```
+
+## Setup systemd for containers
+
+```shell
+# Create user systemd directory
+mkdir -p ~/.config/systemd/user
+
+# Generate unit for each container
+podman generate systemd --name postgres --restart-policy=always --new > ~/.config/systemd/user/postgres.service
+podman generate systemd --name adminer --restart-policy=always --new > ~/.config/systemd/user/adminer.service
+podman generate systemd --name garage --restart-policy=always --new > ~/.config/systemd/user/garage.service
+podman generate systemd --name garage-webui --restart-policy=always --new > ~/.config/systemd/user/garage-webui.service
+
+# Reload systemd and enable all
+systemctl --user daemon-reload
+systemctl --user enable postgres adminer garage garage-webui
+
+# Enable lingering so services start on boot without login
+sudo loginctl enable-linger shopbot
+
+# Run container once manually, then generate systemd unit
+podman generate systemd --name shopbot --restart-policy=always --new > \
+  /etc/systemd/system/shopbot.service
+
+systemctl daemon-reload
+systemctl enable --now shopbot
+```
+
+
+## Appendix
+
+### Add user public keys
 
 ```shell
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDfB0xvz8rrxzXzf1kdG4wdtQPLQDEIAtAwLDfkPO53Lbovn1+jkkSsRKue6EHzOrJWN7Gwf8CR/iGhpbG1DMCMbU18XSEtLczA7egbXvzzmlS+GxUGMOYk+6aXfSYwiMBoSw+0zD15JDWVSbxQ7L/ZBucNscnTPOCS1kLk4GdJM6ohsBXy8uco+b9rb+lCqCmDtad3/2v3uqbDSNjSFBbRP4EZOgozxdWDtXEioRU7Nd6kNkQUFetfM5ZBgmglOC/1AYVRXlT3+LZ3U51UtbR6/VmZWOaxVnv6EZjuQTBNOmvrrxOnJjkKKitZROt3nEAl/aDsd8ZdaDXQvqOuY11DMk2LdnWzsiUPI9FyWzXaaERQfBnEuMRyIJKDsu+70zhpylQdOssr2TlfIFzJZZXfkmD6gNXhVrnL2nVrPzkvy+1udmu9KSmTaQKeQaqzJ//CNM716t79Jl7Il6qimLY4sHHhDF/iK+jSEhaadxglYZ1A6F+wYf4c54LOvNhYtZn5c2YgMT5c5it2c4POMbY4g2/pfIgfnc42h3K/n12R6RDCdoGs4eAmEnpy8/YnX5jmLra8jzz38GPQudH3Ex3lQ9NGXhmq4YoKBNVQEUqEd6yINr1fhIYN5xkDGmBREg7j/NHSvvVEEWkDOG784tKmwaIfDG178/iCjnUjkVq8NQ== felic yong ting rui@DESKTOP-E2JTOO3
 
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPwaRNffYGLoaRCuxpIAFCUxEPwbIM+qZc5puRa8IFAi betneoh@gmail.com
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDXR1cqqisQZY4WbaBUjY3lXXSUq/8xmGP6H5MMEnXwu vidyalakshmi03@gmail.com
 ```
