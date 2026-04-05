@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Dict
+# from typing import Dict
 
 # Logger
 from helpers.observability.logger import log_event
@@ -30,25 +30,26 @@ else:
 # Load FAQ Knowledge Base
 # ==========================================================
 
-def load_faq() -> str:
-    faq_path = Path("data/faq.json")
+# def load_faq() -> str:
+#     faq_path = Path("data/faq.json")
 
-    if not faq_path.exists():
-        raise FileNotFoundError("FAQ file not found at data/faq.json")
+#     if not faq_path.exists():
+#         raise FileNotFoundError("FAQ file not found at data/faq.json")
 
-    try:
-        with open(faq_path, "r") as f:
-            faq_data = json.load(f)
-    except json.JSONDecodeError:
-        raise ValueError("faq.json is not valid JSON.")
+#     try:
+#         with open(faq_path, "r") as f:
+#             faq_data = json.load(f)
+#     except json.JSONDecodeError:
+#         raise ValueError("faq.json is not valid JSON.")
 
-    formatted = ""
-    for item in faq_data:
-        formatted += f"Q: {item['question']}\n"
-        formatted += f"A: {item['answer']}\n\n"
+#     formatted = ""
+#     for item in faq_data:
+#         formatted += f"Q: {item['question']}\n"
+#         formatted += f"A: {item['answer']}\n\n"
 
-    return formatted
+#     return formatted
 
+from tools.customer_support_tools import search_faq
 
 # ==========================================================
 # Responsible Prompt Design (Module 1)
@@ -116,8 +117,10 @@ def customer_support_agent(state: dict) -> dict:
     else:
         query = ""
 
-    faq_context = load_faq()
+    # faq_context = load_faq()
+    faq_context = search_faq.invoke(query)
     prompt = build_prompt(query=query, faq_context=faq_context)
+
     result = llm.invoke(prompt)
     if hasattr(result, "content"):
         result = result.content
@@ -135,17 +138,6 @@ def customer_support_agent(state: dict) -> dict:
 
     log_event(f"Support Response Generated | Escalate={state.get('escalate', False)}")
 
-    # When called from LangGraph (messages-based state)
-    if "messages" in state:
-        from langchain_core.messages import AIMessage
-        reply = "I'm sorry, I don't have that information. Let me connect you with a human agent." \
-            if state.get("escalate") else state.get("response", "")
-        return {
-            "messages": [AIMessage(content=reply)],
-            "current_agent": "customer_support_agent",
-        }
-
-    # When called directly from test file
     # When called from LangGraph (messages-based state)
     if "messages" in state:
         from langchain_core.messages import AIMessage
