@@ -133,7 +133,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: DOTENV_PRIVATE_KEY_PRODUCTION,OPENAI_API_KEY        # ← pass to remote shell
+          envs: DOTENV_PRIVATE_KEY_CI,OPENAI_API_KEY        # ← pass to remote shell
           script: |
             IMAGE=quay.io/iamgini/shopbot:${{ needs.build-and-push.outputs.image_tag }}
 
@@ -146,9 +146,9 @@ jobs:
               --network pg_net \
               --network garage_net \
               -p 8001:8001 \
-              -e DOTENV_PRIVATE_KEY_PRODUCTION=$DOTENV_PRIVATE_KEY_PRODUCTION \
+              -e DOTENV_PRIVATE_KEY_CI=$DOTENV_PRIVATE_KEY_CI \
               -e OPENAI_API_KEY=$OPENAI_API_KEY \
               $IMAGE
         env:
-          DOTENV_PRIVATE_KEY_PRODUCTION: ${{ secrets.DOTENV_PRIVATE_KEY_PRODUCTION }}
+          DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

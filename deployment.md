@@ -235,8 +235,7 @@ docker run -d \
   -p 8001:8001 \
   -e DOTENV_PRIVATE_KEY_CI=$DOTENV_PRIVATE_KEY_CI \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  quay.io/iamgini/shopbot:3af3bd22114bd33b06e4dfe4c37c3fec8b18cc5f
-
+  quay.io/iamgini/shopbot:3f33d28c8414533fe6a30b013591cf842fd7b9d2
 
 ```
 
