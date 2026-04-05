@@ -30,7 +30,7 @@ networks:
   pg_net:
     name: pg_net
     driver: bridge
-    ipam:
-      config:
-        - subnet: xxx.xxx.xx.xx/xx  # to define
-          gateway: xxx.xxx.xx.xx    # to define
+    # ipam:
+    #   config:
+    #     - subnet: xxx.xxx.xx.xx/xx  # to define
+    #       gateway: xxx.xxx.xx.xx    # to define

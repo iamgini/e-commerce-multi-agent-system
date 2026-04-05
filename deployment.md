@@ -16,9 +16,11 @@ EC2 instance
   - [Garage (S3) and PostgreSQL](#garage-s3-and-postgresql)
     - [Accessing component UI from localhost](#accessing-component-ui-from-localhost)
   - [Run Shopbot container](#run-shopbot-container)
-  - [Setup systemd for containers](#setup-systemd-for-containers)
     - [Docker](#docker)
     - [Podman](#podman)
+  - [Setup systemd for containers](#setup-systemd-for-containers)
+    - [Docker](#docker-1)
+    - [Podman](#podman-1)
     - [Reload systemd and enable all](#reload-systemd-and-enable-all)
   - [Appendix](#appendix)
     - [Add user public keys](#add-user-public-keys)
@@ -126,7 +128,7 @@ aws ec2 authorize-security-group-ingress \
 ```shell
 # Amazon Linux 2023
 sudo dnf install -y podman podman-compose
-sudo dnf install nginxnginx
+sudo dnf install nginx
 
 python -m pip install podman-compose
 ```
@@ -154,6 +156,8 @@ sudo chmod 750 /etc/nginx/certs/
 
 sudo semanage fcontext -a -t cert_t "/etc/nginx/certs(/.*)?"
 sudo restorecon -Rv /etc/nginx/certs/
+
+
 ```
 
 ### Start or Stop EC2
@@ -197,17 +201,40 @@ ssh -L 4900:localhost:4900 \
     -L 8081:localhost:8081 \
     ec2-user@47.130.15.25
 ```
-http://localhost:4909 → garage webui
-http://localhost:4900 → garage S3 API
-http://localhost:6432 → postgres
-http://localhost:8081 → your other service
+- http://localhost:4909 → garage webui
+- http://localhost:4900 → garage S3 API
+- http://localhost:6432 → postgres
+- http://localhost:8081 → your other service
 
 ## Run Shopbot container
 
+### Docker
+
+```shell
+$ docker run -d \
+  --name shopbot \
+  --network pg_net \
+  --network garage_net \
+  -p 8001:8001 \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  quay.io/iamgini/shopbot:latest
+
+docker run -d \
+  --name shopbot \
+  --network pg_net \
+  --network garage_net \
+  -p 8001:8001 \
+  -e DOTENV_PRIVATE_KEY_PRODUCTION=$DOTENV_PRIVATE_KEY_PRODUCTION \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  quay.io/iamgini/shopbot:latest
+
+```
+
+### Podman
 ```shell
 $ podman run -d \
   --name shopbot \
-  --env-file /home/ec2-user/.env \
+  --env-file /home/shopbot/.env \
   --network host \
   -p 8001:8001 \
   quay.io/iamgini/shopbot:latest
