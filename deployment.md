@@ -238,8 +238,6 @@ docker run -d \
   quay.io/iamgini/shopbot:5af7e9a8b6835022b491ed1de2c73c089a385955
 
 
-
-
 ```
 
 ### Podman
