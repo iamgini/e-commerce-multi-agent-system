@@ -226,9 +226,9 @@ def _seed_demo_data(conn: psycopg.Connection) -> None:
             VALUES (%s, %s, %s)
             RETURNING id
             """,
-    ("user_123", "delivered", 59.98),
-)
-order_id = cur.fetchone()[0]
+            ("user_123", "delivered", 59.98),
+        )
+        order_id = cur.fetchone()[0]
     
         cur.executemany(
             """
