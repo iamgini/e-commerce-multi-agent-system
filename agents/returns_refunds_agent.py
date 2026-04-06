@@ -1,15 +1,17 @@
 import os
 import sys
-
+import logging
 from langchain_core.messages import SystemMessage, AIMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
+from helpers.observability.log_formatting import format_agent_response
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from config import LLM_MODEL, LLM_TEMPERATURE, OPENAI_API_KEY
 from tools.returns_tools import RETURNS_TOOLS
 
+logger = logging.getLogger(__name__)
 # ── System prompt ──────────────────────────────────────────────────────────────
 
 RETURNS_SYSTEM_PROMPT = """You are a Returns & Refunds Agent for an e-commerce platform.
@@ -78,6 +80,12 @@ def returns_refunds_agent_node(state: dict, config: RunnableConfig = None) -> di
     # Prepend the system prompt so the LLM always has its persona
     messages = [SystemMessage(content=RETURNS_SYSTEM_PROMPT)] + state["messages"]
     response = llm_with_tools.invoke(messages, config=config)
+    
+    user_id = config.get("configurable", {}).get("thread_id", "unknown_user")
+    logger.info(
+       f"USER_ID: {user_id} | "
+       f"{format_agent_response(response)}"
+    )
 
     return {
         "messages": [response],

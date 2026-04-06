@@ -108,21 +108,47 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && vars.EC2_READY == 'true'
+    if: github.ref == 'refs/heads/main' # && vars.EC2_READY == 'true'
     steps:
+      # - name: Deploy to EC2
+      #   uses: appleboy/ssh-action@v1
+      #   with:
+      #     host: ${{ secrets.EC2_HOST }}
+      #     username: ec2-user
+      #     key: ${{ secrets.EC2_SSH_KEY }}
+      #     script: |
+      #       podman pull quay.io/iamgini/shopbot:latest
+      #       podman stop shopbot || true
+      #       podman rm shopbot || true
+      #       podman run -d \
+      #         --name shopbot \
+      #         --env-file /home/ec2-user/.env \
+      #         --network host \
+      #         -p 8001:8001 \
+      #         quay.io/iamgini/shopbot:latest
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DOTENV_PRIVATE_KEY_CI,OPENAI_API_KEY        # ← pass to remote shell
           script: |
-            podman pull quay.io/iamgini/shopbot:latest
-            podman stop shopbot || true
-            podman rm shopbot || true
-            podman run -d \
+            IMAGE=quay.io/iamgini/shopbot:${{ needs.build-and-push.outputs.image_tag }}
+
+            docker pull $IMAGE
+            docker stop shopbot || true
+            docker rm shopbot || true
+
+            docker run -d \
               --name shopbot \
-              --env-file /home/ec2-user/.env \
-              --network host \
+              --network pg_net \
+              --network garage_net \
               -p 8001:8001 \
-              quay.io/iamgini/shopbot:latest
+              -e DOTENV_PRIVATE_KEY_CI=$DOTENV_PRIVATE_KEY_CI \
+              -e OPENAI_API_KEY=$OPENAI_API_KEY \
+              $IMAGE
+        env:
+          DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
