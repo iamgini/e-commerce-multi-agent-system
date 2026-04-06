@@ -1,10 +1,16 @@
 import json
 import os
 import sys
-
+from typing import Annotated
+from langchain_core.runnables import RunnableConfig
+from langgraph.prebuilt import InjectedState
 from langchain_core.tools import tool
+import logging
+from helpers.observability.log_formatting import tool_tracing
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+logger = logging.getLogger(__name__)
 
 try:
     from helpers.database import returns_db
@@ -14,7 +20,8 @@ except ImportError:
 
 
 @tool
-def check_return_eligibility(order_id: str, days_old: int) -> str:
+@tool_tracing
+def check_return_eligibility(order_id: str, days_old: int,config: RunnableConfig) -> str:
     """Check if order is within 30-day return window"""
     if USE_DB:
         result = returns_db.check_eligibility(order_id, days_old)
@@ -30,10 +37,16 @@ def check_return_eligibility(order_id: str, days_old: int) -> str:
 
 
 @tool
-def create_return_request(order_id: str, reason: str) -> str:
+@tool_tracing
+def create_return_request(
+    config: RunnableConfig,
+    user_id: Annotated[str, InjectedState("user_id")],
+    order_id: str,
+    reason: str,
+) -> str:
     """Create a return request"""
     if USE_DB:
-        result = returns_db.create_return(order_id, "test_user", reason)
+        result = returns_db.create_return(order_id, user_id, reason)
     else:
         result = {
             "return_id": f"RET-{order_id}",
@@ -44,7 +57,8 @@ def create_return_request(order_id: str, reason: str) -> str:
 
 
 @tool
-def get_return_status(return_id: str) -> str:
+@tool_tracing
+def get_return_status(return_id: str,config: RunnableConfig) -> str:
     """Get return status"""
     if USE_DB:
         numeric_id = return_id.replace("RET-", "") if return_id.startswith("RET-") else return_id
@@ -59,27 +73,8 @@ def get_return_status(return_id: str) -> str:
 
 
 @tool
-def get_refund_status(order_id: str) -> str:
-    """Get refund status"""
-    return json.dumps({
-        "order_id": order_id,
-        "status": "processing",
-        "message": "Refund will be processed within 5-7 business days."
-    }, indent=2)
-
-
-@tool
-def file_complaint(order_id: str, issue: str) -> str:
-    """File a complaint"""
-    return json.dumps({
-        "ticket_id": f"TICKET-{order_id}",
-        "status": "open",
-        "message": "Your complaint has been filed."
-    }, indent=2)
-
-
-@tool
-def get_return_policy() -> str:
+@tool_tracing
+def get_return_policy(config: RunnableConfig) -> str:
     """Get return policy"""
     return json.dumps({
         "return_window": "30 days",
@@ -89,6 +84,34 @@ def get_return_policy() -> str:
         "free_shipping": "Yes",
         "timeline": "5-7 business days"
     }, indent=2)
+
+@tool
+@tool_tracing
+def get_refund_status(order_id: str, config: RunnableConfig) -> str:
+    """Get refund status"""
+    if USE_DB:
+        result = returns_db.get_refund_status(order_id)
+    else:
+        result = {
+            "order_id": order_id,
+            "status": "processing",
+            "message": "Refund will be processed within 5-7 business days."
+        }
+    return json.dumps(result, indent=2)
+
+@tool
+@tool_tracing
+def file_complaint(order_id: str, issue: str, config: RunnableConfig) -> str:
+    """File a complaint"""
+    if USE_DB:
+        result = returns_db.create_complaint(order_id, issue)
+    else:
+        result = {
+            "ticket_id": f"TICKET-{order_id}",
+            "status": "open",
+            "message": "Your complaint has been filed."
+        }
+    return json.dumps(result, indent=2)
 
 
 RETURNS_TOOLS = [

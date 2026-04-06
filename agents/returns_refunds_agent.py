@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-from langchain_core.messages import SystemMessage, AIMessage
+from langchain_core.messages import SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from helpers.observability.log_formatting import format_agent_response
@@ -62,7 +62,7 @@ def create_returns_agent() -> ChatOpenAI:
         temperature=LLM_TEMPERATURE,
         api_key=OPENAI_API_KEY,
     )
-    return llm.bind_tools(RETURNS_TOOLS, tool_choice="auto")
+    return llm.bind_tools(RETURNS_TOOLS)
 
 
 # ── LangGraph node ─────────────────────────────────────────────────────────────
