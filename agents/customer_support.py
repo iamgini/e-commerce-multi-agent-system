@@ -1,5 +1,5 @@
-import json
-from pathlib import Path
+# import json
+# from pathlib import Path
 # from typing import Dict
 
 # Logger
@@ -7,6 +7,9 @@ from helpers.observability.logger import log_event
 
 # State
 # from state import AgentState
+
+# Tools
+from tools.customer_support_tools import search_faq
 
 import os
 
@@ -48,8 +51,6 @@ else:
 #         formatted += f"A: {item['answer']}\n\n"
 
 #     return formatted
-
-from tools.customer_support_tools import search_faq
 
 # ==========================================================
 # Responsible Prompt Design (Module 1)
