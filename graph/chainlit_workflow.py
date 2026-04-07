@@ -4,7 +4,6 @@ import sys
 from typing import Annotated, TypedDict
 
 from langchain_core.messages import AIMessage, BaseMessage
-from langgraph.checkpoint.postgres import PostgresSaver
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
@@ -18,7 +17,7 @@ from agents.recommendation_agent import recommendation_agent_node
 from agents.sales_agent import sales_agent_node
 from agents.returns_refunds_agent import returns_refunds_agent_node
 from config import (
-    CHECKPOINTER_DB_DSN,    # Used for local testing
+    CHAINLIT_DB_DSN,    # Used for local testing
     COORDINATOR_NODE,
     CUSTOMER_SUPPORT_NODE,
     ORDER_INVENTORY_NODE,
@@ -117,7 +116,7 @@ def should_continue_order_inventory(state: AgentState) -> str:
 # ── Graph ──────────────────────────────────────────────────────────────────────
 
 
-def build_graph(checkpointer: PostgresSaver) -> StateGraph:
+def build_graph() -> StateGraph:
     """Assemble and compile the full multi-agent LangGraph."""
 
     builder = StateGraph(AgentState)
@@ -196,27 +195,19 @@ def build_graph(checkpointer: PostgresSaver) -> StateGraph:
     builder.add_edge("returns_tools", RETURNS_REFUNDS_NODE)
     # builder.add_edge(CUSTOMER_SUPPORT_NODE, END) ## Not required
 
-    return builder.compile(checkpointer=checkpointer)
+    return builder.compile()
 
 
 # ── Singleton accessor ─────────────────────────────────────────────────────────
 
 _graph = None
-_checkpointer_ctx = None
-_checkpointer = None
-
 
 def get_graph():
     """
     Return a lazily-compiled singleton graph instance.
-
-    The checkpointer database is created automatically inside DB_DIR on first
-    call (same directory as products.db and cart.db).
     """
-    global _graph, _checkpointer_ctx, _checkpointer
+    global _graph
     if _graph is None:
         # os.makedirs(DB_DIR, exist_ok=True)
-        _checkpointer_ctx = PostgresSaver.from_conn_string(CHECKPOINTER_DB_DSN)
-        _checkpointer = _checkpointer_ctx.__enter__()
-        _graph = build_graph(checkpointer=_checkpointer)
+        _graph = build_graph()
     return _graph

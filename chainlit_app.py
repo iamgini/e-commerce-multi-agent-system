@@ -13,20 +13,21 @@ import asyncio
 import logging
 import os
 import sys
-# from functools import partial
-# from venv import logger
 
 import chainlit as cl
+from chainlit.types import ThreadDict
 from langchain_core.messages import AIMessage, HumanMessage
+from ulid import ULID
 
-# Ensure the project root is on sys.path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from graph.workflow import get_graph
+from graph.chainlit_workflow import get_graph
+from helpers.database.users_db import get_user, verify_password
 from scripts.db_setup import initialise_databases
 from scripts.logger_setup import initialise_logger
 
 initialise_databases()
+# logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -49,31 +50,77 @@ def _last_ai_text(messages: list) -> str:
     return "(no response)"
 
 
-def _agent_label(result: dict) -> str:
-    return (
-        result.get("current_agent", "Assistant")
-        .replace("_", " ")
-        .title()
-    )
+# def _agent_label(result: dict) -> str:
+#     return (
+#         result.get("current_agent", "Assistant")
+#         .replace("_", " ")
+#         .title()
+#     )
 
 
 # ---------------------------------------------------------------------------
 # Chainlit lifecycle
 # ---------------------------------------------------------------------------
 
+
+@cl.password_auth_callback
+async def auth_callback(username: str, password: str):
+    user = get_user(username.strip())
+
+    if not user:
+        return None     # Authentication failed
+
+    username, password_hash = user
+
+    if verify_password(password, password_hash):
+        return cl.User(
+            identifier=username,
+            metadata={"role": "user"}
+        )
+
+    return None
+
+
 @cl.on_chat_start
 async def on_chat_start():
     """Called once when a user opens the chat window."""
+    
+    ## Apply logging configurations
     global logger
     initialise_logger()
-    logger  = logging.getLogger(__name__)
+    logger = logging.getLogger(__name__)
     
+    # Get the current thread ID from the session
+    thread_id = cl.user_session.get("id")
+    
+    # Get user details from auth callback
+    user = cl.user_session.get("user")
+    
+    if user:
+        user_id = user.identifier  
+        role = user.metadata.get("role", "user")
+    else:
+        user_id = "anonymous"   # Should not trigger unless auth goes wrong
+        role = "guest"
+    
+    
+    # # Force the data layer to initialize metadata as an empty object
+    # # This prevents the "NOT NULL" database error
+    # if cl_data._data_layer:
+    #     await cl_data._data_layer.update_thread(
+    #         thread_id=thread_id, 
+    #         metadata={}
+    #     )
+    
+    # Set user session
+    cl.user_session.set("user_id", user_id)
+    cl.user_session.set("thread_id", thread_id)
+    cl.user_session.set("role", role)
     cl.user_session.set("message_history", [])
-    cl.user_session.set("user_id", "user_001")
 
     await cl.Message(
         content=(
-            "👋 Welcome to **ShopBot** — your e-commerce assistant!\n\n"
+            f"👋 Hello {user_id.capitalize()}. Welcome to **ShopBot** — your e-commerce assistant!\n\n"
             "I can help you with:\n"
             "- 🔍 Product search & recommendations\n"
             "- 🛒 Cart & checkout\n"
@@ -85,12 +132,70 @@ async def on_chat_start():
     ).send()
 
 
+## Working batched
+# @cl.on_message
+# async def on_message(message: cl.Message):
+#     """Called on every user message."""
+#     history: list = cl.user_session.get("message_history", [])
+#     user_id: str = cl.user_session.get("user_id", "user_001")
+#     session_id: str = cl.user_session.get("session_id", f"{user_id}_{int(time.time())}")
+    
+#     # logger.info(message.content) 
+    
+#     # Append user turn
+#     history.append(HumanMessage(content=message.content))
+
+#     state_input = {
+#         "messages": history,
+#         "route": "",
+#         "current_agent": "",
+#         "user_id": user_id,
+#         "session_id": session_id,
+#     }
+
+#     # Run the synchronous graph.invoke in a thread so it doesn't
+#     # block Chainlit's async event loop (Python 3.14 + anyio strict mode)
+#     async with cl.Step(name="Routing…", show_input=False) as step:
+#         try:
+#             graph = get_graph()
+
+#             result = await asyncio.to_thread(
+#                 graph.invoke,
+#                 state_input,
+#                 {"configurable": {
+#                     "user_id": user_id,
+#                     "thread_id": session_id,
+#                     }
+#                  },
+#             )
+
+#         except Exception as exc:
+#             await cl.Message(content=f"⚠️ Error: {exc}").send()
+#             logger.error(f"\n[ERROR] Agent error: {exc}\n")
+#             return
+        
+#         finally:
+#             await step.remove()
+
+#     # Persist updated history
+#     cl.user_session.set("message_history", result["messages"])
+
+#     reply = _last_ai_text(result["messages"])
+#     agent = _agent_label(result)
+#     route = result.get("route", "")
+
+#     # Send reply with agent label as author
+#     await cl.Message(content=reply, author=agent).send()
+
+
+### Working streaming
 @cl.on_message
 async def on_message(message: cl.Message):
     """Called on every user message."""
     history: list = cl.user_session.get("message_history", [])
-    user_id: str = cl.user_session.get("user_id", "user_001")
-    
+    user_id: str =  cl.user_session.get("user_id", "anonymous")
+    session_id: str = cl.user_session.get("thread_id", str(ULID()))
+
     logger.info(message.content) 
     
     # Append user turn
@@ -101,34 +206,66 @@ async def on_message(message: cl.Message):
         "route": "",
         "current_agent": "",
         "user_id": user_id,
+        "thread_id": session_id,
     }
 
-    # Run the synchronous graph.invoke in a thread so it doesn't
-    # block Chainlit's async event loop (Python 3.14 + anyio strict mode)
-    async with cl.Step(name="Routing…", show_input=False) as step:
+    final_message = cl.Message(content="")
+    graph = get_graph()
+
+    # async with cl.Step(name="Reasoning...", type="run", show_input=False) as step:
+    async with cl.Step(name="Thinking...", type="run", show_input=False):
         try:
             graph = get_graph()
+
             result = await asyncio.to_thread(
                 graph.invoke,
                 state_input,
-                {"configurable": {"thread_id": user_id}},
+                {"configurable": {
+                    "user_id": user_id,
+                    "thread_id": session_id,
+                    }
+                 },
             )
-            
+
         except Exception as exc:
             await cl.Message(content=f"⚠️ Error: {exc}").send()
             logger.error(f"\n[ERROR] Agent error: {exc}\n")
             return
-        
-        finally:
-            await step.remove()
 
     # Persist updated history
     cl.user_session.set("message_history", result["messages"])
 
     reply = _last_ai_text(result["messages"])
-    agent = _agent_label(result)
-    route = result.get("route", "")
-
-    # Send reply with agent label as author
-    await cl.Message(content=reply, author=agent).send()
     
+    for token in reply.split():
+        await final_message.stream_token(token + " ")
+        await asyncio.sleep(0.02)  # Delay for effect
+        
+    await final_message.send()
+
+
+# @cl.on_chat_resume
+# async def resume(thread: ThreadDict):
+#     # Your thread ID from Chainlit
+#     thread_id = thread["id"]  
+    
+#     # Re-instantiate the graph and set the thread_id
+#     # LangGraph will automatically pull the state from Postgres
+#     cl.user_session.set("thread_id", thread_id)
+
+#     await cl.Message(content="Resuming our previous conversation...").send()
+
+
+@cl.on_chat_resume
+async def on_chat_resume(thread: ThreadDict):
+    # Reconstruct message history from the resumed thread steps
+    message_history = []
+    for step in thread["steps"]:
+        # Standard step types are often "user_message" and "ai_message"
+        role = "user" if step["type"] == "user_message" else "assistant"
+        message_history.append({"role": role, "content": step["output"]})
+    
+    # Store the history back in the user session
+    cl.user_session.set("message_history", message_history)
+    
+    # await cl.Message(content="Welcome back! I've restored our conversation.").send()

@@ -1,20 +1,23 @@
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 import psycopg
-from psycopg import errors
 from langgraph.checkpoint.postgres import PostgresSaver
+from psycopg import errors
 
 from config import (
-    MAINTENANCE_DB_DSN,
     CART_DB_DSN,
     CHECKPOINTER_DB_DSN,
+    MAINTENANCE_DB_DSN,
     ORDER_INVENTORY_DB_DSN,
-    RETURNS_DB_DSN,
     PRODUCTS_DB_DSN,
+    RETURNS_DB_DSN,
+    USERS_DB_DSN,
 )
-from scripts.seed_data import SEED_CATEGORIES, SEED_PRODUCTS
+from helpers.database.users_db import encrypt_password
+from scripts.seed_data import SEED_CATEGORIES, SEED_PRODUCTS, SEED_USERS
 
 # ── Schema helpers ─────────────────────────────────────────────────────────────
 
@@ -291,57 +294,94 @@ def _create_returns_schema(conn: psycopg.Connection) -> None:
         conn.commit()
 
 
+def _create_users_schema(conn: psycopg.Connection) -> None:
+    """Create users table in PostgreSQL."""
+    with conn.cursor() as cur:
+        cur.execute("CREATE EXTENSION IF NOT EXISTS citext")    # For case insensitive usernames
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                username CITEXT PRIMARY KEY,
+                password_hash TEXT NOT NULL
+            );
+        """)
+
+
+def seed_users(conn: psycopg.Connection) -> None:
+    """Insert users if they don't already exist."""
+    hashed_users = []
+    for username, password in SEED_USERS:
+        hashed = encrypt_password(password)
+        hashed_users.append((username, hashed))
+        
+    with conn.cursor() as cur:
+        cur.executemany(
+            """
+            INSERT INTO users 
+                (username, password_hash)
+            VALUES (%s, %s)
+            ON CONFLICT (username) DO NOTHING;
+            """,
+            hashed_users,
+        )
+
 
 # ── Entrypoint in main.py ──────────────────────────────────────────────────────
 
 
 def initialise_databases() -> None:
     """Create schema and seed data for both databases."""
-    try:
-        with psycopg.connect(MAINTENANCE_DB_DSN, autocommit=True) as conn:
-            with conn.cursor() as cur:
-                cur.execute("CREATE DATABASE products_db")
-                cur.execute("CREATE DATABASE cart_db")
-                cur.execute("CREATE DATABASE returns_db")
-                cur.execute("CREATE DATABASE order_inventory_db")
-                
-    except errors.DuplicateDatabase:
-        print("Agent databases already exists, skipping creation.")
+    db_names = [
+        "products_db",
+        "cart_db",
+        "returns_db",
+        "order_inventory_db",
+        "checkpoints_db",
+        "users_db",
+        "chainlit_db"
+        ]
+    
+    with psycopg.connect(MAINTENANCE_DB_DSN, autocommit=True) as conn:
+        with conn.cursor() as cur:
+            for db_name in db_names:
+                try:
+                    cur.execute(f'CREATE DATABASE "{db_name}"')
+                    print(f"Created database: {db_name}")
+                    
+                except errors.DuplicateDatabase:
+                    print(f"Database: '{db_name}' already exists, skipping creation.")    
 
-    try:
-        with psycopg.connect(MAINTENANCE_DB_DSN, autocommit=True) as conn:
-            with conn.cursor() as cur:
-                cur.execute("CREATE DATABASE checkpoints_db")
-
-        with PostgresSaver.from_conn_string(CHECKPOINTER_DB_DSN) as checkpointer:
-            TARGET_DB = "checkpoints_db"
-            checkpointer.setup()
-            print(f"[DB] Checkpoints database ready → {TARGET_DB}")
-
-    except errors.DuplicateDatabase:
-        print("Database already exists, skipping creation.")
+    with PostgresSaver.from_conn_string(CHECKPOINTER_DB_DSN) as checkpointer:
+        target_db = "checkpoints_db"
+        checkpointer.setup()
+        print(f"[DB] Checkpoints database ready → {target_db}")
 
     with psycopg.connect(PRODUCTS_DB_DSN) as conn:
-        TARGET_DB = "products_db"
+        target_db = "products_db"
         _create_products_schema(conn)
         seed_products(conn)
-        print(f"[DB] Products database ready → {TARGET_DB}")
+        print(f"[DB] Products database ready → {target_db}")
 
     with psycopg.connect(CART_DB_DSN) as conn:
-        TARGET_DB = "cart_db"
+        target_db = "cart_db"
         _create_cart_schema(conn)
-        print(f"[DB] Cart database ready → {TARGET_DB}")
+        print(f"[DB] Cart database ready → {target_db}")
     
     with psycopg.connect(RETURNS_DB_DSN) as conn:
-        TARGET_DB = "returns_db"
+        target_db = "returns_db"
         _create_returns_schema(conn)
-        print(f"[DB] Returns database ready → {TARGET_DB}")
+        print(f"[DB] Returns database ready → {target_db}")
 
     with psycopg.connect(ORDER_INVENTORY_DB_DSN) as conn:
-        TARGET_DB = "order_inventory_db"
+        target_db = "order_inventory_db"
         _create_order_schema(conn)
         _seed_demo_data(conn)
-        print(f"[DB] Order & inventory database ready → {TARGET_DB}")
+        print(f"[DB] Order & inventory database ready → {target_db}")
+
+    with psycopg.connect(USERS_DB_DSN) as conn:
+        target_db = "users_db"
+        _create_users_schema(conn)
+        seed_users(conn)
+        print(f"[DB] User database ready → {target_db}")
 
 if __name__ == "__main__":
     initialise_databases()

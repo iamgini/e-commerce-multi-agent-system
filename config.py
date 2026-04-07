@@ -1,8 +1,8 @@
 import os
 
-## Use load_dotenv for internal testing purposes
-# from dotenv import load_dotenv
-# load_dotenv()
+# Use load_dotenv for internal testing purposes
+from dotenv import load_dotenv
+load_dotenv()
 
 # ── LLM ──────────────────────────────────────────────────────────────────────
 # OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY")           # Use this for internal testing
@@ -51,6 +51,8 @@ CART_DB_DSN: str = os.environ.get("CART_DB_DSN")
 ORDER_INVENTORY_DB_DSN: str = os.environ.get("ORDER_INVENTORY_DB_DSN")
 RETURNS_DB_DSN: str = os.getenv("RETURNS_DB_DSN")
 CHECKPOINTER_DB_DSN = os.environ.get("CHECKPOINTER_DB_DSN")
+USERS_DB_DSN: str = os.environ.get("USERS_DB_DSN")
+CHAINLIT_DB_DSN: str =os.environ.get("DATABASE_URL")
 
 # ── S3 Logging ────────────────────────────────────────────────────────────────
 # Use this for internal testing

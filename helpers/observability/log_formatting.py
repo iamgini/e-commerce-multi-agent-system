@@ -30,7 +30,7 @@ def tool_tracing(func):
         config = kwargs.get("config")
         user_id = "unknown_user"
         if isinstance(config, dict) or hasattr(config, "get"):
-            user_id = config.get("metadata", {}).get("thread_id", "unknown_user")
+            user_id = config.get("metadata", {}).get("user_id", "unknown_user")
         
         logger.info(f"USER_ID: {user_id} | TOOL_START | {func.__name__} | Args: {args} Kwargs: {kwargs}")
         

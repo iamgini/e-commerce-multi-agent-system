@@ -19,12 +19,22 @@ class S3RotatingFileHandler(logging.handlers.RotatingFileHandler):
     to S3 upon rotation of local logfiles
     """
     def __init__(self, client_params, filename, chunk_size, backupCount, s3_bucket, s3_prefix):
-        super().__init__(filename, maxBytes=chunk_size, backupCount=backupCount, encoding='utf-8')
+        super().__init__(filename,
+                         maxBytes=chunk_size,
+                         backupCount=backupCount,
+                         encoding='utf-8',
+                         delay=True
+                        )
         self.s3_bucket = s3_bucket
         self.s3_prefix = s3_prefix.lstrip("./")
         self.s3_client = boto3.client('s3', **client_params)
 
     def doRollover(self):
+        # Close the current file stream so Windows releases the lock
+        if self.stream:
+            self.stream.close()
+            self.stream = None
+        
         # Perform standard local rotation first
         super().doRollover()
         

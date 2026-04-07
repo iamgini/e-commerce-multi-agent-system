@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 from langchain_core.messages import HumanMessage
 
@@ -10,7 +11,7 @@ from agents.coordinator import coordinator_node
 
 def run_case(label: str, text: str):
     state = {"messages": [HumanMessage(content=text)]}
-    result = coordinator_node(state, {"configurable": {"thread_id": "test_user_001"}})
+    result = coordinator_node(state, {"configurable": {"user_id": "test_user_001", "session_id": f"test_user_001_{int(time.time())}"}})
     print(f"{label:20} | {text}")
     print("route ->", result.get("route"))
     print("-" * 80)

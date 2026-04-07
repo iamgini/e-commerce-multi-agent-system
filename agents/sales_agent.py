@@ -120,6 +120,7 @@ def create_sales_agent() -> ChatOpenAI:
         model=LLM_MODEL,
         temperature=LLM_TEMPERATURE,
         api_key=OPENAI_API_KEY,
+        streaming=True
     )
     return llm.bind_tools(SALES_TOOLS)
 
@@ -138,7 +139,7 @@ def sales_agent_node(state: dict, config: RunnableConfig = None) -> dict:
     messages = [SystemMessage(content=SALES_SYSTEM_PROMPT)] + state["messages"]
     response = llm_with_tools.invoke(messages, config=config)
 
-    user_id = config.get("configurable", {}).get("thread_id", "unknown_user")
+    user_id = config.get("configurable", {}).get("user_id", "unknown_user")
     logger.info(
        f"USER_ID: {user_id} | "
        f"{format_agent_response(response)}"

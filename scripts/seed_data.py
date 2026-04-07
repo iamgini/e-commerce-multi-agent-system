@@ -271,3 +271,11 @@ SEED_PRODUCTS = [
     ('Playdate', 'Indie yellow handheld with hand crank, black-and-white reflective display and seasonal games.', 199.99, 40, 11, 4.4, 'handheld,indie,crank,monochrome,unique'),
     ('Nintendo Switch (OLED Model) White', 'Standard Nintendo Switch in white colorway with OLED screen and enhanced audio.', 349.99, 70, 11, 4.9, 'gaming-console,oled,portable,white,nintendo')
 ]
+
+
+SEED_USERS = [
+    # Username, Plaintext_Password
+    ('alice', 'kiwi-apple'),
+    ('bob', 'coach-casino'),
+    ('charlie', 'cobble-stack'),
+]
