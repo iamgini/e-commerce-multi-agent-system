@@ -1,4 +1,4 @@
---index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
 
 vijil-dome>=1.5.4
 langchain>=1.2.15
