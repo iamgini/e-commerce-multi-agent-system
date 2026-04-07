@@ -61,8 +61,11 @@ def create_return_request(
 def get_return_status(return_id: str,config: RunnableConfig) -> str:
     """Get return status"""
     if USE_DB:
-        numeric_id = return_id.replace("RET-", "") if return_id.startswith("RET-") else return_id
-        result = returns_db.get_return_status(int(numeric_id))
+       try:
+         numeric_id = return_id.replace("RET-", "").replace("ORD-", "")
+         result = returns_db.get_return_status(int(numeric_id))
+       except ValueError:
+        result = {"error": f"Invalid return ID format: {return_id}"}
     else:
         result = {
             "return_id": return_id,

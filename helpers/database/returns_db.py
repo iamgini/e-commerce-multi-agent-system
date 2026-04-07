@@ -27,7 +27,7 @@ def get_return_status(return_id: int) -> dict:
     with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id, status FROM returns WHERE id = %s",
+                "SELECT id,order_id,status FROM returns WHERE id = %s",
                 (return_id,)
             )
             row = cur.fetchone()
@@ -37,7 +37,8 @@ def get_return_status(return_id: int) -> dict:
     
     return {
         "return_id": f"RET-{row[0]}",
-        "status": row[1],
+        "order_id": row[1],
+        "status": row[2],
         "message": "Your return is being processed."
     }
 
