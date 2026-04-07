@@ -44,7 +44,7 @@ curl -s -X POST http://localhost:8000/chat \
 ```shell
 $ uv run python -c "import chainlit_app"
 $ uv run chainlit run chainlit_app.py --port 8001
-
+$ uv run chainlit run chainlit_app.py --port 8001 -h  # headless mode
 ```
 
 And access `http://localhost:8001`

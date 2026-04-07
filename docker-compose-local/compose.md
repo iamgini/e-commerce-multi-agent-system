@@ -5,7 +5,7 @@
 If using linux, this is the recommended structure for running containers
 
 ```shell
-/home/
+/home
 ├── postgresql              
 │    ├── data   # postgres container data will be mounted here
 │    └── docker-compose.yml

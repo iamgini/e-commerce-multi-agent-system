@@ -227,7 +227,7 @@ def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
     is somehow reached after an AI turn), default to ROUTE_RECOMMEND rather
     than re-routing mid-response.
     """
-    user_id = config.get("configurable", {}).get("thread_id", "unknown_user")
+    user_id = config.get("configurable", {}).get("user_id", "unknown_user")
     # Guard: Only route when the most recent message is from the human,
     # prevents accidental re-entry if the graph topology is ever extended
     last_msg = state["messages"][-1] if state["messages"] else None
@@ -254,6 +254,7 @@ def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
         model=LLM_MODEL,
         temperature=LLM_TEMPERATURE,
         api_key=OPENAI_API_KEY,
+        streaming=True
     )
 
     messages = (

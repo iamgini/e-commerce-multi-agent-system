@@ -2,9 +2,9 @@ import argparse
 import logging
 import os
 import sys
+import time
 
 from langchain_core.messages import AIMessage, HumanMessage
-from scripts.db_setup import initialise_databases
 
 # Ensure the project root is on the path so all imports resolve
 sys.path.insert(0, os.path.dirname(__file__))
@@ -34,7 +34,7 @@ def _extract_last_ai_text(messages: list) -> str:
     return "(no response)"
 
 
-def _make_config(user_id: str) -> dict:
+def _make_config(user_id: str, session_id: str) -> dict:
     """
     Build the LangGraph config dict for a given user.
 
@@ -42,16 +42,22 @@ def _make_config(user_id: str) -> dict:
     checkpoints.db.  Using user_id as the thread_id means each customer has
     exactly one persistent conversation thread across sessions.
     """
-    return {"configurable": {"thread_id": user_id}}
+    return {
+        "configurable": {
+        "thread_id": session_id,
+        "user_id": user_id
+        }
+    }
 
 
-def run_interactive(user_id: str) -> None:
+def run_interactive(user_id: str, session_id: str) -> None:
     """Start an interactive terminal session with the multi-agent system."""
-    print(f"\n\n**Session user: {user_id}**")
+    print(f"\n\n**User: {user_id}**")
+    print(f"\n\n**Session ID: {session_id}**")
     print("**Checkpoint: data/checkpoints.db  (conversation persists)**\n")
 
     graph = get_graph()
-    config = _make_config(user_id)
+    config = _make_config(user_id, session_id)
     continue_session = True
     
     try:
@@ -77,6 +83,7 @@ def run_interactive(user_id: str) -> None:
                 "route": "",
                 "current_agent": "",
                 "user_id": user_id,
+                "session_id": session_id,
             }
 
             try:
@@ -154,7 +161,9 @@ def run_interactive(user_id: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="E-Commerce Multi-Agent System")
     parser.add_argument(
-        "--user", default="user_001", help="User ID for the session (default: user_001)"
+        "--user",
+        default="user_001",
+        help="User ID for the session (default: user_001)",
     )
     parser.add_argument(
         "--demo",
@@ -165,6 +174,8 @@ def main() -> None:
         "--setup-only", action="store_true", help="Initialise databases and exit"
     )
     args = parser.parse_args()
+    
+    session_id=f"{args.user}_{int(time.time())}"
 
     # Ensures databases exists and loaded
     initialise_databases()
@@ -176,7 +187,7 @@ def main() -> None:
     # if args.demo:
     #     run_demo(args.user)
     # else:
-    run_interactive(args.user)
+    run_interactive(args.user, session_id)
 
 
 if __name__ == "__main__":

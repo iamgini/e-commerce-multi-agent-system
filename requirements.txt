@@ -1,18 +1,25 @@
+--index-url https://download.pytorch.org/whl/cpu
+
+torch
+vijil-dome
 langchain
 langchain-openai
 langchain-core
 langgraph
 langgraph-checkpoint-postgres
 python-dotenv
+dotenvx
 ddgs
 pydantic
+prisma
+boto3
+asyncpg
 psycopg[binary]
-s3-log-handler
-# langgraph-checkpoint-sqlite
-# openai
-# pydantic-core
 fastapi
 uvicorn[standard]
 chainlit
+bcrypt
+# langgraph-checkpoint-sqlite
+# openai
+# pydantic-core
 # langchain-ollama - optional for local testing
-dotenvx

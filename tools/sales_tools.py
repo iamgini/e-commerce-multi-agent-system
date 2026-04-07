@@ -46,7 +46,7 @@ def find_product(query: str, config: RunnableConfig) -> str:
           category - product category name
         Or a plain-text message if no products are found.
     """
-    results = product_db.search_products(query, limit=5)
+    results = product_db.search_products(query, limit=8)
     if not results:
         return f"No products found matching '{query}'."
 
@@ -74,12 +74,12 @@ def find_product_by_id(product_id: int, config: RunnableConfig) -> str:
     but not yet a product name. 
 
     Args:
-        query: Product ID, e.g. "1", "2", "3".
+        query: Product ID, e.g. 1, 15, 39.
 
     Returns:
         A JSON array of matches, each containing:
-          id            - integer product ID required by add_to_cart
-          name          - full product name
+          id            - integer product ID
+          name          - full product name required by view_cart
           description   - description of the product
           price         - unit price in USD
           stock         - units currently available
@@ -90,6 +90,13 @@ def find_product_by_id(product_id: int, config: RunnableConfig) -> str:
     results = product_db.get_product_by_id(product_id)
     if not results:
         return f"No products found matching '{product_id}'."
+
+    # Normalize results
+    if isinstance(results, str):
+        results = json.loads(results)
+
+    if isinstance(results, dict):
+        results = [results]
 
     compact = [
         {
