@@ -78,7 +78,7 @@ jobs:
   build-and-push:
     needs: [secret-detection, vulnerability-scan]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
 
