@@ -76,14 +76,21 @@ jobs:
         run: pip-audit -r requirements.txt
 
   build-and-push:
-    # needs: [secret-detection, lint, vulnerability-scan]  # only build if all checks pass
-    needs: [secret-detection, vulnerability-scan]  # only build if all checks pass
+    needs: [secret-detection, vulnerability-scan]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  # only deploy from main
+    if: github.ref == 'refs/heads/main'
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
+
     steps:
       - uses: actions/checkout@v4
+
+      # ✅ Install QEMU for ARM emulation
+       - name: Install QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+          sudo podman run --rm --privileged docker.io/library/multiarch/qemu-user-static --reset -p yes
 
       - name: Log in to Quay
         run: echo "${{ secrets.QUAY_PASSWORD }}" | podman login quay.io -u "${{ secrets.QUAY_USERNAME }}" --password-stdin
@@ -92,18 +99,40 @@ jobs:
         id: meta
         run: echo "version=${{ github.sha }}" >> $GITHUB_OUTPUT
 
-      - name: Build image
-        # run: podman build --file Containerfile-ShopBot -t quay.io/iamgini/shopbot:${{ github.sha }} -t quay.io/iamgini/shopbot:latest .
+      # ✅ Create a multi-arch manifest
+      - name: Create manifest
         run: |
-          podman build --file Containerfile-ShopBot \
-            -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
-            -t quay.io/iamgini/shopbot:latest \
+          podman manifest create quay.io/iamgini/shopbot:${{ github.sha }}
+
+      # ✅ Build AMD64
+      - name: Build amd64 image
+        run: |
+          podman build \
+            --arch amd64 \
+            --file Containerfile-ShopBot \
+            --manifest quay.io/iamgini/shopbot:${{ github.sha }} \
             .
 
+      # ✅ Build ARM64
+      - name: Build arm64 image
+        run: |
+          podman build \
+            --arch arm64 \
+            --file Containerfile-ShopBot \
+            --manifest quay.io/iamgini/shopbot:${{ github.sha }} \
+            .
+
+      # ✅ Push multi-arch image
       - name: Push image
         run: |
-          podman push quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
-          podman push quay.io/iamgini/shopbot:latest
+          podman manifest push --all quay.io/iamgini/shopbot:${{ github.sha }}
+
+      # (optional) tag as latest
+      - name: Tag latest
+        run: |
+          podman manifest create quay.io/iamgini/shopbot:latest
+          podman manifest add quay.io/iamgini/shopbot:latest quay.io/iamgini/shopbot:${{ github.sha }}
+          podman manifest push --all quay.io/iamgini/shopbot:latest
 
   deploy:
     needs: build-and-push
