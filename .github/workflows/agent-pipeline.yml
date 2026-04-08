@@ -95,7 +95,7 @@ jobs:
       - name: Build image
         # run: podman build --file Containerfile-ShopBot -t quay.io/iamgini/shopbot:${{ github.sha }} -t quay.io/iamgini/shopbot:latest .
         run: |
-          podman build --platform linux/amd64,Linux/arm64, --file Containerfile-ShopBot \
+          podman build --file Containerfile-ShopBot \
             -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
             -t quay.io/iamgini/shopbot:latest \
             .
