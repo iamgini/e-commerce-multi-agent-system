@@ -79,7 +79,7 @@ jobs:
     # needs: [secret-detection, lint, vulnerability-scan]  # only build if all checks pass
     needs: [secret-detection, vulnerability-scan]  # only build if all checks pass
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  # only deploy from main
+    # if: github.ref == 'refs/heads/main'  # only deploy from main
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
     steps:
