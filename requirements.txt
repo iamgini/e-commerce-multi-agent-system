@@ -17,6 +17,7 @@ fastapi
 uvicorn[standard]
 chainlit
 bcrypt
+python-ulid
 
 # langgraph-checkpoint-sqlite
 # openai
