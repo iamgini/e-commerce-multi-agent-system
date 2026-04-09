@@ -23,9 +23,6 @@ COPY chainlit-setup/chainlit_data_layer.py /usr/local/lib/python3.12/site-packag
 
 EXPOSE 8001
 
-# Create imprint of prisma schema in database
-CMD ["prisma", "migrate", "deploy", "--schema", "chainlit-setup/prisma/schema.prisma"]
-
 # Before (broken — dotenvx never runs, .env.ci stays encrypted)
 # CMD ["chainlit", "run", "chainlit_app.py", "--port", "8001", "--host", "0.0.0.0"]
 
