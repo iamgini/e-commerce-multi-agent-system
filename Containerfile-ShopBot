@@ -18,6 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # Copy the full project
 COPY . .
 
+# Replace bugged file with hotfix file
+COPY chainlit-setup/chainlit_data_layer.py /usr/local/lib/python3.12/site-packages/chainlit/data
+
 EXPOSE 8001
 
 # Before (broken — dotenvx never runs, .env.ci stays encrypted)

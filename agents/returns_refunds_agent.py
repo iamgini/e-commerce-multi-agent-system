@@ -1,7 +1,7 @@
 import os
 import sys
 import logging
-from langchain_core.messages import SystemMessage, AIMessage
+from langchain_core.messages import SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from helpers.observability.log_formatting import format_agent_response
@@ -23,6 +23,10 @@ Your responsibilities:
 4. Handle damage complaints
 5. Provide return policy information
 
+## Important
+- When tool results contain an order_id, ALWAYS include it in your response to the customer.
+- Never say you don't have information that was already returned by a tool in this conversation.
+
 Return Policy:
 - Return Window: 30 days from purchase
 - Unopened: 100% refund
@@ -35,7 +39,8 @@ Return Policy:
 Available tools:
 - check_return_eligibility(order_id, days_old): Check if order is returnable
 - create_return_request(order_id, reason): Start a return
-- get_return_status(return_id): Track return status
+- get_return_status(return_id): Track return status -returns return_id, order_id, and status
+ALWAYS display the order_id in your response if it is present in the tool result.
 - get_refund_status(order_id): Check refund status
 - file_complaint(order_id, issue): File damage claim
 - get_return_policy(): Get policy details
@@ -62,7 +67,7 @@ def create_returns_agent() -> ChatOpenAI:
         temperature=LLM_TEMPERATURE,
         api_key=OPENAI_API_KEY,
     )
-    return llm.bind_tools(RETURNS_TOOLS, tool_choice="auto")
+    return llm.bind_tools(RETURNS_TOOLS)
 
 
 # ── LangGraph node ─────────────────────────────────────────────────────────────

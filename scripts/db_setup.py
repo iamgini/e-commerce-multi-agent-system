@@ -279,7 +279,7 @@ def seed_products(conn: psycopg.Connection) -> None:
         )
         
 def _create_returns_schema(conn: psycopg.Connection) -> None:
-    """Create returns table in PostgreSQL."""
+    """Create returns, refunds and complaints tables in PostgreSQL."""
     with conn.cursor() as cur:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS returns (
@@ -288,6 +288,23 @@ def _create_returns_schema(conn: psycopg.Connection) -> None:
                 user_id     TEXT NOT NULL,
                 reason      TEXT,
                 status      TEXT DEFAULT 'created',
+                created_at  TIMESTAMP DEFAULT NOW()
+            );
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS refunds (
+                id          SERIAL PRIMARY KEY,
+                order_id    TEXT NOT NULL,
+                status      TEXT DEFAULT 'processing',
+                created_at  TIMESTAMP DEFAULT NOW()
+            );
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS complaints (
+                id          SERIAL PRIMARY KEY,
+                order_id    TEXT NOT NULL,
+                issue       TEXT,
+                status      TEXT DEFAULT 'open',
                 created_at  TIMESTAMP DEFAULT NOW()
             );
         """)

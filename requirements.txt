@@ -1,7 +1,6 @@
---index-url https://download.pytorch.org/whl/cpu
+#--extra-index-url https://download.pytorch.org/whl/cpu
+#vijil-dome
 
-torch
-vijil-dome
 langchain
 langchain-openai
 langchain-core
@@ -19,6 +18,8 @@ fastapi
 uvicorn[standard]
 chainlit
 bcrypt
+python-ulid
+
 # langgraph-checkpoint-sqlite
 # openai
 # pydantic-core
