@@ -28,7 +28,7 @@ def initialise_logger() -> None:
     handler = AsyncS3PipeHandler(
         client_params=client_params,
         bucket_name=S3_BUCKETNAME,
-        chunk_size=100*1024,    # 100KB of logs will trigger a rotation
+        chunk_size=10*1024,    # 10KB of logs will trigger a rotation
         filename="backend.log"
         )
     

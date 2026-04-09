@@ -84,7 +84,7 @@ async def auth_callback(username: str, password: str):
 @cl.on_chat_start
 async def on_chat_start():
     """Called once when a user opens the chat window."""
-    
+
     ## Apply logging configurations
     global logger
     initialise_logger()
@@ -102,15 +102,6 @@ async def on_chat_start():
     else:
         user_id = "anonymous"   # Should not trigger unless auth goes wrong
         role = "guest"
-    
-    
-    # # Force the data layer to initialize metadata as an empty object
-    # # This prevents the "NOT NULL" database error
-    # if cl_data._data_layer:
-    #     await cl_data._data_layer.update_thread(
-    #         thread_id=thread_id, 
-    #         metadata={}
-    #     )
     
     # Set user session
     cl.user_session.set("user_id", user_id)
@@ -212,8 +203,7 @@ async def on_message(message: cl.Message):
     final_message = cl.Message(content="")
     graph = get_graph()
 
-    # async with cl.Step(name="Reasoning...", type="run", show_input=False) as step:
-    async with cl.Step(name="Thinking...", type="run", show_input=False):
+    async with cl.Step(name="", type="run", show_input=False):
         try:
             graph = get_graph()
 
@@ -242,18 +232,6 @@ async def on_message(message: cl.Message):
         await asyncio.sleep(0.02)  # Delay for effect
         
     await final_message.send()
-
-
-# @cl.on_chat_resume
-# async def resume(thread: ThreadDict):
-#     # Your thread ID from Chainlit
-#     thread_id = thread["id"]  
-    
-#     # Re-instantiate the graph and set the thread_id
-#     # LangGraph will automatically pull the state from Postgres
-#     cl.user_session.set("thread_id", thread_id)
-
-#     await cl.Message(content="Resuming our previous conversation...").send()
 
 
 @cl.on_chat_resume

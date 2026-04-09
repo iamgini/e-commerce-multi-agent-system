@@ -5,10 +5,10 @@ services:
     container_name: garage
     image: docker.io/dxflrs/garage:v2.2.0
     restart: unless-stopped
-    ports:
-      - 3900:3900
-      - 3901:3901
-      - 3903:3903
+    expose:     # Port forward is only needed for access beyond host machine
+      - 3900
+      - 3901
+      - 3903
     networks:
       - garage_net
     volumes:
@@ -24,13 +24,21 @@ services:
       - 3909:3909
     networks:
       - garage_net
+      - public_net
     volumes:
       - ./garage.toml:/etc/garage.toml:ro
     environment:
       API_BASE_URL: "http://garage:3903"      # Since both containers are in the same network, map by container name
       S3_ENDPOINT_URL: "http://garage:3900"   # Since both containers are in the same network, map by container name
+    depends_on:
+      - garage
 
 networks:
   garage_net:
     name: garage_net
     driver: bridge
+    internal: true
+
+  public_net:   # Hides databases and exposes only the web UI
+    name: public_net
+    external: true

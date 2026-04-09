@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
     shm_size: 128mb
     ports:
-      - 5432:5432   # Port forwarding is needed if postgres is not hosted on the same machine
+      - 5432:5432   # Port forward is only needed for access beyond host machine
     networks:
       - pg_net
     volumes:
