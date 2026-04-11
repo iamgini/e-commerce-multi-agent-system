@@ -28,7 +28,7 @@ COPY ["guardrails-ai_setup/main.py", "guardrails-ai_setup/post-install.py", "/us
 # Setup guardrails-ai
 ARG GUARDRAILS_TOKEN
 RUN export GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN && \
-    guardrails configure --token $GUARDRAILS_TOKEN && \
+    guardrails configure --token $GUARDRAILS_TOKEN --disable-metrics --disable-remote-inferencing && \
     guardrails hub install hub://guardrails/toxic_language hub://guardrails/detect_pii hub://guardrails/detect_jailbreak --install-local-models
 
 EXPOSE 8001
