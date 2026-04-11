@@ -26,7 +26,10 @@ RUN mkdir -p /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jai
 COPY ["guardrails-ai_setup/main.py", "guardrails-ai_setup/post-install.py", "/usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak/"]
 
 # Setup guardrails-ai
-RUN guardrails hub install hub://guardrails/toxic_language hub://guardrails/detect_pii hub://guardrails/detect_jailbreak --install-local-models
+ARG DOTENV_PRIVATE_KEY_CI
+RUN export GUARDRAILS_TOKEN=$(DOTENV_PRIVATE_KEY_CI=$DOTENV_PRIVATE_KEY_CI dotenvx get GUARDRAILS_API_KEY) && \
+    guardrails hub install --token $GUARDRAILS_TOKEN && \
+    guardrails hub install hub://guardrails/toxic_language hub://guardrails/detect_pii hub://guardrails/detect_jailbreak --install-local-models
 
 EXPOSE 8001
 
