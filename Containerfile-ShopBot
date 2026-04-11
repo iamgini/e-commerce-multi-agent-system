@@ -23,7 +23,8 @@ COPY . .
 
 # Replace bugged file with hotfix file (for detect_jailbreak)
 RUN mkdir -p /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak
-COPY ["guardrails-ai_setup/main.py", "guardrails-ai_setup/post-install.py", "/usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak/"]
+COPY guardrails-ai_setup/main.py /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak/
+COPY guardrails-ai_setup/post-install.py /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak/
 
 # Setup guardrails-ai
 ARG GUARDRAILS_TOKEN
