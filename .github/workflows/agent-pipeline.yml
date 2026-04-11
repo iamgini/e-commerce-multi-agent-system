@@ -95,7 +95,8 @@ jobs:
       - name: Build image
         # run: podman build --file Containerfile-ShopBot -t quay.io/iamgini/shopbot:${{ github.sha }} -t quay.io/iamgini/shopbot:latest .
         run: |
-          podman build --file Containerfile-ShopBot \
+          podman build --build-arg GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN \
+            --file Containerfile-ShopBot \
             -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
             -t quay.io/iamgini/shopbot:latest \
             .
@@ -105,7 +106,7 @@ jobs:
           podman push quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
           podman push quay.io/iamgini/shopbot:latest
     env:
-      DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
+      GUARDRAILS_TOKEN: ${{ secrets.GUARDRAILS_TOKEN }}
 
   deploy:
     needs: build-and-push
