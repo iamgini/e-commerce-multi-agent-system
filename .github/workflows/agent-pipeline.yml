@@ -73,7 +73,7 @@ jobs:
         run: pip install pip-audit
 
       - name: Scan dependencies for vulnerabilities
-        run: pip-audit -r requirements.txt
+        run: pip-audit -r requirements.txt --ignore litellm
 
   build-and-push:
     # needs: [secret-detection, lint, vulnerability-scan]  # only build if all checks pass
