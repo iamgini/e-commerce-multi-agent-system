@@ -32,8 +32,8 @@ ARG GUARDRAILS_TOKEN
 RUN export GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN && \
     guardrails configure --token $GUARDRAILS_TOKEN --disable-metrics --disable-remote-inferencing && \
     guardrails hub install hub://guardrails/toxic_language --install-local-models && \
-    guardrails hub install hub://guardrails/detect_pii --install-local-models
-#    guardrails hub install hub://guardrails/detect_jailbreak --install-local-models
+    guardrails hub install hub://guardrails/detect_pii --install-local-models && \
+    guardrails hub install hub://guardrails/detect_jailbreak --install-local-models || true
 
 EXPOSE 8001 
 
