@@ -137,8 +137,11 @@ def recommendation_agent_node(state: dict, config: RunnableConfig = None) -> dic
     response = llm_with_tools.invoke(messages, config=config)
     
     user_id = config.get("configurable", {}).get("user_id", "unknown_user")
+    session_id = config.get("configurable", {}).get("thread_id", "no_id")
+    
     logger.info(
        f"USER_ID: {user_id} | "
+       f"SESSION_ID: {session_id} | "
        f"{format_agent_response(response)}"
        )
     
