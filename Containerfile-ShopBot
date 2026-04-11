@@ -23,16 +23,19 @@ COPY . .
 
 # Replace bugged file with hotfix file (for detect_jailbreak)
 # RUN mkdir -p /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak
-COPY guardrails-ai_setup/main.py /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak/
-COPY guardrails-ai_setup/post-install.py /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak/
+COPY guardrails-ai_setup/guardrails_grhub_detect_jailbreak /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak/
+COPY guardrails-ai_setup/guardrails_grhub_detect_jailbreak-0.1.6.dist-info /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak-0.1.6.dist-info/
+RUN python guardrails-ai_setup/post-install.py
 
 # Setup guardrails-ai
 ARG GUARDRAILS_TOKEN
 RUN export GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN && \
     guardrails configure --token $GUARDRAILS_TOKEN --disable-metrics --disable-remote-inferencing && \
-    guardrails hub install hub://guardrails/toxic_language hub://guardrails/detect_pii hub://guardrails/detect_jailbreak --install-local-models
+    guardrails hub install hub://guardrails/toxic_language --install-local-models && \
+    guardrails hub install hub://guardrails/detect_pii --install-local-models
+#    guardrails hub install hub://guardrails/detect_jailbreak --install-local-models
 
-EXPOSE 8001
+EXPOSE 8001 
 
 # Before (broken — dotenvx never runs, .env.ci stays encrypted)
 # CMD ["chainlit", "run", "chainlit_app.py", "--port", "8001", "--host", "0.0.0.0"]
