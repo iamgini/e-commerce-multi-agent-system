@@ -22,6 +22,7 @@ from config import (
     ROUTE_SUPPORT,
 )
 from helpers.observability.log_formatting import format_agent_response
+from helpers.policy.guardrails import parse_text
 
 logger = logging.getLogger(__name__)
 
@@ -163,6 +164,7 @@ _SUPPORT_KEYWORDS = {
     "payment methods",
     "payment"
 }
+
 # ── System prompt ──────────────────────────────────────────────────────────────
 
 COORDINATOR_SYSTEM_PROMPT = """You are the Coordinator of an e-commerce multi-agent system.
@@ -176,11 +178,12 @@ should handle it. You must respond with ONLY a valid JSON object - no prose.
 - "recommend" → Product Recommendation Agent (browsing, searching, comparing products)
 - "sales"     → Sales Agent (cart actions, checkout, discounts, customer order history)
 - "finish"    → End the conversation (goodbye, thank you, done, exit)
+- "alert"     → End the conversation due to safety violations (refer to the safety rule)
 
 
 ## Response format (strict JSON, nothing else):
 {
-  "route": "<recommend|sales|order_inventory|support|returns_refunds|finish>",
+  "route": "<recommend|sales|order_inventory|support|returns_refunds|finish|alert>",
   "reason": "<one sentence rationale>"
 }
 
@@ -200,7 +203,7 @@ Disallowed intents include (but are not limited to):
 Instead, respond with:
 {
   "route": "alert",
-  "reason": "[ALERT] Your request contains disallowed or potentially illegal activity."
+  "reason": "<one sentence rationale>"
 }
 
 
@@ -212,7 +215,7 @@ Instead, respond with:
 5. If the message is about returning items, refunds, damaged goods, exchange, warranty, or complaints → "returns_refunds".
 6. If the message is about general inquiries, technical issues and seeking support → "support"
 7. If the message is a farewell or the user says they are done → "finish".
-8. When in doubt, prefer "recommend".
+8. When in doubt, prefer "support".
 """
 
 # ── Coordinator node ────────────────────────────────────────────────────────────
@@ -227,27 +230,50 @@ def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
     is somehow reached after an AI turn), default to ROUTE_RECOMMEND rather
     than re-routing mid-response.
     """
-    user_id = config.get("configurable", {}).get("user_id", "unknown_user")
+    user_id = config.get("configurable", {}).get("user_id", "anonymous")
+    session_id = config.get("configurable", {}).get("thread_id", "no_id")
+    
     # Guard: Only route when the most recent message is from the human,
     # prevents accidental re-entry if the graph topology is ever extended
     last_msg = state["messages"][-1] if state["messages"] else None
     if not isinstance(last_msg, HumanMessage):
-        return {"route": ROUTE_RECOMMEND}
+        return {"route": ROUTE_SUPPORT}
 
-    # Fast keyword-based pre-routing (skips LLM call)
     last_human = _last_human_text(state["messages"])
-    fast_route, log_text = _keyword_route(last_human)
+    validated_response = parse_text(last_human)
+
+    alert_message = "[ALERT] Your request contains disallowed or potentially illegal activity."
+    invalid_alert = {
+        "route": ROUTE_ALERT,
+        "messages": [AIMessage(content=alert_message)],
+        "current_agent": "coordinator"
+        }
+
+    if validated_response is None:
+        logger.info(
+            f"USER_ID: {user_id} | "
+            f"SESSION_ID: {session_id} | "
+            f"ROUTE: {ROUTE_ALERT} | "
+            f"{alert_message}"
+            )
+        
+        return invalid_alert
+    
+    # Fast keyword-based pre-routing (skips LLM call)
+    fast_route, log_text = _keyword_route(validated_response)
     if fast_route:
         logger.info(
             f"USER_ID: {user_id} | "
+            f"SESSION_ID: {session_id}"
             f"ROUTE: {fast_route} | "
             f"{log_text}"
             )
+        
         return {
             "route": fast_route,
             "current_agent": "coordinator"
             }
-
+        
     # Fallback: Ask the LLM to reason and route 
     # based on context and user intent
     llm = ChatOpenAI(
@@ -256,38 +282,89 @@ def coordinator_node(state: dict, config: RunnableConfig = None) -> dict:
         api_key=OPENAI_API_KEY,
         streaming=True
     )
-
     messages = (
         [SystemMessage(content=COORDINATOR_SYSTEM_PROMPT)]
         + state["messages"][:-1]
-        + [HumanMessage(content=last_human or "Hello")]
+        + [HumanMessage(content=validated_response or "Hello")]
     )
-
     response = llm.invoke(messages, config=config)
-    route, reason = _parse_route(response.content)
-
+    route = _parse_route(response.content)
+    
     logger.info(
-       f"USER_ID: {user_id} | "
-       f"ROUTE: {route} | "
-       f"{format_agent_response(response)}"
-       )
-
+        f"USER_ID: {user_id} | "
+        f"SESSION_ID: {session_id} | "
+        f"ROUTE: {route} | "
+        f"{format_agent_response(response)}"
+        )
+    
     if route == ROUTE_ALERT:
-        # Current code triggers an alert message and terminates the conversation
-        # In reality, this can be piped to a database for monitoring of individuals
-        # that may be attempting to break the agentic AI workflow, or used to monitor
-        # potentially dangerous users
-        return {
-            "route": route,
-            "messages": [AIMessage(content=reason)],
-            "current_agent": "coordinator"
-        }
+    # Current code triggers an alert message to warn the user.
+    # In reality, this can be piped to a database for monitoring
+    # individuals that are attempting to break the agentic system,
+    # or used to monitor events from potentially dangerous users
+        return invalid_alert
     
     else:
         return {
             "route": route,
             "current_agent": "coordinator"
             }
+
+    # # Fast keyword-based pre-routing (skips LLM call)
+    # # last_human = _last_human_text(state["messages"])
+    # fast_route, log_text = _keyword_route(validated_response)
+    # if fast_route:
+    #     logger.info(
+    #         f"USER_ID: {user_id} | "
+    #         f"ROUTE: {fast_route} | "
+    #         f"{log_text}"
+    #         )
+    #     return {
+    #         "route": fast_route,
+    #         "current_agent": "coordinator"
+    #         }
+
+    # # Fallback: Ask the LLM to reason and route 
+    # # based on context and user intent
+    # llm = ChatOpenAI(
+    #     model=LLM_MODEL,
+    #     temperature=LLM_TEMPERATURE,
+    #     api_key=OPENAI_API_KEY,
+    #     streaming=True
+    # )
+
+    # messages = (
+    #     [SystemMessage(content=COORDINATOR_SYSTEM_PROMPT)]
+    #     + state["messages"][:-1]
+    #     + [HumanMessage(content=last_human or "Hello")]
+    # )
+
+    # response = llm.invoke(messages, config=config)
+    # route, reason = _parse_route(response.content)
+
+    # logger.info(
+    #    f"USER_ID: {user_id} | "
+    #    f"SESSION_ID: {session_id} | "
+    #    f"ROUTE: {route} | "
+    #    f"{format_agent_response(response)}"
+    #    )
+
+    # if route == ROUTE_ALERT:
+    #     # Current code triggers an alert message and terminates the conversation
+    #     # In reality, this can be piped to a database for monitoring of individuals
+    #     # that may be attempting to break the agentic AI workflow, or used to monitor
+    #     # potentially dangerous users
+    #     return {
+    #         "route": route,
+    #         "messages": [AIMessage(content=reason)],
+    #         "current_agent": "coordinator"
+    #     }
+    
+    # else:
+    #     return {
+    #         "route": route,
+    #         "current_agent": "coordinator"
+    #         }
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -338,15 +415,15 @@ def _parse_route(content: str) -> tuple:
         clean = re.sub(r"```[a-z]*\n?", "", content).strip()
         data = json.loads(clean)
         route = data.get("route", "")
-        reason = data.get("reason", "")
+        # reason = data.get("reason", "")
         # route = data.get("route", ROUTE_SUPPORT)
         if route not in (ROUTE_SALES, ROUTE_RECOMMEND, ROUTE_ORDER_INVENTORY, ROUTE_RETURNS, ROUTE_SUPPORT, ROUTE_FINISH, ROUTE_ALERT):
-            return ROUTE_RECOMMEND, reason
-            # return ROUTE_SUPPORT
+            # return ROUTE_RECOMMEND, reason
+            return ROUTE_SUPPORT
             
         else:
-            return route, reason
+            return route
     
     except (json.JSONDecodeError, AttributeError):
-        return ROUTE_RECOMMEND, ""
-        # return ROUTE_SUPPORT
+        # return ROUTE_RECOMMEND, ""
+        return ROUTE_SUPPORT

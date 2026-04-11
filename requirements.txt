@@ -1,11 +1,10 @@
-#--extra-index-url https://download.pytorch.org/whl/cpu
-#vijil-dome
-
 langchain
 langchain-openai
 langchain-core
 langgraph
 langgraph-checkpoint-postgres
+guardrails-ai
+torch
 python-dotenv
 dotenvx
 ddgs

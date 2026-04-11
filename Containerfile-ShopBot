@@ -18,8 +18,15 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # Copy the full project
 COPY . .
 
-# Replace bugged file with hotfix file
-COPY chainlit-setup/chainlit_data_layer.py /usr/local/lib/python3.12/site-packages/chainlit/data
+# Replace bugged file with hotfix file (for chainlit==2.10.1)
+# COPY chainlit_setup/chainlit_data_layer.py /usr/local/lib/python3.12/site-packages/chainlit/data
+
+# Replace bugged file with hotfix file (for detect_jailbreak)
+RUN mkdir -p /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak
+COPY ["guardrails-ai_setup/main.py", "guardrails-ai_setup/config.py", "/usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak/"]
+
+# Setup guardrails-ai
+RUN guardrails hub install hub://guardrails/toxic_language hub://guardrails/detect_pii hub://guardrails/detect_jailbreak --install-local-models
 
 EXPOSE 8001
 

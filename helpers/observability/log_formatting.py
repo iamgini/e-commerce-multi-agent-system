@@ -29,16 +29,18 @@ def tool_tracing(func):
     def wrapper(*args, **kwargs):
         config = kwargs.get("config")
         user_id = "unknown_user"
-        if isinstance(config, dict) or hasattr(config, "get"):
-            user_id = config.get("metadata", {}).get("user_id", "unknown_user")
+        print_kwargs = {k: v for k, v in kwargs.items() if k != "config"}
         
-        logger.info(f"USER_ID: {user_id} | TOOL_START | {func.__name__} | Args: {args} Kwargs: {kwargs}")
+        if isinstance(config, dict) or hasattr(config, "get"):
+            user_id = config.get("metadata", {}).get("user_id", "anonymous")
+            session_id = config.get("metadata", {}).get("thread_id", "no_id")
+        logger.info(f"USER_ID: {user_id} | SESSION_ID: {session_id} | TOOL_START | {func.__name__} | Args: {args} Kwargs: {print_kwargs}")
         
         try:
             result = func(*args, **kwargs)
-            logger.info(f"USER_ID: {user_id} | TOOL_SUCCESS | {func.__name__} | Result: {result}")
+            logger.info(f"USER_ID: {user_id} | SESSION_ID: {session_id} | TOOL_SUCCESS | {func.__name__} | Result: {result}")
             return result
         except Exception as e:
-            logger.error(f"USER_ID: {user_id} | TOOL_ERROR | {func.__name__} | Error: {str(e)}")
+            logger.error(f"USER_ID: {user_id} | SESSION_ID: {session_id}| TOOL_ERROR | {func.__name__} | Error: {str(e)}")
             raise e
     return wrapper

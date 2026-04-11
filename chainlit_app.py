@@ -17,7 +17,6 @@ import sys
 import chainlit as cl
 from chainlit.types import ThreadDict
 from langchain_core.messages import AIMessage, HumanMessage
-from ulid import ULID
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -185,7 +184,7 @@ async def on_message(message: cl.Message):
     """Called on every user message."""
     history: list = cl.user_session.get("message_history", [])
     user_id: str =  cl.user_session.get("user_id", "anonymous")
-    session_id: str = cl.user_session.get("thread_id", str(ULID()))
+    session_id: str = cl.user_session.get("thread_id", "no_id")
 
     logger.info(message.content) 
     

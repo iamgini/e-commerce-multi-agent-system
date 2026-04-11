@@ -66,7 +66,7 @@ def route_from_coordinator(state: AgentState) -> str:
         return END
     if route == ROUTE_FINISH:
         return END
-    return RECOMMENDATION_NODE  # default
+    return CUSTOMER_SUPPORT_NODE  # default
 
 
 def should_continue_sales(state: AgentState) -> str:
