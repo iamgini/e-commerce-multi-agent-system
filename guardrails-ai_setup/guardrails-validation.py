@@ -23,13 +23,13 @@ logging.getLogger("presidio-analyzer").setLevel(logging.ERROR)
 validators = [
     ToxicLanguage(threshold=0.5, validation_method="sentence", on_fail="refrain"),
     DetectPII(pii_entities="pii", on_fail="fix"),
-    DetectJailbreak(threshold=0.705, device='cpu', on_fail='refrain'),
+    DetectJailbreak(threshold=0.74, device='cpu', on_fail='refrain'),
 ]
 
 guard = Guard().use(validators=validators)
 
 # Prepare dataset
-df = pd.read_csv(f"{os.getcwd()}\\guardrails-ai_setup\\jailbreak_dataset_full_balanced.csv")
+df = pd.read_csv(f"{os.getcwd()}\\guardrails-ai_setup\\jackhhao\\jailbreak_dataset_full_balanced.csv")
 mapping = {'benign': True, 'jailbreak': False}
 # df['type'] = df['type'].map(mapping)
 
@@ -78,7 +78,7 @@ print(df_cm)
 # Generate results
 df["guardrail_preds"] = results
 df["guardrail_reason"] = reason
-df.to_csv(f"{os.getcwd()}\\guardrails-ai_setup\\jailbreak_results_cpu.csv", index=False)
+df.to_csv(f"{os.getcwd()}\\guardrails-ai_setup\\jackhhao\\jailbreak_results_cpu.csv", index=False)
 
 
 # strings = [
