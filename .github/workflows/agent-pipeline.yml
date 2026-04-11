@@ -104,6 +104,8 @@ jobs:
         run: |
           podman push quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
           podman push quay.io/iamgini/shopbot:latest
+    env:
+      DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
 
   deploy:
     needs: build-and-push
