@@ -152,8 +152,8 @@ jobs:
               --network ollama_net \ 
               -p 8001:8001 \
               -e DOTENV_PRIVATE_KEY_CI=$DOTENV_PRIVATE_KEY_CI \
-          #    -e OPENAI_API_KEY=$OPENAI_API_KEY \
               $IMAGE
+          #    -e OPENAI_API_KEY=$OPENAI_API_KEY \
         env:
           DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
           # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
