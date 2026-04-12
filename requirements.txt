@@ -21,7 +21,7 @@ fastapi
 uvicorn[standard]
 chainlit
 bcrypt
-pip install git+https://github.com/guardrails-ai/sainatha_prompt_injection_detector.git@main
+git+https://github.com/guardrails-ai/sainatha_prompt_injection_detector.git@main
 
 # langgraph-checkpoint-sqlite
 # openai
