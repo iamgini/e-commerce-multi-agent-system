@@ -48,14 +48,6 @@
       ],
       "installed_at": "2026-04-12T05:42:08.931168+00:00",
       "package_name": "validator"
-    },
-    "guardrails/response_evaluator": {
-      "import_path": "guardrails_grhub_response_evaluator",
-      "exports": [
-        "ResponseEvaluator"
-      ],
-      "installed_at": "2026-04-12T08:28:19.395570+00:00",
-      "package_name": "guardrails-grhub-response-evaluator"
     }
   }
 }

@@ -24,9 +24,9 @@ COPY . .
 
 # Replace bugged file with hotfix file (for detect_jailbreak)
 # RUN mkdir -p /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak
-COPY guardrails-ai_setup/guardrails_grhub_detect_jailbreak /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak/
-COPY guardrails-ai_setup/guardrails_grhub_detect_jailbreak-0.1.6.dist-info /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak-0.1.6.dist-info/
-RUN python guardrails-ai_setup/post-install.py
+# COPY guardrails-ai_setup/guardrails_grhub_detect_jailbreak /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak/
+# COPY guardrails-ai_setup/guardrails_grhub_detect_jailbreak-0.1.6.dist-info /usr/local/lib/python3.12/site-packages/guardrails_grhub_detect_jailbreak-0.1.6.dist-info/
+# RUN python guardrails-ai_setup/post-install.py
 
 # Setup guardrails-ai
 ARG GUARDRAILS_TOKEN
@@ -34,7 +34,11 @@ RUN export GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN && \
     guardrails configure --token $GUARDRAILS_TOKEN --disable-metrics --disable-remote-inferencing && \
     guardrails hub install hub://guardrails/toxic_language --install-local-models && \
     guardrails hub install hub://guardrails/detect_pii --install-local-models && \
-    guardrails hub install hub://guardrails/detect_jailbreak --install-local-models || true
+    guardrails hub install hub://guardrails/unusual_prompt --install-local-models
+
+# Setup prompt_injection_detector 
+COPY guardrails-ai_setup/prompt_injection/.guardrails/ .guardrails/
+COPY guardrails-ai_setup/prompt_injection/__init__.pyi /usr/local/lib/python3.12/site-packages/guardrails/hub/
 
 EXPOSE 8001 
 

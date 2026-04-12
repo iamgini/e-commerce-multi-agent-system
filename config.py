@@ -75,3 +75,7 @@ DISCOUNT_CODES: dict[str, float] = {
     "SAVE20": 0.20,
     "WELCOME": 0.15,
 }
+
+# ── Guardrails ────────────────────────────────────────────────────────────────
+GUARDRAILS_MODEL: str = os.environ.get("GUARDRAILS_MODEL")
+GUARDRAILS_LLM_ENDPOINT: str = os.environ.get("GUARDRAILS_LLM_ENDPOINT")
