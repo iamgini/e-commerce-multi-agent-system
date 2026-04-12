@@ -1,55 +1,32 @@
-import json
-from pathlib import Path
-# from typing import Dict
+import functools
+import os
 
 # Logger
 from helpers.observability.logger import log_event
 
-# State
-# from state import AgentState
-
-import os
-
 from langchain_openai import ChatOpenAI
 
 from config import OPENAI_API_KEY, LLM_MODEL, LLM_TEMPERATURE
+from tools.customer_support_tools import search_faq, get_top_score
 
-# Switch LLM provider via .env:
-# LLM_PROVIDER=ollama  → free, local (default)
-# LLM_PROVIDER=openai  → uses OPENAI_API_KEY
+# ==========================================================
+# LLM — lazy singleton (Module 4)
+# Instantiated on first call, not at import time.
+# Swap provider via LLM_PROVIDER env var:
+#   LLM_PROVIDER=openai  (default) → uses OPENAI_API_KEY
+#   LLM_PROVIDER=ollama             → local, no API key needed
+# Swap Ollama model via OLLAMA_MODEL env var (default: llama3)
+# ==========================================================
 
-_provider = os.getenv("LLM_PROVIDER", "openai").lower()
-
-if _provider == "openai":
-    llm = ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE, api_key=OPENAI_API_KEY)
-else:
+@functools.lru_cache(maxsize=1)
+def _get_llm():
+    provider = os.getenv("LLM_PROVIDER", "openai").lower()
+    if provider == "openai":
+        return ChatOpenAI(model=LLM_MODEL, temperature=LLM_TEMPERATURE, api_key=OPENAI_API_KEY)
     from langchain_ollama import OllamaLLM
-    llm = OllamaLLM(model="llama3")
+    ollama_model = os.getenv("OLLAMA_MODEL", "llama3")
+    return OllamaLLM(model=ollama_model)
 
-# ==========================================================
-# Load FAQ Knowledge Base
-# ==========================================================
-
-# def load_faq() -> str:
-#     faq_path = Path("data/faq.json")
-
-#     if not faq_path.exists():
-#         raise FileNotFoundError("FAQ file not found at data/faq.json")
-
-#     try:
-#         with open(faq_path, "r") as f:
-#             faq_data = json.load(f)
-#     except json.JSONDecodeError:
-#         raise ValueError("faq.json is not valid JSON.")
-
-#     formatted = ""
-#     for item in faq_data:
-#         formatted += f"Q: {item['question']}\n"
-#         formatted += f"A: {item['answer']}\n\n"
-
-#     return formatted
-
-from tools.customer_support_tools import search_faq
 
 # ==========================================================
 # Responsible Prompt Design (Module 1)
@@ -76,24 +53,41 @@ Answer:
 
 
 # ==========================================================
-# Confidence Estimation (Explainability)
+# Confidence Estimation (Module 1 — Explainability)
+# Score-aware: low keyword overlap → lower confidence.
 # ==========================================================
 
-def estimate_confidence(response: str) -> float:
+_CONFIDENCE_HIGH  = 0.90
+_CONFIDENCE_MED   = 0.70
+_CONFIDENCE_LOW   = 0.50
+_HIGH_SCORE_THRESHOLD = 3
+_LOW_SCORE_THRESHOLD  = 1
+
+def estimate_confidence(response: str, faq_score: int) -> float:
+    """
+    Return a confidence float based on the FAQ keyword-match score.
+    0.0  → ESCALATE trigger
+    0.50 → weak match  (score == 1)
+    0.70 → medium match (score == 2)
+    0.90 → strong match (score >= 3)
+    """
     if "ESCALATE" in response:
         return 0.0
-    return 0.85  # simple static estimate for demo
+    if faq_score >= _HIGH_SCORE_THRESHOLD:
+        return _CONFIDENCE_HIGH
+    if faq_score >= _LOW_SCORE_THRESHOLD:
+        return _CONFIDENCE_MED
+    return _CONFIDENCE_LOW
 
 
 # ==========================================================
-# Main Agent Function (LangGraph Node)
+# Main Agent Function (LangGraph Node) (Module 3)
 # ==========================================================
-
 
 def customer_support_agent(state: dict) -> dict:
     log_event("Customer Support Agent invoked")
 
-    # Extract query from messages (LangGraph) or direct user_query (test)
+    # --- Extract query (single block — duplicate removed) ---
     if "user_query" in state and state["user_query"]:
         query = state["user_query"]
     elif "messages" in state and state["messages"]:
@@ -105,48 +99,78 @@ def customer_support_agent(state: dict) -> dict:
     else:
         query = ""
 
-    # Extract query from messages (LangGraph) or direct user_query (test)
-    if "user_query" in state and state["user_query"]:
-        query = state["user_query"]
-    elif "messages" in state and state["messages"]:
-        from langchain_core.messages import HumanMessage
-        query = next(
-            (m.content for m in reversed(state["messages"]) if isinstance(m, HumanMessage)),
-            ""
-        )
-    else:
-        query = ""
+    # Log query for audit trail (Module 2 — logging)
+    log_event(f"Customer Support Query | length={len(query)} chars")
 
-    # faq_context = load_faq()
+    # --- Retrieve FAQ context (controlled knowledge source, Module 2) ---
     faq_context = search_faq.invoke(query)
-    prompt = build_prompt(query=query, faq_context=faq_context)
 
-    result = llm.invoke(prompt)
-    if hasattr(result, "content"):
-        result = result.content
-
-    if "ESCALATE" in result:
-        state["response"] = None
-        state["escalate"] = True
-        state["confidence"] = 0.0
-        state["explanation"] = "No matching FAQ found. Escalated to human agent."
+    # Guard: if FAQ tool itself errored, escalate immediately (Module 2)
+    if faq_context.startswith("FAQ unavailable:"):
+        log_event(f"FAQ unavailable — escalating | reason={faq_context}")
+        escalate    = True
+        confidence  = 0.0
+        explanation = f"FAQ knowledge base unavailable: {faq_context}"
+        response    = None
     else:
-        state["response"] = result.strip()
-        state["escalate"] = False
-        state["confidence"] = estimate_confidence(result)
-        state["explanation"] = "Response generated using internal FAQ knowledge base."
+        # --- LLM call (Module 4 — lazy, replaceable LLM) ---
+        prompt = build_prompt(query=query, faq_context=faq_context)
+        try:
+            result = _get_llm().invoke(prompt)
+        except Exception as exc:
+            log_event(f"LLM call failed | error={exc}")
+            escalate    = True
+            confidence  = 0.0
+            explanation = "LLM unavailable. Escalated to human agent."
+            response    = None
+        else:
+            if hasattr(result, "content"):
+                result = result.content
 
-    log_event(f"Support Response Generated | Escalate={state.get('escalate', False)}")
+            # --- Score-aware confidence (Module 1 — explainability) ---
+            faq_score   = get_top_score(query)
+            escalate    = "ESCALATE" in result
+            confidence  = estimate_confidence(result, faq_score)
+            if escalate:
+                response    = None
+                explanation = (
+                    f"No FAQ match found (keyword score={faq_score}). "
+                    "Escalated to human agent."
+                )
+            else:
+                response    = result.strip()
+                explanation = (
+                    f"Response generated from FAQ knowledge base "
+                    f"(keyword score={faq_score}, confidence={confidence:.2f})."
+                )
 
-    # When called from LangGraph (messages-based state)
+    log_event(
+        f"Support Response Generated | escalate={escalate} "
+        f"| confidence={confidence} | explanation={explanation}"
+    )
+
+    # --- Return path: LangGraph (messages-based state) (Module 3) ---
     if "messages" in state:
         from langchain_core.messages import AIMessage
-        reply = "I'm sorry, I don't have that information. Let me connect you with a human agent." \
-            if state.get("escalate") else state.get("response", "")
+        reply = (
+            "I'm sorry, I don't have that information. "
+            "Let me connect you with a human agent."
+            if escalate else response or ""
+        )
         return {
-            "messages": [AIMessage(content=reply)],
+            "messages":    [AIMessage(content=reply)],
             "current_agent": "customer_support_agent",
+            # Confidence & explanation flow into shared AgentState
+            "confidence":  confidence,
+            "explanation": explanation,
+            "escalate":    escalate,
         }
 
-    # When called directly from test file
-    return state
+    # --- Return path: direct test call ---
+    return {
+        **state,
+        "response":    response,
+        "escalate":    escalate,
+        "confidence":  confidence,
+        "explanation": explanation,
+    }
