@@ -47,6 +47,9 @@ class AgentState(TypedDict):
     current_agent: str  # which agent last responded
     user_id: str  # customer identifier passed through all nodes
     session_id: str
+    confidence: float   # added
+    explanation: str    # added
+    escalate: bool      # added
 
 # ── Edge conditions ────────────────────────────────────────────────────────────
 
@@ -136,7 +139,7 @@ def build_graph(checkpointer: PostgresSaver) -> StateGraph:
     builder.add_node("order_inventory_tools", ToolNode(ORDER_INVENTORY_TOOLS))
     builder.add_node("returns_tools", ToolNode(RETURNS_TOOLS))
     # builder.add_node() ## Insert your tool node here
-   
+
 
 
     # ── Edges ──────────────────────────────────────────────────────────────────

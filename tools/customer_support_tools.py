@@ -23,6 +23,21 @@ def _score(query: str, item: dict) -> int:
     return sum(1 for t in tokens if t in text)
 
 
+def get_top_score(query: str) -> int:
+    """
+    Return the highest keyword-match score across all FAQ entries for a given
+    query.  Returns 0 if the FAQ is unavailable or no entries match.
+    Used by customer_support_agent to compute score-aware confidence.
+    """
+    try:
+        faq_data = _load_faq_data()
+    except (FileNotFoundError, ValueError):
+        return 0
+    if not faq_data:
+        return 0
+    return max(_score(query, item) for item in faq_data)
+
+
 @tool
 def search_faq(query: str) -> str:
     """
@@ -38,6 +53,7 @@ def search_faq(query: str) -> str:
     try:
         faq_data = _load_faq_data()
     except (FileNotFoundError, ValueError) as e:
+        logger.error("FAQ load failed: %s", e)
         return f"FAQ unavailable: {e}"
 
     scored = sorted(faq_data, key=lambda item: _score(query, item), reverse=True)
