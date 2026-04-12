@@ -73,7 +73,7 @@ jobs:
         run: pip install pip-audit
 
       - name: Scan dependencies for vulnerabilities
-        run: pip-audit -r requirements.txt --ignore litellm
+        run: pip-audit -r requirements.txt --ignore-vuln CVE-2026-35029 --ignore-vuln CVE-2026-35030 --ignore-vuln GHSA-69x8-hrgq-fjj8
 
   build-and-push:
     # needs: [secret-detection, lint, vulnerability-scan]  # only build if all checks pass
@@ -95,7 +95,8 @@ jobs:
       - name: Build image
         # run: podman build --file Containerfile-ShopBot -t quay.io/iamgini/shopbot:${{ github.sha }} -t quay.io/iamgini/shopbot:latest .
         run: |
-          podman build --file Containerfile-ShopBot \
+          podman build --build-arg GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN \
+            --file Containerfile-ShopBot \
             -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
             -t quay.io/iamgini/shopbot:latest \
             .
@@ -104,6 +105,8 @@ jobs:
         run: |
           podman push quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
           podman push quay.io/iamgini/shopbot:latest
+    env:
+      GUARDRAILS_TOKEN: ${{ secrets.GUARDRAILS_TOKEN }}
 
   deploy:
     needs: build-and-push
@@ -151,4 +154,4 @@ jobs:
               $IMAGE
         env:
           DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

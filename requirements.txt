@@ -1,13 +1,17 @@
+# --extra-index-url https://download.pytorch.org/whl/cpu
+
 langchain
 langchain-openai
 langchain-core
 langgraph
 langgraph-checkpoint-postgres
 guardrails-ai
-torch
+# torch
+# transformers
 python-dotenv
-dotenvx
 ddgs
+# cached-path
+# rich
 pydantic
 prisma
 boto3
@@ -17,6 +21,7 @@ fastapi
 uvicorn[standard]
 chainlit
 bcrypt
+pip install git+https://github.com/guardrails-ai/sainatha_prompt_injection_detector.git@main
 
 # langgraph-checkpoint-sqlite
 # openai
