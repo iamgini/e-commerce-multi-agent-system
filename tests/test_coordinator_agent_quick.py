@@ -21,5 +21,6 @@ if __name__ == "__main__":
     run_case("Recommendation", "Can you recommend a good wireless mouse?")
     run_case("Sales", "Add the keyboard to my cart and show my total")
     run_case("Order Inventory", "Create a purchase order and show low stock items")
+    run_case("Return", "Create a return request for my order")
     run_case("Support", "I need help with my account")
     run_case("Finish", "Thanks, bye")
