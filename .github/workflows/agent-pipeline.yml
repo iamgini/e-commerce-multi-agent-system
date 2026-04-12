@@ -137,7 +137,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: DOTENV_PRIVATE_KEY_CI,OPENAI_API_KEY        # ← pass to remote shell
+          envs: DOTENV_PRIVATE_KEY_CI #,OPENAI_API_KEY        # ← pass to remote shell
           script: |
             IMAGE=quay.io/iamgini/shopbot:${{ needs.build-and-push.outputs.image_tag }}
 
