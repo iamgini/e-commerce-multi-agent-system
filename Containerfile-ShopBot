@@ -33,9 +33,10 @@ COPY . .
 ARG GUARDRAILS_TOKEN
 RUN export GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN && \
     guardrails configure --token $GUARDRAILS_TOKEN --disable-metrics --disable-remote-inferencing && \
-    guardrails hub install hub://guardrails/toxic_language --install-local-models && \
-    guardrails hub install hub://guardrails/detect_pii --install-local-models && \
-    guardrails hub install hub://guardrails/unusual_prompt --install-local-models
+    guardrails hub install hub://guardrails/toxic_language --install-local-models || true
+
+RUN guardrails hub install hub://guardrails/detect_pii --install-local-models && \
+    guardrails hub install hub://guardrails/unusual_prompt --install-local-models || true
 
 # Setup prompt_injection_detector 
 COPY guardrails-ai_setup/prompt_injection/.guardrails/ /app/.guardrails/
