@@ -24,9 +24,9 @@ from graph.chainlit_workflow import get_graph
 from helpers.database.users_db import get_user, verify_password
 from scripts.db_setup import initialise_databases
 from scripts.logger_setup import initialise_logger
-from scripts.guardrails_setup import initialize_guardrails
+# from scripts.guardrails_setup import initialize_guardrails
 
-initialize_guardrails()
+# initialize_guardrails()
 initialise_databases()
 # logger = logging.getLogger(__name__)
 
