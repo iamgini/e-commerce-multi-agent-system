@@ -9,7 +9,7 @@ guardrails-ai
 torch
 transformers
 detoxify
-presidio-analyser
+presidio-analyzer
 presidio-anonymizer
 nltk
 python-dotenv
