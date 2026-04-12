@@ -1,7 +1,7 @@
 from typing import Optional
-from scripts.guardrails_setup import initialize_guardrails
+from scripts.guardrails_setup import create_guardrail
 
-guard = initialize_guardrails()
+guard = create_guardrail()
 
 def parse_text(input_text: str) -> Optional[str]:
     """
