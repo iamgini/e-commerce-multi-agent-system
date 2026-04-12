@@ -76,8 +76,8 @@ jobs:
         run: pip-audit -r requirements.txt --ignore-vuln CVE-2026-35029 --ignore-vuln CVE-2026-35030 --ignore-vuln GHSA-69x8-hrgq-fjj8
 
   build-and-push:
-    # needs: [secret-detection, lint, vulnerability-scan]  # only build if all checks pass
-    needs: [secret-detection, vulnerability-scan]  # only build if all checks pass
+    needs: [secret-detection, lint, vulnerability-scan]  # only build if all checks pass
+    # needs: [secret-detection, vulnerability-scan]  # only build if all checks pass
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'  # only deploy from main
     outputs:
