@@ -15,14 +15,16 @@ from guardrails.hub import (
     UnusualPrompt,
 )
 
+from config import GUARDRAILS_LLM_ENDPOINT, GUARDRAILS_MODEL
+
 # Because of language detection warnings
 logging.getLogger("presidio-analyzer").setLevel(logging.ERROR)
 logging.getLogger("LiteLLM").setLevel(logging.ERROR)
 
 kwargs = {
     "llm_api": litellm.completion,
-    "model": "ollama/llama3.2:3b",
-    "api_base": "http://localhost:11434"
+    "model": GUARDRAILS_MODEL,
+    "api_base": GUARDRAILS_LLM_ENDPOINT
 }
 
 # Use the Guard with validators
