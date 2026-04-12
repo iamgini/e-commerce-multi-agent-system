@@ -23,13 +23,13 @@ kwargs = {
     }
 
 
-def initialize_guardrails():
-    install("hub://guardrails/toxic_language", install_local_models=True)
-    install("hub://guardrails/detect_pii", install_local_models=True)
-    install("hub://guardrails/unusual_prompt", install_local_models=True)
-    subprocess.run(["cp", "-f", "/app/guardrails-ai_setup/prompt_injection/.guardrails/hub_registry.json", "/app/.guardrails/hub_registry.json"], check=True)
-    subprocess.run(["cp", "-f", "/app/guardrails-ai_setup/prompt_injection/__init__.pyi", "/usr/local/lib/python3.12/site-packages/guardrails/hub/__init__.pyi"], check=True)
-    print("[Guardrails] Completed setup.")
+# def initialize_guardrails():
+#     install("hub://guardrails/toxic_language", install_local_models=True)
+#     install("hub://guardrails/detect_pii", install_local_models=True)
+#     install("hub://guardrails/unusual_prompt", install_local_models=True)
+#     subprocess.run(["cp", "-f", "/app/guardrails-ai_setup/prompt_injection/.guardrails/hub_registry.json", "/app/.guardrails/hub_registry.json"], check=True)
+#     subprocess.run(["cp", "-f", "/app/guardrails-ai_setup/prompt_injection/__init__.pyi", "/usr/local/lib/python3.12/site-packages/guardrails/hub/__init__.pyi"], check=True)
+#     print("[Guardrails] Completed setup.")
 
 
 def create_guardrail() -> Guard:
