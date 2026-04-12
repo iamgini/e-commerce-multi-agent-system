@@ -78,6 +78,7 @@ jobs:
   unit-tests:
     needs: setup
     runs-on: ubuntu-latest
+    if: vars.UNIT_TEST == 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -130,23 +131,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' # && vars.EC2_READY == 'true'
     steps:
-      # - name: Deploy to EC2
-      #   uses: appleboy/ssh-action@v1
-      #   with:
-      #     host: ${{ secrets.EC2_HOST }}
-      #     username: ec2-user
-      #     key: ${{ secrets.EC2_SSH_KEY }}
-      #     script: |
-      #       podman pull quay.io/iamgini/shopbot:latest
-      #       podman stop shopbot || true
-      #       podman rm shopbot || true
-      #       podman run -d \
-      #         --name shopbot \
-      #         --env-file /home/ec2-user/.env \
-      #         --network host \
-      #         -p 8001:8001 \
-      #         quay.io/iamgini/shopbot:latest
-
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
         with:
