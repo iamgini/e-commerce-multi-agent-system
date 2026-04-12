@@ -38,7 +38,7 @@ RUN export GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN && \
     guardrails hub install hub://guardrails/unusual_prompt --install-local-models
 
 # Setup prompt_injection_detector 
-COPY guardrails-ai_setup/prompt_injection/.guardrails/ .guardrails/
+COPY guardrails-ai_setup/prompt_injection/.guardrails/ /app/.guardrails/
 COPY guardrails-ai_setup/prompt_injection/__init__.pyi /usr/local/lib/python3.12/site-packages/guardrails/hub/
 
 EXPOSE 8001 
