@@ -1,4 +1,4 @@
-# --extra-index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
 
 langchain
 langchain-openai
@@ -6,8 +6,12 @@ langchain-core
 langgraph
 langgraph-checkpoint-postgres
 guardrails-ai
-# torch
-# transformers
+torch
+transformers
+detoxify
+presidio-analyser
+presidio-anonymizer
+nltk
 python-dotenv
 ddgs
 # cached-path
