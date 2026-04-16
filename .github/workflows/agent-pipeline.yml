@@ -90,6 +90,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
+      - name: Install guardrails hub validators
+        run: guardrails hub install hub://guardrails/detect_pii --quiet
       - name: Run unit tests
         run: pytest tests/test_coordinator_agent.py tests/test_customer_support_agent.py -v
 
