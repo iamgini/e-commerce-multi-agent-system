@@ -10,6 +10,7 @@ from langgraph.prebuilt import InjectedState
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from helpers.database import order_inventory_db
+
 def _json_default(obj):
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
@@ -56,7 +57,8 @@ def list_purchase_orders(status: Optional[str] = None) -> str:
     """
     orders = order_inventory_db.list_purchase_orders(status=status)
     #return json.dumps(orders, indent=2)
-    return json.dumps(order, indent=2, default=_json_default)
+    #return json.dumps(order, indent=2, default=_json_default)
+    return json.dumps(orders, indent=2, default=_json_default)
 
 
 @tool
@@ -118,7 +120,8 @@ def list_supply_orders(status: Optional[str] = None) -> str:
     """
     orders = order_inventory_db.list_supply_orders(status=status)
     #return json.dumps(orders, indent=2)
-    return json.dumps(order, indent=2, default=_json_default)
+    #return json.dumps(order, indent=2, default=_json_default)
+    return json.dumps(orders, indent=2, default=_json_default)
 
 
 @tool
@@ -160,7 +163,8 @@ def receive_stock(
         note=note,
     )
     #return json.dumps(product, indent=2)
-    return json.dumps(order, indent=2, default=_json_default)
+    #return json.dumps(order, indent=2, default=_json_default)
+    return json.dumps(product, indent=2, default=_json_default)
 
 
 @tool
@@ -208,7 +212,8 @@ def view_stock_by_product(
         low_stock_only=low_stock_only,
     )
     #return json.dumps(results, indent=2)
-    return json.dumps(order, indent=2, default=_json_default)
+    #return json.dumps(order, indent=2, default=_json_default)
+    return json.dumps(results, indent=2, default=_json_default)
 
 
 @tool
@@ -220,7 +225,8 @@ def view_order_history(
     """
     orders = order_inventory_db.get_user_orders(user_id)
     #return json.dumps(orders, indent=2)
-    return json.dumps(order, indent=2, default=_json_default)
+    #return json.dumps(order, indent=2, default=_json_default)
+    return json.dumps(orders, indent=2, default=_json_default)
 
 
 @tool
