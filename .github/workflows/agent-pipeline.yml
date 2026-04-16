@@ -75,7 +75,11 @@ jobs:
         run: pip install pip-audit
 
       - name: Scan dependencies for vulnerabilities
-        run: pip-audit -r requirements.txt --ignore-vuln CVE-2026-35029 --ignore-vuln CVE-2026-35030 --ignore-vuln GHSA-69x8-hrgq-fjj8
+        run: |
+          pip-audit -r requirements.txt \
+            --ignore-vuln CVE-2026-35029 \
+            --ignore-vuln CVE-2026-35030 \
+            --ignore-vuln GHSA-69x8-hrgq-fjj8
 
   # unit-tests:
   #   needs: setup
