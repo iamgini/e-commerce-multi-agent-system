@@ -33,17 +33,6 @@ jobs:
       #   env:
       #     DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
 
-  # secret-detection:
-  #   needs: setup
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-  #     - name: Detect secrets
-  #       uses: gitleaks/gitleaks-action@v2
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   secret-detection:
     needs: setup
     runs-on: ubuntu-latest
@@ -126,12 +115,6 @@ jobs:
         run: echo "version=${{ github.sha }}" >> $GITHUB_OUTPUT
 
       - name: Build image
-        # run: podman build --file Containerfile-ShopBot -t quay.io/iamgini/shopbot:${{ github.sha }} -t quay.io/iamgini/shopbot:latest .
-        # podman build --build-arg GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN \
-        #     --file Containerfile-ShopBot \
-        #     -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
-        #     -t quay.io/iamgini/shopbot:latest \
-        #     .
         run: |
           APP_VERSION=$(date +%Y.%m).${GITHUB_SHA::7}
           podman build --build-arg GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN \
