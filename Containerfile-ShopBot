@@ -38,11 +38,14 @@ RUN guardrails hub install hub://guardrails/detect_pii --install-local-models
 RUN guardrails hub install hub://guardrails/toxic_language --install-local-models
 
 
-# Setup prompt_injection_detector 
+# Setup prompt_injection_detector
 COPY guardrails-ai_setup/prompt_injection/.guardrails/ /app/.guardrails/
 COPY guardrails-ai_setup/prompt_injection/__init__.pyi /usr/local/lib/python3.12/site-packages/guardrails/hub/
 
-EXPOSE 8001 
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION
+
+EXPOSE 8001
 
 # Before (broken — dotenvx never runs, .env.ci stays encrypted)
 # CMD ["chainlit", "run", "chainlit_app.py", "--port", "8001", "--host", "0.0.0.0"]
