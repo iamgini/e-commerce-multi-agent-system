@@ -78,7 +78,7 @@ jobs:
   unit-tests:
     needs: setup
     runs-on: ubuntu-latest
-    if: vars.UNIT_TEST == 'true'
+    # if: vars.UNIT_TEST == 'true'
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
