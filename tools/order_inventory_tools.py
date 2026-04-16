@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from datetime import date, datetime
 from typing import Annotated, Optional
 
 from langchain_core.tools import tool
@@ -9,6 +10,10 @@ from langgraph.prebuilt import InjectedState
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from helpers.database import order_inventory_db
+def _json_default(obj):
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 
 @tool
@@ -40,7 +45,8 @@ def create_purchase_order(
         expected_date=expected_date,
         notes=notes,
     )
-    return json.dumps(order, indent=2)
+   # return json.dumps(order, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 
 @tool
@@ -49,7 +55,8 @@ def list_purchase_orders(status: Optional[str] = None) -> str:
     List purchase orders, optionally filtered by status.
     """
     orders = order_inventory_db.list_purchase_orders(status=status)
-    return json.dumps(orders, indent=2)
+    #return json.dumps(orders, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 
 @tool
@@ -68,8 +75,8 @@ def update_purchase_order(
         expected_date=expected_date,
         notes=notes,
     )
-    return json.dumps(order, indent=2)
-
+    #return json.dumps(order, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 @tool
 def create_supply_order(
@@ -100,7 +107,8 @@ def create_supply_order(
         reference=reference,
         notes=notes,
     )
-    return json.dumps(order, indent=2)
+    #return json.dumps(order, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 
 @tool
@@ -109,7 +117,8 @@ def list_supply_orders(status: Optional[str] = None) -> str:
     List supply orders, optionally filtered by status.
     """
     orders = order_inventory_db.list_supply_orders(status=status)
-    return json.dumps(orders, indent=2)
+    #return json.dumps(orders, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 
 @tool
@@ -128,7 +137,8 @@ def update_supply_order(
         reference=reference,
         notes=notes,
     )
-    return json.dumps(order, indent=2)
+   # return json.dumps(order, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 
 @tool
@@ -149,7 +159,8 @@ def receive_stock(
         reference_id=reference_id,
         note=note,
     )
-    return json.dumps(product, indent=2)
+    #return json.dumps(product, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 
 @tool
@@ -178,7 +189,8 @@ def reduce_stock_on_customer_sale(
         total_amount=total_amount,
         status=status,
     )
-    return json.dumps(order, indent=2)
+    #return json.dumps(order, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 
 @tool
@@ -195,7 +207,8 @@ def view_stock_by_product(
         query=query,
         low_stock_only=low_stock_only,
     )
-    return json.dumps(results, indent=2)
+    #return json.dumps(results, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 
 @tool
@@ -206,7 +219,8 @@ def view_order_history(
     View the current user's order history.
     """
     orders = order_inventory_db.get_user_orders(user_id)
-    return json.dumps(orders, indent=2)
+    #return json.dumps(orders, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 
 @tool
@@ -215,7 +229,8 @@ def view_order_status(order_id: int) -> str:
     View one order with its status and items.
     """
     order = order_inventory_db.get_order(order_id)
-    return json.dumps(order, indent=2)
+    #return json.dumps(order, indent=2)
+    return json.dumps(order, indent=2, default=_json_default)
 
 
 ORDER_INVENTORY_TOOLS = [
