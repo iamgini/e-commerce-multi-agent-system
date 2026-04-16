@@ -14,6 +14,8 @@ import logging
 import os
 import sys
 
+VERSION = os.getenv("APP_VERSION", "dev")
+
 import chainlit as cl
 from chainlit.types import ThreadDict
 from langchain_core.messages import AIMessage, HumanMessage
@@ -90,20 +92,20 @@ async def on_chat_start():
     global logger
     initialise_logger()
     logger = logging.getLogger(__name__)
-    
+
     # Get the current thread ID from the session
     thread_id = cl.user_session.get("id")
-    
+
     # Get user details from auth callback
     user = cl.user_session.get("user")
-    
+
     if user:
-        user_id = user.identifier  
+        user_id = user.identifier
         role = user.metadata.get("role", "user")
     else:
         user_id = "anonymous"   # Should not trigger unless auth goes wrong
         role = "guest"
-    
+
     # Set user session
     cl.user_session.set("user_id", user_id)
     cl.user_session.set("thread_id", thread_id)
@@ -112,7 +114,7 @@ async def on_chat_start():
 
     await cl.Message(
         content=(
-            f"👋 Hello {user_id.capitalize()}. Welcome to **ShopBot** — your e-commerce assistant!\n\n"
+            f"👋 Hello {user_id.capitalize()}. Welcome to **ShopBot** `{VERSION}` — your e-commerce assistant!\n\n"
             "I can help you with:\n"
             "- 🔍 Product search & recommendations\n"
             "- 🛒 Cart & checkout\n"
@@ -131,9 +133,9 @@ async def on_chat_start():
 #     history: list = cl.user_session.get("message_history", [])
 #     user_id: str = cl.user_session.get("user_id", "user_001")
 #     session_id: str = cl.user_session.get("session_id", f"{user_id}_{int(time.time())}")
-    
-#     # logger.info(message.content) 
-    
+
+#     # logger.info(message.content)
+
 #     # Append user turn
 #     history.append(HumanMessage(content=message.content))
 
@@ -165,7 +167,7 @@ async def on_chat_start():
 #             await cl.Message(content=f"⚠️ Error: {exc}").send()
 #             logger.error(f"\n[ERROR] Agent error: {exc}\n")
 #             return
-        
+
 #         finally:
 #             await step.remove()
 
@@ -188,8 +190,8 @@ async def on_message(message: cl.Message):
     user_id: str =  cl.user_session.get("user_id", "anonymous")
     session_id: str = cl.user_session.get("thread_id", "no_id")
 
-    logger.info(message.content) 
-    
+    logger.info(message.content)
+
     # Append user turn
     history.append(HumanMessage(content=message.content))
 
@@ -227,11 +229,11 @@ async def on_message(message: cl.Message):
     cl.user_session.set("message_history", result["messages"])
 
     reply = _last_ai_text(result["messages"])
-    
+
     for token in reply.split():
         await final_message.stream_token(token + " ")
         await asyncio.sleep(0.02)  # Delay for effect
-        
+
     await final_message.send()
 
 
@@ -243,8 +245,8 @@ async def on_chat_resume(thread: ThreadDict):
         # Standard step types are often "user_message" and "ai_message"
         role = "user" if step["type"] == "user_message" else "assistant"
         message_history.append({"role": role, "content": step["output"]})
-    
+
     # Store the history back in the user session
     cl.user_session.set("message_history", message_history)
-    
+
     # await cl.Message(content="Welcome back! I've restored our conversation.").send()

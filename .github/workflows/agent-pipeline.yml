@@ -114,8 +114,15 @@ jobs:
 
       - name: Build image
         # run: podman build --file Containerfile-ShopBot -t quay.io/iamgini/shopbot:${{ github.sha }} -t quay.io/iamgini/shopbot:latest .
+        # podman build --build-arg GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN \
+        #     --file Containerfile-ShopBot \
+        #     -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
+        #     -t quay.io/iamgini/shopbot:latest \
+        #     .
         run: |
+          APP_VERSION=$(date +%Y.%m).${GITHUB_SHA::7}
           podman build --build-arg GUARDRAILS_TOKEN=$GUARDRAILS_TOKEN \
+            --build-arg APP_VERSION=$APP_VERSION \
             --file Containerfile-ShopBot \
             -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
             -t quay.io/iamgini/shopbot:latest \
