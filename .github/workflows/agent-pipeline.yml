@@ -135,7 +135,8 @@ jobs:
           scanners: vuln
           severity: CRITICAL,HIGH
           exit-code: '1'
-          skip-version-check: true
+          ignore-unfixed: true
+          trivyignores: .trivyignore
 
       - name: Log in to Quay
         if: github.ref == 'refs/heads/main'

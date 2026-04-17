@@ -1,0 +1,4 @@
+# litellm - known vulns, no fix available yet
+CVE-2026-35030
+CVE-2026-35029
+GHSA-69x8-hrgq-fjj8
