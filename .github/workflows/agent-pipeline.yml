@@ -11,30 +11,31 @@ on:
       - main
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # removed set up as no downstream job using the artifacts!
+  # setup:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.11"
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+  #     - name: Install dependencies
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         pip install -r requirements.txt
 
-      # - name: Add dotenvx and run tests
-      #   run: |
-      #        curl -sfS https://dotenvx.sh/install.sh | sh
-      #        dotenvx run -- python tests/test_order_inventory_state.py
-      #   env:
-      #     DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
+  #     # - name: Add dotenvx and run tests
+  #     #   run: |
+  #     #        curl -sfS https://dotenvx.sh/install.sh | sh
+  #     #        dotenvx run -- python tests/test_order_inventory_state.py
+  #     #   env:
+  #     #     DOTENV_PRIVATE_KEY_CI: ${{ secrets.DOTENV_PRIVATE_KEY_CI }}
 
   secret-detection:
-    needs: setup
+    # needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +47,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   lint:
-    needs: setup
+    # needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +61,7 @@ jobs:
         run: ruff check agents/
 
   vulnerability-scan:
-    needs: setup
+    # needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -99,14 +100,11 @@ jobs:
     needs: [secret-detection, lint, vulnerability-scan]  # only build if all checks pass
     # needs: [secret-detection, vulnerability-scan]  # only build if all checks pass
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  # only deploy from main
+    # if: github.ref == 'refs/heads/main'  # only deploy from main
     outputs:
       image_tag: ${{ steps.meta.outputs.version }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Log in to Quay
-        run: echo "${{ secrets.QUAY_PASSWORD }}" | podman login quay.io -u "${{ secrets.QUAY_USERNAME }}" --password-stdin
 
       - name: Generate image tag
         id: meta
@@ -127,8 +125,25 @@ jobs:
             -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
             -t quay.io/iamgini/shopbot:latest \
             .
+      # - name: Save image to tar
+      #   run: podman save -o shopbot.tar quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
+
+      # - name: Scan image for vulnerabilities
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     input: shopbot.tar
+      #     scanners: vuln
+      #     severity: CRITICAL,HIGH
+      #     exit-code: '1'
+      #     ignore-unfixed: true
+      #     trivyignores: .trivyignore
+
+      - name: Log in to Quay
+        if: github.ref == 'refs/heads/main'
+        run: echo "${{ secrets.QUAY_PASSWORD }}" | podman login quay.io -u "${{ secrets.QUAY_USERNAME }}" --password-stdin
 
       - name: Push image
+        if: github.ref == 'refs/heads/main'
         run: |
           podman push quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
           podman push quay.io/iamgini/shopbot:latest
