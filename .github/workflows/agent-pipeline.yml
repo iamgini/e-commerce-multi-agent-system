@@ -125,13 +125,17 @@ jobs:
             -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
             -t quay.io/iamgini/shopbot:latest \
             .
+      - name: Tag image for Trivy
+        run: podman tag quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} localhost/shopbot:scan
+
       - name: Scan image for vulnerabilities
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
+          image-ref: localhost/shopbot:scan
           scanners: vuln
           severity: CRITICAL,HIGH
           exit-code: '1'
+          skip-version-check: true
 
       - name: Log in to Quay
         if: github.ref == 'refs/heads/main'
