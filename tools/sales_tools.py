@@ -416,7 +416,7 @@ def get_order_history(
     orders = cart_db.get_user_orders(user_id)
     if not orders:
         return "No past orders found for this account."
-    return json.dumps(orders, indent=2)
+    return json.dumps(orders, indent=2, default=str)
 
 
 @tool
@@ -434,7 +434,7 @@ def get_order_details(order_id: int, config: RunnableConfig) -> str:
     order = cart_db.get_order(order_id)
     if not order:
         return f"Order #{order_id} not found."
-    return json.dumps(order, indent=2)
+    return json.dumps(order, indent=2, default=str)
 
 
 # ── Convenience export ─────────────────────────────────────────────────────────
