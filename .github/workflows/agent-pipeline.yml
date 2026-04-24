@@ -125,18 +125,18 @@ jobs:
             -t quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }} \
             -t quay.io/iamgini/shopbot:latest \
             .
-      # - name: Save image to tar
-      #   run: podman save -o shopbot.tar quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
+      - name: Save image to tar
+        run: podman save -o shopbot.tar quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
 
-      # - name: Scan image for vulnerabilities
-      #   uses: aquasecurity/trivy-action@master
-      #   with:
-      #     input: shopbot.tar
-      #     scanners: vuln
-      #     severity: CRITICAL,HIGH
-      #     exit-code: '1'
-      #     ignore-unfixed: true
-      #     trivyignores: .trivyignore
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          input: shopbot.tar
+          scanners: vuln
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          ignore-unfixed: true
+          trivyignores: .trivyignore
 
       - name: Log in to Quay
         if: github.ref == 'refs/heads/main'
