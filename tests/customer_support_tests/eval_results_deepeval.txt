@@ -1,0 +1,2676 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.0.3, pluggy-1.6.0 -- /home/gmadappa/community/e-commerce-multi-agent-system/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/gmadappa/community/e-commerce-multi-agent-system
+plugins: Faker-37.12.0, repeat-0.9.4, deepeval-3.9.7, anyio-4.13.0, asyncio-1.3.0, xdist-3.8.0, rerunfailures-16.1, langsmith-0.7.33
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 20 items
+
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[return_policy] 
+
+[return_policy] Answer Relevancy: 1.00 — The score is 1.00 because the response directly addressed the return policy without including any irrelevant information.
+PASSED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[shipping_time] 
+
+[shipping_time] Answer Relevancy: 1.00 — The score is 1.00 because the response directly addressed the question about shipping times without any irrelevant statements.
+PASSED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[payment_methods] 
+
+[payment_methods] Answer Relevancy: 1.00 — The score is 1.00 because the response directly addressed the question about payment methods without any irrelevant statements.
+PASSED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[free_shipping] 
+FAILED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[refund_time] 
+FAILED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[contact_support] 
+
+[contact_support] Answer Relevancy: 1.00 — The score is 1.00 because the response directly addresses the question about contacting support without any irrelevant statements.
+PASSED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[cancel_order] 
+FAILED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[hallucination_guard] 
+
+[hallucination_guard] Answer Relevancy: 1.00 — The score is 1.00 because the response directly addressed the return policy without including any irrelevant information.
+PASSED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[return_policy] 
+FAILED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[shipping_time] 
+FAILED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[payment_methods] 
+
+[payment_methods] Faithfulness: 1.00 — The score is 1.00 because there are no contradictions present, indicating that the actual output aligns perfectly with the retrieval context.
+PASSED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[free_shipping] 
+FAILED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[refund_time] 
+FAILED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[contact_support] 
+
+[contact_support] Faithfulness: 1.00 — The score is 1.00 because there are no contradictions present, indicating that the actual output aligns perfectly with the retrieval context.
+PASSED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[cancel_order] 
+FAILED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[hallucination_guard] 
+
+[hallucination_guard] Faithfulness: 0.00 — The score is 0.00 because the actual output incorrectly states that items can be returned within 60 days and that refunds are processed instantly, contradicting the retrieval context which specifies a 30-day return policy and a 3-5 business day refund processing time.
+FAILED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_hallucination_detected_on_bad_answer 
+
+[hallucination_guard] Hallucination score: 1.00 — The score is 1.00 because the actual output contradicts the provided context regarding the return policy and refund processing times, indicating a complete misalignment with the factual information.
+PASSED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_contextual_recall[return_policy] 
+
+[return_policy] Contextual Recall: 1.00 — The score is 1.00 because the sentence in the expected output directly matches the information provided in the 1st node of the retrieval context, confirming its accuracy.
+PASSED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_contextual_recall[shipping_time] 
+
+[shipping_time] Contextual Recall: 1.00 — The score is 1.00 because the sentence directly matches the information provided in the 1st node in the retrieval context, confirming its accuracy.
+PASSED
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_contextual_recall[payment_methods] 
+
+[payment_methods] Contextual Recall: 1.00 — The score is 1.00 because the sentence in the expected output directly matches the information provided in the first node of the retrieval context.
+PASSEDRunning teardown with pytest sessionfinish...
+
+
+=================================== FAILURES ===================================
+___________ TestDeepEvalMetrics.test_answer_relevancy[free_shipping] ___________
+
+fut = <coroutine object GPTModel.a_generate at 0x7f074f872980>, timeout = 88.5
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        If the task suppresses the cancellation and returns a value instead,
+        that value is returned.
+    
+        This function is a coroutine.
+        """
+        # The special case for timeout <= 0 is for the following case:
+        #
+        # async def test_waitfor():
+        #     func_started = False
+        #
+        #     async def func():
+        #         nonlocal func_started
+        #         func_started = True
+        #
+        #     try:
+        #         await asyncio.wait_for(func(), 0)
+        #     except asyncio.TimeoutError:
+        #         assert not func_started
+        #     else:
+        #         assert False
+        #
+        # asyncio.run(test_waitfor())
+    
+    
+        if timeout is not None and timeout <= 0:
+            fut = ensure_future(fut)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise TimeoutError from exc
+    
+        async with timeouts.timeout(timeout):
+>           return await fut
+                   ^^^^^^^^^
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:520: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/models/llms/openai_model.py:230: in a_generate
+    completion = await client.beta.chat.completions.parse(
+.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py:1694: in parse
+    return await self._post(
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1913: in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1630: in request
+    response = await self._send_request(
+.venv/lib/python3.12/site-packages/openai/_client.py:829: in _send_request
+    return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_client.py:807: in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1553: in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_transports/default.py:394: in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request
+    raise exc from None
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:236: in handle_async_request
+    response = await connection.handle_async_request(
+.venv/lib/python3.12/site-packages/httpcore/_async/connection.py:103: in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:136: in handle_async_request
+    raise exc
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:106: in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:177: in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:217: in _receive_event
+    data = await self._network_stream.read(
+.venv/lib/python3.12/site-packages/httpcore/_backends/anyio.py:35: in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:239: in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:182: in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1284: in receive
+    await self._protocol.read_event.wait()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <asyncio.locks.Event object at 0x7f074ee432f0 [set]>
+
+    async def wait(self):
+        """Block until the internal flag is true.
+    
+        If the internal flag is true on entry, return True
+        immediately.  Otherwise, block until another coroutine calls
+        set() to set the flag to true, then return True.
+        """
+        if self._value:
+            return True
+    
+        fut = self._get_loop().create_future()
+        self._waiters.append(fut)
+        try:
+>           await fut
+E           asyncio.exceptions.CancelledError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/locks.py:212: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074f7bcf50>, "For the provided list of statements, determin...:\nDo you offer free shipping?\n\nStatements:\n['Free standard shipping is available on orders over $50.']\n\nJSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.answer_relevancy.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f872980>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+>               return await asyncio.wait_for(coro, per_attempt_timeout)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:658: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:519: in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Timeout [expired]>
+exc_type = <class 'asyncio.exceptions.CancelledError'>
+exc_val = CancelledError(), exc_tb = <traceback object at 0x7f074ee5d5c0>
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        assert self._state in (_State.ENTERED, _State.EXPIRING)
+    
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+            self._timeout_handler = None
+    
+        if self._state is _State.EXPIRING:
+            self._state = _State.EXPIRED
+    
+            if self._task.uncancel() <= self._cancelling and exc_type is exceptions.CancelledError:
+                # Since there are no new cancel requests, we're
+                # handling this.
+>               raise TimeoutError from exc_val
+E               TimeoutError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/timeouts.py:115: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <AsyncRetrying object at 0x7f0750421a30 (stop=<deepeval.models.retry_policy.StopFromEnv object at 0x7f0797467380>, wai...before=<function before_nothing at 0x7f07997522a0>, after=<function make_after_log.<locals>._after at 0x7f0797710cc0>)>
+fn = <function GPTModel.a_generate at 0x7f07974a0860>
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074f7bcf50>, "For the provided list of statements, determin...:\nDo you offer free shipping?\n\nStatements:\n['Free standard shipping is available on orders over $50.']\n\nJSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.answer_relevancy.schema.Verdicts'>}
+retry_state = <RetryCallState 139669374640320: attempt #2; slept for 2.98; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+is_async = True, do = <tenacity.DoAttempt object at 0x7f074ee54f20>
+
+    async def __call__(  # type: ignore[override]
+        self, fn: WrappedFn, *args: t.Any, **kwargs: t.Any
+    ) -> WrappedFnReturnT:
+        self.begin()
+    
+        retry_state = RetryCallState(retry_object=self, fn=fn, args=args, kwargs=kwargs)
+        is_async = _utils.is_coroutine_callable(fn)
+        while True:
+            do = await self.iter(retry_state=retry_state)
+            if isinstance(do, DoAttempt):
+                try:
+                    if is_async:
+>                       result = await fn(*args, **kwargs)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074f7bcf50>, "For the provided list of statements, determin...:\nDo you offer free shipping?\n\nStatements:\n['Free standard shipping is available on orders over $50.']\n\nJSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.answer_relevancy.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f872980>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+                return await asyncio.wait_for(coro, per_attempt_timeout)
+            except (asyncio.TimeoutError, TimeoutError) as e:
+                if (
+                    logger.isEnabledFor(logging.DEBUG)
+                    and get_settings().DEEPEVAL_VERBOSE_MODE is True
+                ):
+                    logger.debug(
+                        "async timeout after %.3fs (active_threads=%d, tasks=%d)",
+                        per_attempt_timeout,
+                        threading.active_count(),
+                        len(asyncio.all_tasks()),
+                    )
+>               raise _make_timeout_error(per_attempt_timeout) from e
+E               TimeoutError: call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:670: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.eval_customer_support.TestDeepEvalMetrics object at 0x7f07505a4590>
+case = {'ground_truth': 'Yes, we offer free standard shipping on orders over $50.', 'id': 'free_shipping', 'llm_answer': 'Yes, free standard shipping is available on orders over $50.', 'query': 'Do you offer free shipping?'}
+
+    @pytest.mark.parametrize("case", [c for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"], ids=[c["id"] for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"])
+    def test_answer_relevancy(self, case):
+        """Response must be relevant to the customer's question (>= 0.7)."""
+        tc = self._make_test_case(case)
+        metric = AnswerRelevancyMetric(threshold=0.7, model="gpt-4o-mini", include_reason=True)
+>       metric.measure(tc)
+
+tests/eval_customer_support.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1355: in wrapper
+    return func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/answer_relevancy/answer_relevancy.py:79: in measure
+    loop.run_until_complete(
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/answer_relevancy/answer_relevancy.py:147: in a_measure
+    await self._a_generate_verdicts(input, test_case.multimodal)
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/answer_relevancy/answer_relevancy.py:226: in _a_generate_verdicts
+    return await a_generate_with_schema_and_extract(
+.venv/lib/python3.12/site-packages/deepeval/metrics/utils.py:457: in a_generate_with_schema_and_extract
+    result, cost = await metric.model.a_generate_with_schema(
+.venv/lib/python3.12/site-packages/deepeval/models/base_model.py:135: in a_generate_with_schema
+    return await self.a_generate(*args, schema=schema, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:193: in async_wrapped
+    return await copy(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:112: in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:157: in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/_utils.py:111: in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+rs = <RetryCallState 139669374640320: attempt #2; slept for 2.98; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+
+    def exc_check(rs: "RetryCallState") -> None:
+        fut = t.cast(Future, rs.outcome)
+        retry_exc = self.retry_error_cls(fut)
+        if self.reraise:
+            raise retry_exc.reraise()
+>       raise retry_exc from fut.exception()
+E       tenacity.RetryError: RetryError[<Future at 0x7f074ee431a0 state=finished raised TimeoutError>]
+
+.venv/lib/python3.12/site-packages/tenacity/__init__.py:414: RetryError
+------------------------------ Captured log call -------------------------------
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 1 time(s)...
+INFO     deepeval.retry.openai:retry_policy.py:452 Retrying in 2.981998935405448 s (attempt 1) after TimeoutError('call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.')
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 2 time(s)...
+____________ TestDeepEvalMetrics.test_answer_relevancy[refund_time] ____________
+
+fut = <coroutine object GPTModel.a_generate at 0x7f074f873240>, timeout = 88.5
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        If the task suppresses the cancellation and returns a value instead,
+        that value is returned.
+    
+        This function is a coroutine.
+        """
+        # The special case for timeout <= 0 is for the following case:
+        #
+        # async def test_waitfor():
+        #     func_started = False
+        #
+        #     async def func():
+        #         nonlocal func_started
+        #         func_started = True
+        #
+        #     try:
+        #         await asyncio.wait_for(func(), 0)
+        #     except asyncio.TimeoutError:
+        #         assert not func_started
+        #     else:
+        #         assert False
+        #
+        # asyncio.run(test_waitfor())
+    
+    
+        if timeout is not None and timeout <= 0:
+            fut = ensure_future(fut)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise TimeoutError from exc
+    
+        async with timeouts.timeout(timeout):
+>           return await fut
+                   ^^^^^^^^^
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:520: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/models/llms/openai_model.py:230: in a_generate
+    completion = await client.beta.chat.completions.parse(
+.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py:1694: in parse
+    return await self._post(
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1913: in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1630: in request
+    response = await self._send_request(
+.venv/lib/python3.12/site-packages/openai/_client.py:829: in _send_request
+    return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_client.py:807: in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1553: in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_transports/default.py:394: in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request
+    raise exc from None
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:236: in handle_async_request
+    response = await connection.handle_async_request(
+.venv/lib/python3.12/site-packages/httpcore/_async/connection.py:103: in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:136: in handle_async_request
+    raise exc
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:106: in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:177: in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:217: in _receive_event
+    data = await self._network_stream.read(
+.venv/lib/python3.12/site-packages/httpcore/_backends/anyio.py:35: in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:239: in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:182: in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1284: in receive
+    await self._protocol.read_event.wait()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <asyncio.locks.Event object at 0x7f074ee6b2f0 [set]>
+
+    async def wait(self):
+        """Block until the internal flag is true.
+    
+        If the internal flag is true on entry, return True
+        immediately.  Otherwise, block until another coroutine calls
+        set() to set the flag to true, then return True.
+        """
+        if self._value:
+            return True
+    
+        fut = self._get_loop().create_future()
+        self._waiters.append(fut)
+        try:
+>           await fut
+E           asyncio.exceptions.CancelledError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/locks.py:212: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee2a5a0>, "For the provided list of statements, determin...refund take?\n\nStatements:\n['Refunds are processed within 3-5 business days after we receive the item.']\n\nJSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.answer_relevancy.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f873240>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+>               return await asyncio.wait_for(coro, per_attempt_timeout)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:658: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:519: in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Timeout [expired]>
+exc_type = <class 'asyncio.exceptions.CancelledError'>
+exc_val = CancelledError(), exc_tb = <traceback object at 0x7f074d8c2b00>
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        assert self._state in (_State.ENTERED, _State.EXPIRING)
+    
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+            self._timeout_handler = None
+    
+        if self._state is _State.EXPIRING:
+            self._state = _State.EXPIRED
+    
+            if self._task.uncancel() <= self._cancelling and exc_type is exceptions.CancelledError:
+                # Since there are no new cancel requests, we're
+                # handling this.
+>               raise TimeoutError from exc_val
+E               TimeoutError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/timeouts.py:115: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <AsyncRetrying object at 0x7f074ee83920 (stop=<deepeval.models.retry_policy.StopFromEnv object at 0x7f0797467380>, wai...before=<function before_nothing at 0x7f07997522a0>, after=<function make_after_log.<locals>._after at 0x7f0797710cc0>)>
+fn = <function GPTModel.a_generate at 0x7f07974a0860>
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee2a5a0>, "For the provided list of statements, determin...refund take?\n\nStatements:\n['Refunds are processed within 3-5 business days after we receive the item.']\n\nJSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.answer_relevancy.schema.Verdicts'>}
+retry_state = <RetryCallState 139669365332816: attempt #2; slept for 1.52; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+is_async = True, do = <tenacity.DoAttempt object at 0x7f074ee28e00>
+
+    async def __call__(  # type: ignore[override]
+        self, fn: WrappedFn, *args: t.Any, **kwargs: t.Any
+    ) -> WrappedFnReturnT:
+        self.begin()
+    
+        retry_state = RetryCallState(retry_object=self, fn=fn, args=args, kwargs=kwargs)
+        is_async = _utils.is_coroutine_callable(fn)
+        while True:
+            do = await self.iter(retry_state=retry_state)
+            if isinstance(do, DoAttempt):
+                try:
+                    if is_async:
+>                       result = await fn(*args, **kwargs)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee2a5a0>, "For the provided list of statements, determin...refund take?\n\nStatements:\n['Refunds are processed within 3-5 business days after we receive the item.']\n\nJSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.answer_relevancy.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f873240>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+                return await asyncio.wait_for(coro, per_attempt_timeout)
+            except (asyncio.TimeoutError, TimeoutError) as e:
+                if (
+                    logger.isEnabledFor(logging.DEBUG)
+                    and get_settings().DEEPEVAL_VERBOSE_MODE is True
+                ):
+                    logger.debug(
+                        "async timeout after %.3fs (active_threads=%d, tasks=%d)",
+                        per_attempt_timeout,
+                        threading.active_count(),
+                        len(asyncio.all_tasks()),
+                    )
+>               raise _make_timeout_error(per_attempt_timeout) from e
+E               TimeoutError: call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:670: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.eval_customer_support.TestDeepEvalMetrics object at 0x7f07505a4650>
+case = {'ground_truth': 'Refunds are processed within 3-5 business days after we receive your returned item.', 'id': 'refund_...: 'Refunds are processed within 3-5 business days after we receive the item.', 'query': 'How long does a refund take?'}
+
+    @pytest.mark.parametrize("case", [c for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"], ids=[c["id"] for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"])
+    def test_answer_relevancy(self, case):
+        """Response must be relevant to the customer's question (>= 0.7)."""
+        tc = self._make_test_case(case)
+        metric = AnswerRelevancyMetric(threshold=0.7, model="gpt-4o-mini", include_reason=True)
+>       metric.measure(tc)
+
+tests/eval_customer_support.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1355: in wrapper
+    return func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/answer_relevancy/answer_relevancy.py:79: in measure
+    loop.run_until_complete(
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/answer_relevancy/answer_relevancy.py:147: in a_measure
+    await self._a_generate_verdicts(input, test_case.multimodal)
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/answer_relevancy/answer_relevancy.py:226: in _a_generate_verdicts
+    return await a_generate_with_schema_and_extract(
+.venv/lib/python3.12/site-packages/deepeval/metrics/utils.py:457: in a_generate_with_schema_and_extract
+    result, cost = await metric.model.a_generate_with_schema(
+.venv/lib/python3.12/site-packages/deepeval/models/base_model.py:135: in a_generate_with_schema
+    return await self.a_generate(*args, schema=schema, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:193: in async_wrapped
+    return await copy(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:112: in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:157: in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/_utils.py:111: in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+rs = <RetryCallState 139669365332816: attempt #2; slept for 1.52; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+
+    def exc_check(rs: "RetryCallState") -> None:
+        fut = t.cast(Future, rs.outcome)
+        retry_exc = self.retry_error_cls(fut)
+        if self.reraise:
+            raise retry_exc.reraise()
+>       raise retry_exc from fut.exception()
+E       tenacity.RetryError: RetryError[<Future at 0x7f074ee29250 state=finished raised TimeoutError>]
+
+.venv/lib/python3.12/site-packages/tenacity/__init__.py:414: RetryError
+------------------------------ Captured log call -------------------------------
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 1 time(s)...
+INFO     deepeval.retry.openai:retry_policy.py:452 Retrying in 1.517574420847284 s (attempt 1) after TimeoutError('call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.')
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 2 time(s)...
+___________ TestDeepEvalMetrics.test_answer_relevancy[cancel_order] ____________
+
+fut = <coroutine object GPTModel.a_generate at 0x7f074f873c40>, timeout = 88.5
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        If the task suppresses the cancellation and returns a value instead,
+        that value is returned.
+    
+        This function is a coroutine.
+        """
+        # The special case for timeout <= 0 is for the following case:
+        #
+        # async def test_waitfor():
+        #     func_started = False
+        #
+        #     async def func():
+        #         nonlocal func_started
+        #         func_started = True
+        #
+        #     try:
+        #         await asyncio.wait_for(func(), 0)
+        #     except asyncio.TimeoutError:
+        #         assert not func_started
+        #     else:
+        #         assert False
+        #
+        # asyncio.run(test_waitfor())
+    
+    
+        if timeout is not None and timeout <= 0:
+            fut = ensure_future(fut)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise TimeoutError from exc
+    
+        async with timeouts.timeout(timeout):
+>           return await fut
+                   ^^^^^^^^^
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:520: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/models/llms/openai_model.py:230: in a_generate
+    completion = await client.beta.chat.completions.parse(
+.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py:1694: in parse
+    return await self._post(
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1913: in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1630: in request
+    response = await self._send_request(
+.venv/lib/python3.12/site-packages/openai/_client.py:829: in _send_request
+    return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_client.py:807: in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1553: in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_transports/default.py:394: in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request
+    raise exc from None
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:236: in handle_async_request
+    response = await connection.handle_async_request(
+.venv/lib/python3.12/site-packages/httpcore/_async/connection.py:103: in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:136: in handle_async_request
+    raise exc
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:106: in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:177: in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:217: in _receive_event
+    data = await self._network_stream.read(
+.venv/lib/python3.12/site-packages/httpcore/_backends/anyio.py:35: in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:239: in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:182: in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1284: in receive
+    await self._protocol.read_event.wait()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <asyncio.locks.Event object at 0x7f074ee84680 [set]>
+
+    async def wait(self):
+        """Block until the internal flag is true.
+    
+        If the internal flag is true on entry, return True
+        immediately.  Otherwise, block until another coroutine calls
+        set() to set the flag to true, then return True.
+        """
+        if self._value:
+            return True
+    
+        fut = self._get_loop().create_future()
+        self._waiters.append(fut)
+        try:
+>           await fut
+E           asyncio.exceptions.CancelledError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/locks.py:212: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee837a0>, "For the provided list of statements, determin...nInput:\nCan I cancel my order?\n\nStatements:\n['You can cancel your order within 1 hour of placing it.']\n\nJSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.answer_relevancy.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f873c40>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+>               return await asyncio.wait_for(coro, per_attempt_timeout)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:658: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:519: in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Timeout [expired]>
+exc_type = <class 'asyncio.exceptions.CancelledError'>
+exc_val = CancelledError(), exc_tb = <traceback object at 0x7f074e09c640>
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        assert self._state in (_State.ENTERED, _State.EXPIRING)
+    
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+            self._timeout_handler = None
+    
+        if self._state is _State.EXPIRING:
+            self._state = _State.EXPIRED
+    
+            if self._task.uncancel() <= self._cancelling and exc_type is exceptions.CancelledError:
+                # Since there are no new cancel requests, we're
+                # handling this.
+>               raise TimeoutError from exc_val
+E               TimeoutError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/timeouts.py:115: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <AsyncRetrying object at 0x7f074ee680e0 (stop=<deepeval.models.retry_policy.StopFromEnv object at 0x7f0797467380>, wai...before=<function before_nothing at 0x7f07997522a0>, after=<function make_after_log.<locals>._after at 0x7f0797710cc0>)>
+fn = <function GPTModel.a_generate at 0x7f07974a0860>
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee837a0>, "For the provided list of statements, determin...nInput:\nCan I cancel my order?\n\nStatements:\n['You can cancel your order within 1 hour of placing it.']\n\nJSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.answer_relevancy.schema.Verdicts'>}
+retry_state = <RetryCallState 139669365228848: attempt #2; slept for 2.06; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+is_async = True, do = <tenacity.DoAttempt object at 0x7f074ee6b050>
+
+    async def __call__(  # type: ignore[override]
+        self, fn: WrappedFn, *args: t.Any, **kwargs: t.Any
+    ) -> WrappedFnReturnT:
+        self.begin()
+    
+        retry_state = RetryCallState(retry_object=self, fn=fn, args=args, kwargs=kwargs)
+        is_async = _utils.is_coroutine_callable(fn)
+        while True:
+            do = await self.iter(retry_state=retry_state)
+            if isinstance(do, DoAttempt):
+                try:
+                    if is_async:
+>                       result = await fn(*args, **kwargs)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee837a0>, "For the provided list of statements, determin...nInput:\nCan I cancel my order?\n\nStatements:\n['You can cancel your order within 1 hour of placing it.']\n\nJSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.answer_relevancy.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f873c40>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+                return await asyncio.wait_for(coro, per_attempt_timeout)
+            except (asyncio.TimeoutError, TimeoutError) as e:
+                if (
+                    logger.isEnabledFor(logging.DEBUG)
+                    and get_settings().DEEPEVAL_VERBOSE_MODE is True
+                ):
+                    logger.debug(
+                        "async timeout after %.3fs (active_threads=%d, tasks=%d)",
+                        per_attempt_timeout,
+                        threading.active_count(),
+                        len(asyncio.all_tasks()),
+                    )
+>               raise _make_timeout_error(per_attempt_timeout) from e
+E               TimeoutError: call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:670: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.eval_customer_support.TestDeepEvalMetrics object at 0x7f07505a47d0>
+case = {'ground_truth': 'You can cancel or modify your order within 1 hour of placing it.', 'id': 'cancel_order', 'llm_answer': 'You can cancel your order within 1 hour of placing it.', 'query': 'Can I cancel my order?'}
+
+    @pytest.mark.parametrize("case", [c for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"], ids=[c["id"] for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"])
+    def test_answer_relevancy(self, case):
+        """Response must be relevant to the customer's question (>= 0.7)."""
+        tc = self._make_test_case(case)
+        metric = AnswerRelevancyMetric(threshold=0.7, model="gpt-4o-mini", include_reason=True)
+>       metric.measure(tc)
+
+tests/eval_customer_support.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1355: in wrapper
+    return func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/answer_relevancy/answer_relevancy.py:79: in measure
+    loop.run_until_complete(
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/answer_relevancy/answer_relevancy.py:147: in a_measure
+    await self._a_generate_verdicts(input, test_case.multimodal)
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/answer_relevancy/answer_relevancy.py:226: in _a_generate_verdicts
+    return await a_generate_with_schema_and_extract(
+.venv/lib/python3.12/site-packages/deepeval/metrics/utils.py:457: in a_generate_with_schema_and_extract
+    result, cost = await metric.model.a_generate_with_schema(
+.venv/lib/python3.12/site-packages/deepeval/models/base_model.py:135: in a_generate_with_schema
+    return await self.a_generate(*args, schema=schema, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:193: in async_wrapped
+    return await copy(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:112: in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:157: in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/_utils.py:111: in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+rs = <RetryCallState 139669365228848: attempt #2; slept for 2.06; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+
+    def exc_check(rs: "RetryCallState") -> None:
+        fut = t.cast(Future, rs.outcome)
+        retry_exc = self.retry_error_cls(fut)
+        if self.reraise:
+            raise retry_exc.reraise()
+>       raise retry_exc from fut.exception()
+E       tenacity.RetryError: RetryError[<Future at 0x7f074ee0a840 state=finished raised TimeoutError>]
+
+.venv/lib/python3.12/site-packages/tenacity/__init__.py:414: RetryError
+------------------------------ Captured log call -------------------------------
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 1 time(s)...
+INFO     deepeval.retry.openai:retry_policy.py:452 Retrying in 2.064521080396119 s (attempt 1) after TimeoutError('call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.')
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 2 time(s)...
+_____________ TestDeepEvalMetrics.test_faithfulness[return_policy] _____________
+
+fut = <coroutine object GPTModel.a_generate at 0x7f074f873d80>, timeout = 88.5
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        If the task suppresses the cancellation and returns a value instead,
+        that value is returned.
+    
+        This function is a coroutine.
+        """
+        # The special case for timeout <= 0 is for the following case:
+        #
+        # async def test_waitfor():
+        #     func_started = False
+        #
+        #     async def func():
+        #         nonlocal func_started
+        #         func_started = True
+        #
+        #     try:
+        #         await asyncio.wait_for(func(), 0)
+        #     except asyncio.TimeoutError:
+        #         assert not func_started
+        #     else:
+        #         assert False
+        #
+        # asyncio.run(test_waitfor())
+    
+    
+        if timeout is not None and timeout <= 0:
+            fut = ensure_future(fut)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise TimeoutError from exc
+    
+        async with timeouts.timeout(timeout):
+>           return await fut
+                   ^^^^^^^^^
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:520: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/models/llms/openai_model.py:230: in a_generate
+    completion = await client.beta.chat.completions.parse(
+.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py:1694: in parse
+    return await self._post(
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1913: in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1630: in request
+    response = await self._send_request(
+.venv/lib/python3.12/site-packages/openai/_client.py:829: in _send_request
+    return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_client.py:807: in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1553: in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_transports/default.py:394: in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request
+    raise exc from None
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:236: in handle_async_request
+    response = await connection.handle_async_request(
+.venv/lib/python3.12/site-packages/httpcore/_async/connection.py:103: in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:136: in handle_async_request
+    raise exc
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:106: in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:177: in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:217: in _receive_event
+    data = await self._network_stream.read(
+.venv/lib/python3.12/site-packages/httpcore/_backends/anyio.py:35: in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:239: in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:182: in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1284: in receive
+    await self._protocol.read_event.wait()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <asyncio.locks.Event object at 0x7f074f93ec00 [set]>
+
+    async def wait(self):
+        """Block until the internal flag is true.
+    
+        If the internal flag is true on entry, return True
+        immediately.  Otherwise, block until another coroutine calls
+        set() to set the flag to true, then return True.
+        """
+        if self._value:
+            return True
+    
+        fut = self._get_loop().create_future()
+        self._waiters.append(fut)
+        try:
+>           await fut
+E           asyncio.exceptions.CancelledError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/locks.py:212: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee85af0>, "Based on the given claims, which is a list of...hod.\n\n            Claims:\n            ['Items can be returned within 30 days of delivery.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f873d80>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+>               return await asyncio.wait_for(coro, per_attempt_timeout)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:658: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:519: in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Timeout [expired]>
+exc_type = <class 'asyncio.exceptions.CancelledError'>
+exc_val = CancelledError(), exc_tb = <traceback object at 0x7f074f91bcc0>
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        assert self._state in (_State.ENTERED, _State.EXPIRING)
+    
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+            self._timeout_handler = None
+    
+        if self._state is _State.EXPIRING:
+            self._state = _State.EXPIRED
+    
+            if self._task.uncancel() <= self._cancelling and exc_type is exceptions.CancelledError:
+                # Since there are no new cancel requests, we're
+                # handling this.
+>               raise TimeoutError from exc_val
+E               TimeoutError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/timeouts.py:115: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <AsyncRetrying object at 0x7f074ee6bd40 (stop=<deepeval.models.retry_policy.StopFromEnv object at 0x7f0797467380>, wai...before=<function before_nothing at 0x7f07997522a0>, after=<function make_after_log.<locals>._after at 0x7f0797710cc0>)>
+fn = <function GPTModel.a_generate at 0x7f07974a0860>
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee85af0>, "Based on the given claims, which is a list of...hod.\n\n            Claims:\n            ['Items can be returned within 30 days of delivery.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+retry_state = <RetryCallState 139669365240512: attempt #2; slept for 2.69; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+is_async = True, do = <tenacity.DoAttempt object at 0x7f074ee86f60>
+
+    async def __call__(  # type: ignore[override]
+        self, fn: WrappedFn, *args: t.Any, **kwargs: t.Any
+    ) -> WrappedFnReturnT:
+        self.begin()
+    
+        retry_state = RetryCallState(retry_object=self, fn=fn, args=args, kwargs=kwargs)
+        is_async = _utils.is_coroutine_callable(fn)
+        while True:
+            do = await self.iter(retry_state=retry_state)
+            if isinstance(do, DoAttempt):
+                try:
+                    if is_async:
+>                       result = await fn(*args, **kwargs)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee85af0>, "Based on the given claims, which is a list of...hod.\n\n            Claims:\n            ['Items can be returned within 30 days of delivery.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f873d80>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+                return await asyncio.wait_for(coro, per_attempt_timeout)
+            except (asyncio.TimeoutError, TimeoutError) as e:
+                if (
+                    logger.isEnabledFor(logging.DEBUG)
+                    and get_settings().DEEPEVAL_VERBOSE_MODE is True
+                ):
+                    logger.debug(
+                        "async timeout after %.3fs (active_threads=%d, tasks=%d)",
+                        per_attempt_timeout,
+                        threading.active_count(),
+                        len(asyncio.all_tasks()),
+                    )
+>               raise _make_timeout_error(per_attempt_timeout) from e
+E               TimeoutError: call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:670: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.eval_customer_support.TestDeepEvalMetrics object at 0x7f07505a4b60>
+case = {'ground_truth': 'You can return items within 30 days of delivery.', 'id': 'return_policy', 'llm_answer': 'You can return items within 30 days of delivery.', 'query': 'What is your return policy?'}
+
+    @pytest.mark.parametrize("case", [c for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"], ids=[c["id"] for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"])
+    def test_faithfulness(self, case):
+        """Response must be grounded in the FAQ context (no hallucination >= 0.7)."""
+        tc = self._make_test_case(case)
+        metric = FaithfulnessMetric(threshold=0.7, model="gpt-4o-mini", include_reason=True)
+>       metric.measure(tc)
+
+tests/eval_customer_support.py:235: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1355: in wrapper
+    return func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:88: in measure
+    loop.run_until_complete(
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:157: in a_measure
+    self.verdicts = await self._a_generate_verdicts(multimodal)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:234: in _a_generate_verdicts
+    return await a_generate_with_schema_and_extract(
+.venv/lib/python3.12/site-packages/deepeval/metrics/utils.py:457: in a_generate_with_schema_and_extract
+    result, cost = await metric.model.a_generate_with_schema(
+.venv/lib/python3.12/site-packages/deepeval/models/base_model.py:135: in a_generate_with_schema
+    return await self.a_generate(*args, schema=schema, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:193: in async_wrapped
+    return await copy(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:112: in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:157: in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/_utils.py:111: in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+rs = <RetryCallState 139669365240512: attempt #2; slept for 2.69; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+
+    def exc_check(rs: "RetryCallState") -> None:
+        fut = t.cast(Future, rs.outcome)
+        retry_exc = self.retry_error_cls(fut)
+        if self.reraise:
+            raise retry_exc.reraise()
+>       raise retry_exc from fut.exception()
+E       tenacity.RetryError: RetryError[<Future at 0x7f074ee08cb0 state=finished raised TimeoutError>]
+
+.venv/lib/python3.12/site-packages/tenacity/__init__.py:414: RetryError
+------------------------------ Captured log call -------------------------------
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 1 time(s)...
+INFO     deepeval.retry.openai:retry_policy.py:452 Retrying in 2.693987072437115 s (attempt 1) after TimeoutError('call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.')
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 2 time(s)...
+_____________ TestDeepEvalMetrics.test_faithfulness[shipping_time] _____________
+
+fut = <coroutine object GPTModel.a_generate at 0x7f074f8725c0>, timeout = 88.5
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        If the task suppresses the cancellation and returns a value instead,
+        that value is returned.
+    
+        This function is a coroutine.
+        """
+        # The special case for timeout <= 0 is for the following case:
+        #
+        # async def test_waitfor():
+        #     func_started = False
+        #
+        #     async def func():
+        #         nonlocal func_started
+        #         func_started = True
+        #
+        #     try:
+        #         await asyncio.wait_for(func(), 0)
+        #     except asyncio.TimeoutError:
+        #         assert not func_started
+        #     else:
+        #         assert False
+        #
+        # asyncio.run(test_waitfor())
+    
+    
+        if timeout is not None and timeout <= 0:
+            fut = ensure_future(fut)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise TimeoutError from exc
+    
+        async with timeouts.timeout(timeout):
+>           return await fut
+                   ^^^^^^^^^
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:520: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/models/llms/openai_model.py:230: in a_generate
+    completion = await client.beta.chat.completions.parse(
+.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py:1694: in parse
+    return await self._post(
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1913: in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1630: in request
+    response = await self._send_request(
+.venv/lib/python3.12/site-packages/openai/_client.py:829: in _send_request
+    return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_client.py:807: in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1553: in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_transports/default.py:394: in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request
+    raise exc from None
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:236: in handle_async_request
+    response = await connection.handle_async_request(
+.venv/lib/python3.12/site-packages/httpcore/_async/connection.py:103: in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:136: in handle_async_request
+    raise exc
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:106: in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:177: in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:217: in _receive_event
+    data = await self._network_stream.read(
+.venv/lib/python3.12/site-packages/httpcore/_backends/anyio.py:35: in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:239: in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:182: in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1284: in receive
+    await self._protocol.read_event.wait()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <asyncio.locks.Event object at 0x7f074ee29ee0 [set]>
+
+    async def wait(self):
+        """Block until the internal flag is true.
+    
+        If the internal flag is true on entry, return True
+        immediately.  Otherwise, block until another coroutine calls
+        set() to set the flag to true, then return True.
+        """
+        if self._value:
+            return True
+    
+        fut = self._get_loop().create_future()
+        self._waiters.append(fut)
+        try:
+>           await fut
+E           asyncio.exceptions.CancelledError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/locks.py:212: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f07505a45f0>, "Based on the given claims, which is a list of...ling 1-800-123-4567.\n\n            Claims:\n            ['Shipping takes 3-5 business days.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f8725c0>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+>               return await asyncio.wait_for(coro, per_attempt_timeout)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:658: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:519: in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Timeout [expired]>
+exc_type = <class 'asyncio.exceptions.CancelledError'>
+exc_val = CancelledError(), exc_tb = <traceback object at 0x7f074d3150c0>
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        assert self._state in (_State.ENTERED, _State.EXPIRING)
+    
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+            self._timeout_handler = None
+    
+        if self._state is _State.EXPIRING:
+            self._state = _State.EXPIRED
+    
+            if self._task.uncancel() <= self._cancelling and exc_type is exceptions.CancelledError:
+                # Since there are no new cancel requests, we're
+                # handling this.
+>               raise TimeoutError from exc_val
+E               TimeoutError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/timeouts.py:115: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <AsyncRetrying object at 0x7f074ee43c50 (stop=<deepeval.models.retry_policy.StopFromEnv object at 0x7f0797467380>, wai...before=<function before_nothing at 0x7f07997522a0>, after=<function make_after_log.<locals>._after at 0x7f0797710cc0>)>
+fn = <function GPTModel.a_generate at 0x7f07974a0860>
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f07505a45f0>, "Based on the given claims, which is a list of...ling 1-800-123-4567.\n\n            Claims:\n            ['Shipping takes 3-5 business days.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+retry_state = <RetryCallState 139669365067936: attempt #2; slept for 1.8; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+is_async = True, do = <tenacity.DoAttempt object at 0x7f074ee42c90>
+
+    async def __call__(  # type: ignore[override]
+        self, fn: WrappedFn, *args: t.Any, **kwargs: t.Any
+    ) -> WrappedFnReturnT:
+        self.begin()
+    
+        retry_state = RetryCallState(retry_object=self, fn=fn, args=args, kwargs=kwargs)
+        is_async = _utils.is_coroutine_callable(fn)
+        while True:
+            do = await self.iter(retry_state=retry_state)
+            if isinstance(do, DoAttempt):
+                try:
+                    if is_async:
+>                       result = await fn(*args, **kwargs)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f07505a45f0>, "Based on the given claims, which is a list of...ling 1-800-123-4567.\n\n            Claims:\n            ['Shipping takes 3-5 business days.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f8725c0>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+                return await asyncio.wait_for(coro, per_attempt_timeout)
+            except (asyncio.TimeoutError, TimeoutError) as e:
+                if (
+                    logger.isEnabledFor(logging.DEBUG)
+                    and get_settings().DEEPEVAL_VERBOSE_MODE is True
+                ):
+                    logger.debug(
+                        "async timeout after %.3fs (active_threads=%d, tasks=%d)",
+                        per_attempt_timeout,
+                        threading.active_count(),
+                        len(asyncio.all_tasks()),
+                    )
+>               raise _make_timeout_error(per_attempt_timeout) from e
+E               TimeoutError: call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:670: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.eval_customer_support.TestDeepEvalMetrics object at 0x7f07505a4cb0>
+case = {'ground_truth': 'Shipping takes 3-5 business days.', 'id': 'shipping_time', 'llm_answer': 'Shipping takes 3-5 business days.', 'query': 'How long does shipping take?'}
+
+    @pytest.mark.parametrize("case", [c for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"], ids=[c["id"] for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"])
+    def test_faithfulness(self, case):
+        """Response must be grounded in the FAQ context (no hallucination >= 0.7)."""
+        tc = self._make_test_case(case)
+        metric = FaithfulnessMetric(threshold=0.7, model="gpt-4o-mini", include_reason=True)
+>       metric.measure(tc)
+
+tests/eval_customer_support.py:235: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1355: in wrapper
+    return func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:88: in measure
+    loop.run_until_complete(
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:157: in a_measure
+    self.verdicts = await self._a_generate_verdicts(multimodal)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:234: in _a_generate_verdicts
+    return await a_generate_with_schema_and_extract(
+.venv/lib/python3.12/site-packages/deepeval/metrics/utils.py:457: in a_generate_with_schema_and_extract
+    result, cost = await metric.model.a_generate_with_schema(
+.venv/lib/python3.12/site-packages/deepeval/models/base_model.py:135: in a_generate_with_schema
+    return await self.a_generate(*args, schema=schema, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:193: in async_wrapped
+    return await copy(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:112: in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:157: in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/_utils.py:111: in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+rs = <RetryCallState 139669365067936: attempt #2; slept for 1.8; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+
+    def exc_check(rs: "RetryCallState") -> None:
+        fut = t.cast(Future, rs.outcome)
+        retry_exc = self.retry_error_cls(fut)
+        if self.reraise:
+            raise retry_exc.reraise()
+>       raise retry_exc from fut.exception()
+E       tenacity.RetryError: RetryError[<Future at 0x7f074ee56d20 state=finished raised TimeoutError>]
+
+.venv/lib/python3.12/site-packages/tenacity/__init__.py:414: RetryError
+------------------------------ Captured log call -------------------------------
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 1 time(s)...
+INFO     deepeval.retry.openai:retry_policy.py:452 Retrying in 1.8031913815787013 s (attempt 1) after TimeoutError('call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.')
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 2 time(s)...
+_____________ TestDeepEvalMetrics.test_faithfulness[free_shipping] _____________
+
+fut = <coroutine object GPTModel.a_generate at 0x7f074f873ec0>, timeout = 88.5
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        If the task suppresses the cancellation and returns a value instead,
+        that value is returned.
+    
+        This function is a coroutine.
+        """
+        # The special case for timeout <= 0 is for the following case:
+        #
+        # async def test_waitfor():
+        #     func_started = False
+        #
+        #     async def func():
+        #         nonlocal func_started
+        #         func_started = True
+        #
+        #     try:
+        #         await asyncio.wait_for(func(), 0)
+        #     except asyncio.TimeoutError:
+        #         assert not func_started
+        #     else:
+        #         assert False
+        #
+        # asyncio.run(test_waitfor())
+    
+    
+        if timeout is not None and timeout <= 0:
+            fut = ensure_future(fut)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise TimeoutError from exc
+    
+        async with timeouts.timeout(timeout):
+>           return await fut
+                   ^^^^^^^^^
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:520: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/models/llms/openai_model.py:230: in a_generate
+    completion = await client.beta.chat.completions.parse(
+.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py:1694: in parse
+    return await self._post(
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1913: in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1630: in request
+    response = await self._send_request(
+.venv/lib/python3.12/site-packages/openai/_client.py:829: in _send_request
+    return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_client.py:807: in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1553: in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_transports/default.py:394: in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request
+    raise exc from None
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:236: in handle_async_request
+    response = await connection.handle_async_request(
+.venv/lib/python3.12/site-packages/httpcore/_async/connection.py:103: in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:136: in handle_async_request
+    raise exc
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:106: in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:177: in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:217: in _receive_event
+    data = await self._network_stream.read(
+.venv/lib/python3.12/site-packages/httpcore/_backends/anyio.py:35: in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:239: in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:182: in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1284: in receive
+    await self._protocol.read_event.wait()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <asyncio.locks.Event object at 0x7f074f7be090 [set]>
+
+    async def wait(self):
+        """Block until the internal flag is true.
+    
+        If the internal flag is true on entry, return True
+        immediately.  Otherwise, block until another coroutine calls
+        set() to set the flag to true, then return True.
+        """
+        if self._value:
+            return True
+    
+        fut = self._get_loop().create_future()
+        self._waiters.append(fut)
+        try:
+>           await fut
+E           asyncio.exceptions.CancelledError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/locks.py:212: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee0a810>, "Based on the given claims, which is a list of...\n            Claims:\n            ['Free standard shipping is available on orders over $50.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f873ec0>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+>               return await asyncio.wait_for(coro, per_attempt_timeout)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:658: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:519: in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Timeout [expired]>
+exc_type = <class 'asyncio.exceptions.CancelledError'>
+exc_val = CancelledError(), exc_tb = <traceback object at 0x7f074dd5af00>
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        assert self._state in (_State.ENTERED, _State.EXPIRING)
+    
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+            self._timeout_handler = None
+    
+        if self._state is _State.EXPIRING:
+            self._state = _State.EXPIRED
+    
+            if self._task.uncancel() <= self._cancelling and exc_type is exceptions.CancelledError:
+                # Since there are no new cancel requests, we're
+                # handling this.
+>               raise TimeoutError from exc_val
+E               TimeoutError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/timeouts.py:115: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <AsyncRetrying object at 0x7f0750421c10 (stop=<deepeval.models.retry_policy.StopFromEnv object at 0x7f0797467380>, wai...before=<function before_nothing at 0x7f07997522a0>, after=<function make_after_log.<locals>._after at 0x7f0797710cc0>)>
+fn = <function GPTModel.a_generate at 0x7f07974a0860>
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee0a810>, "Based on the given claims, which is a list of...\n            Claims:\n            ['Free standard shipping is available on orders over $50.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+retry_state = <RetryCallState 139669365213760: attempt #2; slept for 2.32; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+is_async = True, do = <tenacity.DoAttempt object at 0x7f074ee2a7b0>
+
+    async def __call__(  # type: ignore[override]
+        self, fn: WrappedFn, *args: t.Any, **kwargs: t.Any
+    ) -> WrappedFnReturnT:
+        self.begin()
+    
+        retry_state = RetryCallState(retry_object=self, fn=fn, args=args, kwargs=kwargs)
+        is_async = _utils.is_coroutine_callable(fn)
+        while True:
+            do = await self.iter(retry_state=retry_state)
+            if isinstance(do, DoAttempt):
+                try:
+                    if is_async:
+>                       result = await fn(*args, **kwargs)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee0a810>, "Based on the given claims, which is a list of...\n            Claims:\n            ['Free standard shipping is available on orders over $50.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f873ec0>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+                return await asyncio.wait_for(coro, per_attempt_timeout)
+            except (asyncio.TimeoutError, TimeoutError) as e:
+                if (
+                    logger.isEnabledFor(logging.DEBUG)
+                    and get_settings().DEEPEVAL_VERBOSE_MODE is True
+                ):
+                    logger.debug(
+                        "async timeout after %.3fs (active_threads=%d, tasks=%d)",
+                        per_attempt_timeout,
+                        threading.active_count(),
+                        len(asyncio.all_tasks()),
+                    )
+>               raise _make_timeout_error(per_attempt_timeout) from e
+E               TimeoutError: call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:670: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.eval_customer_support.TestDeepEvalMetrics object at 0x7f07505a4fb0>
+case = {'ground_truth': 'Yes, we offer free standard shipping on orders over $50.', 'id': 'free_shipping', 'llm_answer': 'Yes, free standard shipping is available on orders over $50.', 'query': 'Do you offer free shipping?'}
+
+    @pytest.mark.parametrize("case", [c for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"], ids=[c["id"] for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"])
+    def test_faithfulness(self, case):
+        """Response must be grounded in the FAQ context (no hallucination >= 0.7)."""
+        tc = self._make_test_case(case)
+        metric = FaithfulnessMetric(threshold=0.7, model="gpt-4o-mini", include_reason=True)
+>       metric.measure(tc)
+
+tests/eval_customer_support.py:235: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1355: in wrapper
+    return func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:88: in measure
+    loop.run_until_complete(
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:157: in a_measure
+    self.verdicts = await self._a_generate_verdicts(multimodal)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:234: in _a_generate_verdicts
+    return await a_generate_with_schema_and_extract(
+.venv/lib/python3.12/site-packages/deepeval/metrics/utils.py:457: in a_generate_with_schema_and_extract
+    result, cost = await metric.model.a_generate_with_schema(
+.venv/lib/python3.12/site-packages/deepeval/models/base_model.py:135: in a_generate_with_schema
+    return await self.a_generate(*args, schema=schema, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:193: in async_wrapped
+    return await copy(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:112: in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:157: in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/_utils.py:111: in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+rs = <RetryCallState 139669365213760: attempt #2; slept for 2.32; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+
+    def exc_check(rs: "RetryCallState") -> None:
+        fut = t.cast(Future, rs.outcome)
+        retry_exc = self.retry_error_cls(fut)
+        if self.reraise:
+            raise retry_exc.reraise()
+>       raise retry_exc from fut.exception()
+E       tenacity.RetryError: RetryError[<Future at 0x7f074f7bf680 state=finished raised TimeoutError>]
+
+.venv/lib/python3.12/site-packages/tenacity/__init__.py:414: RetryError
+------------------------------ Captured log call -------------------------------
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 1 time(s)...
+INFO     deepeval.retry.openai:retry_policy.py:452 Retrying in 2.324868224197621 s (attempt 1) after TimeoutError('call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.')
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 2 time(s)...
+______________ TestDeepEvalMetrics.test_faithfulness[refund_time] ______________
+
+fut = <coroutine object GPTModel.a_generate at 0x7f074f872e80>, timeout = 88.5
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        If the task suppresses the cancellation and returns a value instead,
+        that value is returned.
+    
+        This function is a coroutine.
+        """
+        # The special case for timeout <= 0 is for the following case:
+        #
+        # async def test_waitfor():
+        #     func_started = False
+        #
+        #     async def func():
+        #         nonlocal func_started
+        #         func_started = True
+        #
+        #     try:
+        #         await asyncio.wait_for(func(), 0)
+        #     except asyncio.TimeoutError:
+        #         assert not func_started
+        #     else:
+        #         assert False
+        #
+        # asyncio.run(test_waitfor())
+    
+    
+        if timeout is not None and timeout <= 0:
+            fut = ensure_future(fut)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise TimeoutError from exc
+    
+        async with timeouts.timeout(timeout):
+>           return await fut
+                   ^^^^^^^^^
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:520: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/models/llms/openai_model.py:230: in a_generate
+    completion = await client.beta.chat.completions.parse(
+.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py:1694: in parse
+    return await self._post(
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1913: in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1630: in request
+    response = await self._send_request(
+.venv/lib/python3.12/site-packages/openai/_client.py:829: in _send_request
+    return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_client.py:807: in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1553: in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_transports/default.py:394: in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request
+    raise exc from None
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:236: in handle_async_request
+    response = await connection.handle_async_request(
+.venv/lib/python3.12/site-packages/httpcore/_async/connection.py:103: in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:136: in handle_async_request
+    raise exc
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:106: in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:177: in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:217: in _receive_event
+    data = await self._network_stream.read(
+.venv/lib/python3.12/site-packages/httpcore/_backends/anyio.py:35: in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:239: in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:182: in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1284: in receive
+    await self._protocol.read_event.wait()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <asyncio.locks.Event object at 0x7f074eedea50 [set]>
+
+    async def wait(self):
+        """Block until the internal flag is true.
+    
+        If the internal flag is true on entry, return True
+        immediately.  Otherwise, block until another coroutine calls
+        set() to set the flag to true, then return True.
+        """
+        if self._value:
+            return True
+    
+        fut = self._get_loop().create_future()
+        self._waiters.append(fut)
+        try:
+>           await fut
+E           asyncio.exceptions.CancelledError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/locks.py:212: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee54b30>, "Based on the given claims, which is a list of...ms:\n            ['Refunds are processed within 3-5 business days after we receive the item.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f872e80>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+>               return await asyncio.wait_for(coro, per_attempt_timeout)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:658: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:519: in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Timeout [expired]>
+exc_type = <class 'asyncio.exceptions.CancelledError'>
+exc_val = CancelledError(), exc_tb = <traceback object at 0x7f074de21dc0>
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        assert self._state in (_State.ENTERED, _State.EXPIRING)
+    
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+            self._timeout_handler = None
+    
+        if self._state is _State.EXPIRING:
+            self._state = _State.EXPIRED
+    
+            if self._task.uncancel() <= self._cancelling and exc_type is exceptions.CancelledError:
+                # Since there are no new cancel requests, we're
+                # handling this.
+>               raise TimeoutError from exc_val
+E               TimeoutError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/timeouts.py:115: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <AsyncRetrying object at 0x7f074ee65a60 (stop=<deepeval.models.retry_policy.StopFromEnv object at 0x7f0797467380>, wai...before=<function before_nothing at 0x7f07997522a0>, after=<function make_after_log.<locals>._after at 0x7f0797710cc0>)>
+fn = <function GPTModel.a_generate at 0x7f07974a0860>
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee54b30>, "Based on the given claims, which is a list of...ms:\n            ['Refunds are processed within 3-5 business days after we receive the item.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+retry_state = <RetryCallState 139669364828080: attempt #2; slept for 2.7; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+is_async = True, do = <tenacity.DoAttempt object at 0x7f074eea3da0>
+
+    async def __call__(  # type: ignore[override]
+        self, fn: WrappedFn, *args: t.Any, **kwargs: t.Any
+    ) -> WrappedFnReturnT:
+        self.begin()
+    
+        retry_state = RetryCallState(retry_object=self, fn=fn, args=args, kwargs=kwargs)
+        is_async = _utils.is_coroutine_callable(fn)
+        while True:
+            do = await self.iter(retry_state=retry_state)
+            if isinstance(do, DoAttempt):
+                try:
+                    if is_async:
+>                       result = await fn(*args, **kwargs)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee54b30>, "Based on the given claims, which is a list of...ms:\n            ['Refunds are processed within 3-5 business days after we receive the item.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074f872e80>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+                return await asyncio.wait_for(coro, per_attempt_timeout)
+            except (asyncio.TimeoutError, TimeoutError) as e:
+                if (
+                    logger.isEnabledFor(logging.DEBUG)
+                    and get_settings().DEEPEVAL_VERBOSE_MODE is True
+                ):
+                    logger.debug(
+                        "async timeout after %.3fs (active_threads=%d, tasks=%d)",
+                        per_attempt_timeout,
+                        threading.active_count(),
+                        len(asyncio.all_tasks()),
+                    )
+>               raise _make_timeout_error(per_attempt_timeout) from e
+E               TimeoutError: call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:670: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.eval_customer_support.TestDeepEvalMetrics object at 0x7f07505a5070>
+case = {'ground_truth': 'Refunds are processed within 3-5 business days after we receive your returned item.', 'id': 'refund_...: 'Refunds are processed within 3-5 business days after we receive the item.', 'query': 'How long does a refund take?'}
+
+    @pytest.mark.parametrize("case", [c for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"], ids=[c["id"] for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"])
+    def test_faithfulness(self, case):
+        """Response must be grounded in the FAQ context (no hallucination >= 0.7)."""
+        tc = self._make_test_case(case)
+        metric = FaithfulnessMetric(threshold=0.7, model="gpt-4o-mini", include_reason=True)
+>       metric.measure(tc)
+
+tests/eval_customer_support.py:235: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1355: in wrapper
+    return func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:88: in measure
+    loop.run_until_complete(
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:157: in a_measure
+    self.verdicts = await self._a_generate_verdicts(multimodal)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:234: in _a_generate_verdicts
+    return await a_generate_with_schema_and_extract(
+.venv/lib/python3.12/site-packages/deepeval/metrics/utils.py:457: in a_generate_with_schema_and_extract
+    result, cost = await metric.model.a_generate_with_schema(
+.venv/lib/python3.12/site-packages/deepeval/models/base_model.py:135: in a_generate_with_schema
+    return await self.a_generate(*args, schema=schema, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:193: in async_wrapped
+    return await copy(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:112: in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:157: in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/_utils.py:111: in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+rs = <RetryCallState 139669364828080: attempt #2; slept for 2.7; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+
+    def exc_check(rs: "RetryCallState") -> None:
+        fut = t.cast(Future, rs.outcome)
+        retry_exc = self.retry_error_cls(fut)
+        if self.reraise:
+            raise retry_exc.reraise()
+>       raise retry_exc from fut.exception()
+E       tenacity.RetryError: RetryError[<Future at 0x7f074ee28f80 state=finished raised TimeoutError>]
+
+.venv/lib/python3.12/site-packages/tenacity/__init__.py:414: RetryError
+------------------------------ Captured log call -------------------------------
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 1 time(s)...
+INFO     deepeval.retry.openai:retry_policy.py:452 Retrying in 2.6952136881239555 s (attempt 1) after TimeoutError('call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.')
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 2 time(s)...
+_____________ TestDeepEvalMetrics.test_faithfulness[cancel_order] ______________
+
+fut = <coroutine object GPTModel.a_generate at 0x7f074ee94f40>, timeout = 88.5
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        If the task suppresses the cancellation and returns a value instead,
+        that value is returned.
+    
+        This function is a coroutine.
+        """
+        # The special case for timeout <= 0 is for the following case:
+        #
+        # async def test_waitfor():
+        #     func_started = False
+        #
+        #     async def func():
+        #         nonlocal func_started
+        #         func_started = True
+        #
+        #     try:
+        #         await asyncio.wait_for(func(), 0)
+        #     except asyncio.TimeoutError:
+        #         assert not func_started
+        #     else:
+        #         assert False
+        #
+        # asyncio.run(test_waitfor())
+    
+    
+        if timeout is not None and timeout <= 0:
+            fut = ensure_future(fut)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise TimeoutError from exc
+    
+        async with timeouts.timeout(timeout):
+>           return await fut
+                   ^^^^^^^^^
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:520: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/models/llms/openai_model.py:230: in a_generate
+    completion = await client.beta.chat.completions.parse(
+.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py:1694: in parse
+    return await self._post(
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1913: in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1630: in request
+    response = await self._send_request(
+.venv/lib/python3.12/site-packages/openai/_client.py:829: in _send_request
+    return await self._send_with_auth_retry(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_client.py:807: in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/openai/_base_client.py:1553: in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.12/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpx/_transports/default.py:394: in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:256: in handle_async_request
+    raise exc from None
+.venv/lib/python3.12/site-packages/httpcore/_async/connection_pool.py:236: in handle_async_request
+    response = await connection.handle_async_request(
+.venv/lib/python3.12/site-packages/httpcore/_async/connection.py:103: in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:136: in handle_async_request
+    raise exc
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:106: in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:177: in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/httpcore/_async/http11.py:217: in _receive_event
+    data = await self._network_stream.read(
+.venv/lib/python3.12/site-packages/httpcore/_backends/anyio.py:35: in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:239: in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/streams/tls.py:182: in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py:1284: in receive
+    await self._protocol.read_event.wait()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <asyncio.locks.Event object at 0x7f074eea5220 [set]>
+
+    async def wait(self):
+        """Block until the internal flag is true.
+    
+        If the internal flag is true on entry, return True
+        immediately.  Otherwise, block until another coroutine calls
+        set() to set the flag to true, then return True.
+        """
+        if self._value:
+            return True
+    
+        fut = self._get_loop().create_future()
+        self._waiters.append(fut)
+        try:
+>           await fut
+E           asyncio.exceptions.CancelledError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/locks.py:212: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee04800>, "Based on the given claims, which is a list of...n\n            Claims:\n            ['You can cancel your order within 1 hour of placing it.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074ee94f40>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+>               return await asyncio.wait_for(coro, per_attempt_timeout)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:658: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/tasks.py:519: in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <Timeout [expired]>
+exc_type = <class 'asyncio.exceptions.CancelledError'>
+exc_val = CancelledError(), exc_tb = <traceback object at 0x7f074e4c3900>
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        assert self._state in (_State.ENTERED, _State.EXPIRING)
+    
+        if self._timeout_handler is not None:
+            self._timeout_handler.cancel()
+            self._timeout_handler = None
+    
+        if self._state is _State.EXPIRING:
+            self._state = _State.EXPIRED
+    
+            if self._task.uncancel() <= self._cancelling and exc_type is exceptions.CancelledError:
+                # Since there are no new cancel requests, we're
+                # handling this.
+>               raise TimeoutError from exc_val
+E               TimeoutError
+
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/timeouts.py:115: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <AsyncRetrying object at 0x7f074eedfda0 (stop=<deepeval.models.retry_policy.StopFromEnv object at 0x7f0797467380>, wai...before=<function before_nothing at 0x7f07997522a0>, after=<function make_after_log.<locals>._after at 0x7f0797710cc0>)>
+fn = <function GPTModel.a_generate at 0x7f07974a0860>
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee04800>, "Based on the given claims, which is a list of...n\n            Claims:\n            ['You can cancel your order within 1 hour of placing it.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+retry_state = <RetryCallState 139669365715120: attempt #2; slept for 2.25; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+is_async = True, do = <tenacity.DoAttempt object at 0x7f0750477950>
+
+    async def __call__(  # type: ignore[override]
+        self, fn: WrappedFn, *args: t.Any, **kwargs: t.Any
+    ) -> WrappedFnReturnT:
+        self.begin()
+    
+        retry_state = RetryCallState(retry_object=self, fn=fn, args=args, kwargs=kwargs)
+        is_async = _utils.is_coroutine_callable(fn)
+        while True:
+            do = await self.iter(retry_state=retry_state)
+            if isinstance(do, DoAttempt):
+                try:
+                    if is_async:
+>                       result = await fn(*args, **kwargs)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<deepeval.models.llms.openai_model.GPTModel object at 0x7f074ee04800>, "Based on the given claims, which is a list of...n\n            Claims:\n            ['You can cancel your order within 1 hour of placing it.']\n\n            JSON:\n")
+kwargs = {'schema': <class 'deepeval.metrics.faithfulness.schema.Verdicts'>}
+per_attempt_timeout = 88.5
+coro = <coroutine object GPTModel.a_generate at 0x7f074ee94f40>
+
+    @functools.wraps(func)
+    async def attempt(*args, **kwargs):
+        if _is_budget_spent():
+            raise _make_timeout_error(0)
+    
+        per_attempt_timeout = resolve_effective_attempt_timeout()
+    
+        coro = func(*args, **kwargs)
+        if per_attempt_timeout > 0:
+            try:
+                return await asyncio.wait_for(coro, per_attempt_timeout)
+            except (asyncio.TimeoutError, TimeoutError) as e:
+                if (
+                    logger.isEnabledFor(logging.DEBUG)
+                    and get_settings().DEEPEVAL_VERBOSE_MODE is True
+                ):
+                    logger.debug(
+                        "async timeout after %.3fs (active_threads=%d, tasks=%d)",
+                        per_attempt_timeout,
+                        threading.active_count(),
+                        len(asyncio.all_tasks()),
+                    )
+>               raise _make_timeout_error(per_attempt_timeout) from e
+E               TimeoutError: call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.
+
+.venv/lib/python3.12/site-packages/deepeval/models/retry_policy.py:670: TimeoutError
+
+The above exception was the direct cause of the following exception:
+
+self = <tests.eval_customer_support.TestDeepEvalMetrics object at 0x7f07505a51f0>
+case = {'ground_truth': 'You can cancel or modify your order within 1 hour of placing it.', 'id': 'cancel_order', 'llm_answer': 'You can cancel your order within 1 hour of placing it.', 'query': 'Can I cancel my order?'}
+
+    @pytest.mark.parametrize("case", [c for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"], ids=[c["id"] for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"])
+    def test_faithfulness(self, case):
+        """Response must be grounded in the FAQ context (no hallucination >= 0.7)."""
+        tc = self._make_test_case(case)
+        metric = FaithfulnessMetric(threshold=0.7, model="gpt-4o-mini", include_reason=True)
+>       metric.measure(tc)
+
+tests/eval_customer_support.py:235: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1355: in wrapper
+    return func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:88: in measure
+    loop.run_until_complete(
+../../.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:157: in a_measure
+    self.verdicts = await self._a_generate_verdicts(multimodal)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/metrics/faithfulness/faithfulness.py:234: in _a_generate_verdicts
+    return await a_generate_with_schema_and_extract(
+.venv/lib/python3.12/site-packages/deepeval/metrics/utils.py:457: in a_generate_with_schema_and_extract
+    result, cost = await metric.model.a_generate_with_schema(
+.venv/lib/python3.12/site-packages/deepeval/models/base_model.py:135: in a_generate_with_schema
+    return await self.a_generate(*args, schema=schema, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/deepeval/tracing/tracing.py:1323: in async_wrapper
+    return await func(*args, **func_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:193: in async_wrapped
+    return await copy(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:112: in __call__
+    do = await self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/asyncio/__init__.py:157: in iter
+    result = await action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.12/site-packages/tenacity/_utils.py:111: in inner
+    return call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+rs = <RetryCallState 139669365715120: attempt #2; slept for 2.25; last result: failed (TimeoutError call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.)>
+
+    def exc_check(rs: "RetryCallState") -> None:
+        fut = t.cast(Future, rs.outcome)
+        retry_exc = self.retry_error_cls(fut)
+        if self.reraise:
+            raise retry_exc.reraise()
+>       raise retry_exc from fut.exception()
+E       tenacity.RetryError: RetryError[<Future at 0x7f074eea6b40 state=finished raised TimeoutError>]
+
+.venv/lib/python3.12/site-packages/tenacity/__init__.py:414: RetryError
+------------------------------ Captured log call -------------------------------
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 1 time(s)...
+INFO     deepeval.retry.openai:retry_policy.py:452 Retrying in 2.254828951502662 s (attempt 1) after TimeoutError('call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt.')
+ERROR    deepeval.retry.openai:retry_policy.py:487 call timed out after 88.5s (per attempt). Increase DEEPEVAL_PER_ATTEMPT_TIMEOUT_SECONDS_OVERRIDE (None disables) or reduce work per attempt. Retrying: 2 time(s)...
+__________ TestDeepEvalMetrics.test_faithfulness[hallucination_guard] __________
+
+self = <tests.eval_customer_support.TestDeepEvalMetrics object at 0x7f07505a52b0>
+case = {'ground_truth': 'You can return items within 30 days of delivery.', 'id': 'hallucination_guard', 'llm_answer': 'You can return items within 60 days and get a full cash refund instantly.', 'query': 'What is your return policy?'}
+
+    @pytest.mark.parametrize("case", [c for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"], ids=[c["id"] for c in EVAL_CASES if c["ground_truth"] is not None and c["llm_answer"] != "ESCALATE"])
+    def test_faithfulness(self, case):
+        """Response must be grounded in the FAQ context (no hallucination >= 0.7)."""
+        tc = self._make_test_case(case)
+        metric = FaithfulnessMetric(threshold=0.7, model="gpt-4o-mini", include_reason=True)
+        metric.measure(tc)
+        print(f"\n[{case['id']}] Faithfulness: {metric.score:.2f} — {metric.reason}")
+>       assert metric.score >= 0.7, f"Faithfulness too low: {metric.score:.2f}\nReason: {metric.reason}"
+E       AssertionError: Faithfulness too low: 0.00
+E         Reason: The score is 0.00 because the actual output incorrectly states that items can be returned within 60 days and that refunds are processed instantly, contradicting the retrieval context which specifies a 30-day return policy and a 3-5 business day refund processing time.
+E       assert 0.0 >= 0.7
+E        +  where 0.0 = <deepeval.metrics.faithfulness.faithfulness.FaithfulnessMetric object at 0x7f074eea5310>.score
+
+tests/eval_customer_support.py:237: AssertionError
+=============================== warnings summary ===============================
+tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[return_policy]
+  /home/gmadappa/community/e-commerce-multi-agent-system/.venv/lib/python3.12/site-packages/deepeval/utils.py:195: DeprecationWarning: There is no current event loop
+    loop = asyncio.get_event_loop()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[free_shipping]
+FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[refund_time]
+FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_answer_relevancy[cancel_order]
+FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[return_policy]
+FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[shipping_time]
+FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[free_shipping]
+FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[refund_time]
+FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[cancel_order]
+FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[hallucination_guard]
+============= 9 failed, 11 passed, 1 warning in 1515.17s (0:25:15) =============
