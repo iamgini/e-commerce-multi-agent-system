@@ -33,7 +33,10 @@ def test_confidence_medium_on_weak_faq_match():
 
 
 def test_confidence_low_on_minimal_faq_match():
-    assert estimate_confidence("Here is your answer.", faq_score=1) == 0.50
+    # score=1 hits _LOW_SCORE_THRESHOLD → _CONFIDENCE_MED (0.70)
+    # score=0 with no ESCALATE → _CONFIDENCE_LOW (0.50)
+    assert estimate_confidence("Here is your answer.", faq_score=1) == 0.70
+    assert estimate_confidence("Here is your answer.", faq_score=0) == 0.50
 
 
 def test_confidence_zero_on_escalate():
@@ -126,7 +129,7 @@ def test_ollama_model_reads_env_var(monkeypatch):
     """OLLAMA_MODEL env var must control the Ollama model name."""
     monkeypatch.setenv("LLM_PROVIDER", "ollama")
     monkeypatch.setenv("OLLAMA_MODEL", "mistral")
-    with patch("agents.customer_support.OllamaLLM") as mock_ollama:
+    with patch("langchain_ollama.OllamaLLM") as mock_ollama:
         mock_ollama.return_value = MagicMock()
         from agents.customer_support import _get_llm
         _get_llm.cache_clear()
