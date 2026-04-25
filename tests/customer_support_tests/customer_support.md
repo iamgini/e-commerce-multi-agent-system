@@ -1,6 +1,55 @@
 # Test Results - customer_support
 
 ```shell
+$ pytest tests/test_customer_support_agent.py tests/eval_customer_support.py -v -k "not TestDeepEvalMetrics" --tb=short
+```
+
+Output:
+
+```shell
+$  pytest tests/test_customer_support_agent.py tests/eval_customer_support.py -v -k "not TestDeepEvalMetrics" --tb=short
+============================================ test session starts ============================================
+platform linux -- Python 3.12.13, pytest-9.0.3, pluggy-1.6.0 -- /home/gmadappa/community/e-commerce-multi-agent-system/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/gmadappa/community/e-commerce-multi-agent-system
+plugins: Faker-37.12.0, repeat-0.9.4, deepeval-3.9.7, anyio-4.13.0, asyncio-1.3.0, xdist-3.8.0, rerunfailures-16.1, langsmith-0.7.33
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 47 items / 20 deselected / 27 selected
+
+tests/test_customer_support_agent.py::test_escalates_when_no_faq_match PASSED                         [  3%]
+tests/test_customer_support_agent.py::test_confidence_high_on_strong_faq_match PASSED                 [  7%]
+tests/test_customer_support_agent.py::test_confidence_medium_on_weak_faq_match PASSED                 [ 11%]
+tests/test_customer_support_agent.py::test_confidence_low_on_minimal_faq_match PASSED                 [ 14%]
+tests/test_customer_support_agent.py::test_confidence_zero_on_escalate PASSED                         [ 18%]
+tests/test_customer_support_agent.py::test_explanation_contains_score PASSED                          [ 22%]
+tests/test_customer_support_agent.py::test_faq_unavailable_escalates_without_calling_llm PASSED       [ 25%]
+tests/test_customer_support_agent.py::test_llm_exception_escalates_cleanly PASSED                     [ 29%]
+tests/test_customer_support_agent.py::test_langgraph_return_contains_required_keys PASSED             [ 33%]
+tests/test_customer_support_agent.py::test_state_not_mutated PASSED                                   [ 37%]
+tests/test_customer_support_agent.py::test_llm_is_not_instantiated_at_import PASSED                   [ 40%]
+tests/test_customer_support_agent.py::test_ollama_model_reads_env_var PASSED                          [ 44%]
+tests/eval_customer_support.py::test_agent_answers_faq_queries[return_policy] PASSED                  [ 48%]
+tests/eval_customer_support.py::test_agent_answers_faq_queries[shipping_time] PASSED                  [ 51%]
+tests/eval_customer_support.py::test_agent_answers_faq_queries[payment_methods] PASSED                [ 55%]
+tests/eval_customer_support.py::test_agent_answers_faq_queries[free_shipping] PASSED                  [ 59%]
+tests/eval_customer_support.py::test_agent_answers_faq_queries[refund_time] PASSED                    [ 62%]
+tests/eval_customer_support.py::test_agent_answers_faq_queries[contact_support] PASSED                [ 66%]
+tests/eval_customer_support.py::test_agent_answers_faq_queries[cancel_order] PASSED                   [ 70%]
+tests/eval_customer_support.py::test_agent_answers_faq_queries[hallucination_guard] PASSED            [ 74%]
+tests/eval_customer_support.py::test_out_of_scope_escalates PASSED                                    [ 77%]
+tests/eval_customer_support.py::test_hallucinated_answer_structure PASSED                             [ 81%]
+tests/eval_customer_support.py::test_faq_retrieval_finds_return_policy PASSED                         [ 85%]
+tests/eval_customer_support.py::test_faq_retrieval_finds_shipping PASSED                              [ 88%]
+tests/eval_customer_support.py::test_faq_retrieval_no_match_returns_message PASSED                    [ 92%]
+tests/eval_customer_support.py::test_confidence_reflects_faq_score PASSED                             [ 96%]
+tests/eval_customer_support.py::test_explanation_is_informative PASSED                                [100%]Running teardown with pytest sessionfinish...
+
+
+===================================== 27 passed, 20 deselected in 2.78s =====================================
+```
+
+
+```shell
 $ pytest tests/eval_customer_support.py::test_agent_answers_faq_queries -v --tb=short 2>&1 | head -50
 ============================= test session starts ==============================
 platform linux -- Python 3.12.13, pytest-9.0.3, pluggy-1.6.0 -- /home/iamgini/community/e-commerce-multi-agent-system/.venv/bin/python3
