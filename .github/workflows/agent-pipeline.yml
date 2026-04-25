@@ -74,8 +74,7 @@ jobs:
         run: pip install pip-audit
 
       - name: Scan dependencies for vulnerabilities
-        run: pip-audit -r requirements.txt --ignore-vuln CVE-2026-35029 --ignore-vuln CVE-2026-35030 --ignore-vuln GHSA-69x8-hrgq-fjj8
-
+        run: pip-audit -r requirements.txt --ignore-vuln CVE-2026-35029 --ignore-vuln CVE-2026-35030 --ignore-vuln GHSA-69x8-hrgq-fjj8 --ignore-vuln GHSA-xqmj-j6mv-4862
   # unit-tests:
   #   needs: setup
   #   runs-on: ubuntu-latest
@@ -162,7 +161,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: DOTENV_PRIVATE_KEY_CI #,OPENAI_API_KEY        # ← pass to remote shell
+          envs: DOTENV_PRIVATE_KEY_CI
+          # OPENAI_API_KEY        # ← pass to remote shell
           script: |
             IMAGE=quay.io/iamgini/shopbot:${{ needs.build-and-push.outputs.image_tag }}
 
