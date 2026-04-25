@@ -146,6 +146,14 @@ jobs:
         run: |
           podman push quay.io/iamgini/shopbot:${{ steps.meta.outputs.version }}
           podman push quay.io/iamgini/shopbot:latest
+
+      - name: Push status summary
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "✅ Image pushed to quay.io/iamgini/shopbot"
+          else
+            echo "⏭ Push skipped — not on main branch (branch: ${{ github.ref }})"
+          fi
     env:
       GUARDRAILS_TOKEN: ${{ secrets.GUARDRAILS_TOKEN }}
 
