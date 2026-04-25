@@ -68,3 +68,59 @@ FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[ca
 FAILED tests/eval_customer_support.py::TestDeepEvalMetrics::test_faithfulness[hallucination_guard]
 ============= 9 failed, 11 passed, 1 warning in 1515.17s (0:25:15) =============
 ```
+
+
+```shell
+$  python3 - <<'EOF'
+import sys, os
+sys.path.insert(0, ".")
+os.environ.setdefault("OPENAI_API_KEY", "dummy")  # won't call LLM
+
+from tools.customer_support_tools import search_faq, get_top_score
+
+queries = [
+    "What is your return policy?",
+    "How long does shipping take?",
+    "Do you offer free shipping?",
+    "Where is my order #98765?",   # out of scope — should get no match
+]
+
+for q in queries:
+    score = get_top_score(q)
+    context = search_faq.invoke(q)
+    print(f"Query   : {q}")
+    print(f"Score   : {score}")
+    print(f"Context : {context[:120]}...")
+    print(f"Confidence: {'0.90 (high)' if score >= 3 else '0.70 (medium)' if score >= 1 else '0.50 (low)'}")
+    print("-" * 60)
+EOF
+Query   : What is your return policy?
+Score   : 5
+Context : Q: What is your return policy?
+A: You can return items within 30 days of delivery.
+
+Q: What happens if an item I ordered...
+Confidence: 0.90 (high)
+------------------------------------------------------------
+Query   : How long does shipping take?
+Score   : 5
+Context : Q: How long does shipping take?
+A: Shipping takes 3-5 business days.
+
+Q: How long does a refund take to process?
+A: Refu...
+Confidence: 0.90 (high)
+------------------------------------------------------------
+Query   : Do you offer free shipping?
+Score   : 5
+Context : Q: Do you offer free shipping?
+A: Yes, we offer free standard shipping on orders over $50. Orders below that threshold h...
+Confidence: 0.90 (high)
+------------------------------------------------------------
+Query   : Where is my order #98765?
+Score   : 3
+Context : Q: Can I get a copy of my invoice or receipt?
+A: Yes, order confirmations with invoice details are sent to your email au...
+Confidence: 0.90 (high)
+------------------------------------------------------------
+```
