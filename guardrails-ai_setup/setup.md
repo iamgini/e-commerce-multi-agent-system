@@ -6,6 +6,12 @@ https://huggingface.co/datasets/GeorgeDaDude/Jailbreak_Complete_DS_labeled
 ### From Jackhhao
 https://huggingface.co/datasets/jackhhao/jailbreak-classification/viewer/default/test
 
+### From surge-ai/toxicity
+https://github.com/surge-ai/toxicity
+
+### From Kaggle - PII
+https://www.kaggle.com/code/newtonbaba12345/pii-detection-data-generation-using-gemini
+
 # Toxicity Language Detector
 
 From Guardrails AI, refer to the link: https://guardrailsai.com/hub/validator/guardrails/toxic_language
