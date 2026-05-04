@@ -1,14 +1,24 @@
-# Welcome to Chainlit! 🚀🤖
+# Welcome to ShopBot 🛍️
 
-Hi there, Developer! 👋 We're excited to have you on board. Chainlit is a powerful tool designed to help you prototype, debug and share applications built on top of LLMs.
+Your AI-powered e-commerce assistant — available 24/7 to help you shop, track orders, and get support.
 
-## Useful Links 🔗
+## What I can help with
 
-- **Documentation:** Get started with our comprehensive [Chainlit Documentation](https://docs.chainlit.io) 📚
-- **Discord Community:** Join our friendly [Chainlit Discord](https://discord.gg/k73SQ3FyUh) to ask questions, share your projects, and connect with other developers! 💬
+| | |
+|---|---|
+| 🔍 **Discover products** | Search by keyword, category, budget, or get personalised picks |
+| 🛒 **Cart & checkout** | Add items, apply discount codes, and place orders |
+| 📦 **Orders & inventory** | Check stock levels, purchase orders, and order history |
+| 🔄 **Returns & refunds** | Start a return, check eligibility, or track a refund |
+| 🙋 **General support** | Policy questions, payment methods, shipping info |
 
-We can't wait to see what you create with Chainlit! Happy coding! 💻😊
+## Try asking
 
-## Welcome screen
+- *"Show me wireless headphones under $150"*
+- *"What is your return policy?"*
+- *"Add the mechanical keyboard to my cart"*
+- *"Check the status of my refund"*
 
-To modify the welcome screen, edit the `chainlit.md` file at the root of your project. If you do not want a welcome screen, just leave this file empty.
+---
+
+*Powered by [LangGraph](https://langchain-ai.github.io/langgraph/) · Built with [Chainlit](https://chainlit.io)*
